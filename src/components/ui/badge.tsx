@@ -1,17 +1,20 @@
 import type { HTMLAttributes } from 'react'
 import { cn } from '@/lib/utils'
 
+type BadgeTone = 'watching' | 'watched' | 'notStarted' | 'rating' | 'muted'
+
 type BadgeProps = HTMLAttributes<HTMLSpanElement> & {
-  tone?: 'crimson' | 'violet' | 'gold' | 'muted'
+  tone?: BadgeTone
 }
 
 export function Badge({ className, tone = 'muted', ...props }: BadgeProps) {
-  const tones = {
-    crimson: 'border-crimson/40 text-crimson bg-crimson/10',
-    violet: 'border-violet/40 text-violet bg-violet/10',
-    gold: 'border-gold/40 text-gold bg-gold/10',
-    muted: 'border-border text-muted bg-surface-2',
-  } as const
+  const tones: Record<BadgeTone, string> = {
+    watching: 'border-primary-muted bg-primary-muted text-doom-100',
+    watched: 'border-primary-emphasis/40 bg-primary-emphasis text-on-primary',
+    notStarted: 'border-metal/40 bg-surface-elevated text-metal',
+    rating: 'border-accent/40 bg-accent text-on-primary',
+    muted: 'border-border bg-surface-elevated text-metal',
+  }
 
   return (
     <span

@@ -16,7 +16,7 @@ export function ProgressBar({ value, label, className }: ProgressBarProps) {
         <span className="text-heading">{Math.round(clamped)}%</span>
       </div>
       <div
-        className="h-2 overflow-hidden rounded-full bg-surface-2"
+        className="h-2 overflow-hidden rounded-full bg-surface-elevated"
         role="progressbar"
         aria-label={label}
         aria-valuemin={0}
@@ -24,7 +24,7 @@ export function ProgressBar({ value, label, className }: ProgressBarProps) {
         aria-valuenow={Math.round(clamped)}
       >
         <div
-          className="h-full rounded-full bg-violet transition-[width] duration-200"
+          className="h-full rounded-full bg-linear-to-r from-primary to-primary-emphasis transition-[width] duration-200"
           style={{ width: `${clamped}%` }}
         />
       </div>

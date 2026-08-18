@@ -9,7 +9,7 @@ const publicLinks = [
 
 export function PublicHeader() {
   return (
-    <header className="border-b border-border/80 bg-bg/80 backdrop-blur-md">
+    <header className="border-b border-border/80 bg-surface/90 backdrop-blur-md">
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-4">
         <Link
           to="/"
@@ -25,8 +25,8 @@ export function PublicHeader() {
                   to={link.to}
                   className={({ isActive }) =>
                     cn(
-                      'text-sm text-muted hover:text-heading',
-                      isActive && 'text-heading',
+                      'text-sm text-secondary hover:text-heading',
+                      isActive && 'text-primary-emphasis',
                     )
                   }
                 >

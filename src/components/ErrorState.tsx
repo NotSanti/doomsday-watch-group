@@ -18,7 +18,7 @@ export function ErrorState({
     <div
       role="alert"
       className={cn(
-        'rounded-xl border border-crimson/40 bg-crimson/10 px-6 py-8 text-center',
+        'rounded-xl border border-danger/40 bg-danger/10 px-6 py-8 text-center',
         className,
       )}
     >

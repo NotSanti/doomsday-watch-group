@@ -22,11 +22,11 @@ export function AppShell() {
     <div className="min-h-screen bg-bg">
       <a
         href="#main-content"
-        className="sr-only focus:not-sr-only focus:absolute focus:top-3 focus:left-3 focus:z-50 focus:rounded-md focus:bg-crimson focus:px-3 focus:py-2 focus:text-heading"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-3 focus:left-3 focus:z-50 focus:rounded-md focus:bg-primary focus:px-3 focus:py-2 focus:text-on-primary"
       >
         Skip to content
       </a>
-      <header className="border-b border-border bg-navy/80 backdrop-blur-md">
+      <header className="border-b border-border bg-surface/90 backdrop-blur-md">
         <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4 px-4 py-4">
           <Link
             to="/app"
@@ -43,8 +43,9 @@ export function AppShell() {
                     end={link.end}
                     className={({ isActive }) =>
                       cn(
-                        'rounded-md px-3 py-2 text-sm text-muted hover:bg-surface-2 hover:text-heading',
-                        isActive && 'bg-surface-2 text-heading',
+                        'rounded-md px-3 py-2 text-sm text-secondary hover:bg-surface-hover hover:text-heading',
+                        isActive &&
+                          'bg-surface-hover text-heading ring-1 ring-primary-emphasis/40',
                       )
                     }
                   >

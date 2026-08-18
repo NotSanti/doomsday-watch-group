@@ -9,10 +9,11 @@ const buttonVariants = cva(
     variants: {
       variant: {
         primary:
-          'bg-crimson text-heading hover:bg-crimson-hover shadow-[0_0_24px_color-mix(in_srgb,var(--color-crimson)_28%,transparent)]',
+          'bg-primary text-on-primary hover:bg-primary-hover doom-glow',
         secondary:
-          'border border-border bg-surface-2 text-heading hover:border-crimson/60',
-        ghost: 'text-heading hover:bg-surface-2',
+          'border border-border-strong bg-surface-card text-heading hover:border-primary-emphasis/60 hover:bg-surface-hover',
+        ghost: 'text-heading hover:bg-surface-hover',
+        danger: 'bg-danger text-heading hover:brightness-110',
       },
       size: {
         sm: 'h-9 px-3 text-sm',

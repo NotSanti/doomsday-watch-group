@@ -13,11 +13,11 @@ type CountdownProps = {
 
 function Unit({ label, value }: { label: string; value: string }) {
   return (
-    <div className="min-w-[4.5rem] rounded-lg border border-border bg-surface-2 px-3 py-3 text-center">
-      <div className="font-display text-3xl tracking-[0.12em] text-heading sm:text-4xl">
+    <div className="min-w-[4.5rem] rounded-lg border border-border bg-surface-elevated px-3 py-3 text-center">
+      <div className="metallic-text font-display text-3xl tracking-[0.12em] sm:text-4xl">
         {value}
       </div>
-      <div className="mt-1 text-xs text-muted uppercase">{label}</div>
+      <div className="mt-1 text-xs text-secondary uppercase">{label}</div>
     </div>
   )
 }
@@ -48,7 +48,7 @@ export function Countdown({ targetIso, className }: CountdownProps) {
       aria-live="polite"
     >
       {parts?.elapsed ? (
-        <p className="font-display text-2xl tracking-[0.12em] text-gold uppercase">
+        <p className="gold-text font-display text-2xl tracking-[0.12em] uppercase">
           The date has arrived
         </p>
       ) : (
