@@ -38,9 +38,7 @@ export function useCreateInvite(groupId: string) {
       createInvite(getSupabaseClient(), groupId, values),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: inviteKeys.list(groupId) })
-      toast.success(
-        'Invite created. Copy the link now; it cannot be shown again.',
-      )
+      toast.success('Invite created')
     },
   })
 }

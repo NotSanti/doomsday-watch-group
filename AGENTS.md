@@ -22,5 +22,5 @@ Doomsday Watch Group is built one numbered milestone at a time. Follow these rul
 - Working name: **Doomsday Watch Group**.
 - Include: “Unofficial fan project. Not affiliated with or endorsed by Marvel or Disney.”
 - Group membership is the authorization boundary. UI hiding is not authorization; RLS must enforce it.
-- Store only a hash of invite tokens. Redeem invites through an atomic backend function.
+- Store invite tokens for owner recopy (owner-only RLS). Look up redemption by hash. Clear the stored token on revoke. Redeem invites through an atomic backend function.
 - Never expose a Supabase service-role key or TMDB token in the Vite client bundle.

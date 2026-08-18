@@ -1,10 +1,10 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
-import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
+import { CopyInviteLink } from '@/features/invites/CopyInviteLink'
 import { toFriendlyCreateInviteError } from '@/features/invites/invite-errors'
 import { inviteUrl } from '@/features/invites/invite-link'
 import {
@@ -82,7 +82,7 @@ function CreateInviteForm({
       })}
     >
       <p className="text-sm text-muted">
-        The full link is shown once. Store only what you copy here.
+        You can copy this link again from the invite list until you revoke it.
       </p>
       {formError ? (
         <p
@@ -144,12 +144,12 @@ function CreateInviteForm({
 
 function CreatedInviteCopy({ created }: { created: CreatedInvite }) {
   const url = inviteUrl(getClientEnv().VITE_APP_URL, created.token)
-  const [copied, setCopied] = useState(false)
 
   return (
     <div className="space-y-4">
       <p className="text-sm text-muted">
-        Copy this link now. It cannot be recovered after you close this dialog.
+        Copy this link whenever you need it. It stays available on this page
+        until you revoke the invite.
       </p>
       <div>
         <label
@@ -160,22 +160,7 @@ function CreatedInviteCopy({ created }: { created: CreatedInvite }) {
         </label>
         <Input id="invite-link" readOnly value={url} />
       </div>
-      <Button
-        className="w-full"
-        onClick={() => {
-          void navigator.clipboard.writeText(url).then(
-            () => {
-              setCopied(true)
-              toast.success('Invite link copied')
-            },
-            () => {
-              toast.success('Select the link to copy it')
-            },
-          )
-        }}
-      >
-        {copied ? 'Copied' : 'Copy link'}
-      </Button>
+      <CopyInviteLink token={created.token} />
     </div>
   )
 }

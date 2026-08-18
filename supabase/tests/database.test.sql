@@ -1,5 +1,5 @@
 begin;
-select plan(26);
+select plan(28);
 
 create temp table test_users (
   label text primary key,
@@ -141,7 +141,17 @@ select isnt(
     from public.group_invites
     where id = (select invite_id from alpha_invite)
   ),
-  'raw invite token is not stored'
+  'stored raw token is not the hash'
+);
+
+select is(
+  (
+    select token
+    from public.group_invites
+    where id = (select invite_id from alpha_invite)
+  ),
+  (select token from alpha_invite),
+  'raw invite token is stored for owner recopy'
 );
 
 select is(
@@ -348,6 +358,16 @@ select * from public.create_invite(
 );
 
 select public.revoke_invite((select invite_id from revoked_invite));
+
+select is(
+  (
+    select token
+    from public.group_invites
+    where id = (select invite_id from revoked_invite)
+  ),
+  null,
+  'revoked invite token is cleared'
+);
 
 create temp table exhausted_invite as
 select * from public.create_invite(

@@ -96,6 +96,7 @@ export type Database = {
           max_uses: number | null
           revoked_at: string | null
           token_hash: string
+          token: string | null
           use_count: number
         }
         Insert: {
@@ -107,6 +108,7 @@ export type Database = {
           max_uses?: number | null
           revoked_at?: string | null
           token_hash: string
+          token?: string | null
           use_count?: number
         }
         Update: {
@@ -118,6 +120,7 @@ export type Database = {
           max_uses?: number | null
           revoked_at?: string | null
           token_hash?: string
+          token?: string | null
           use_count?: number
         }
         Relationships: [
