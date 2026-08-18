@@ -44,29 +44,6 @@ export function AboutPage() {
   )
 }
 
-export function AppHomePage() {
-  return (
-    <EmptyState
-      title="Your groups"
-      description="Create or join a private watch group. Group creation is wired in Milestone 4."
-      action={
-        <Button asChild>
-          <Link to="/groups/demo">Open demo group shell</Link>
-        </Button>
-      }
-    />
-  )
-}
-
-export function GroupDashboardPage() {
-  return (
-    <EmptyState
-      title="Group dashboard"
-      description="Current title, progress, activity, and standings will appear here."
-    />
-  )
-}
-
 export function WatchlistPage() {
   return (
     <EmptyState
