@@ -74,7 +74,7 @@ Do not build in MVP: public groups, chat/comments/reactions/notifications, multi
 ## Milestone checklist
 
 - [x] 0 — GitHub repo and Vercel hosting
-- [ ] 1 — Design foundation and static route shell
+- [x] 1 — Design foundation and static route shell
 - [ ] 2 — Supabase schema, seed, and RLS
 - [ ] 3 — Authentication and profile onboarding
 - [ ] 4 — Group creation, switcher, membership
