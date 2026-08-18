@@ -85,10 +85,10 @@ export function GroupHomePage() {
                   <p className="mt-3 text-sm text-muted">{group.description}</p>
                 ) : null}
                 <div className="mt-4">
-                  <p className="text-xs tracking-[0.14em] text-secondary uppercase">
+                  <p className="text-center text-xs tracking-[0.14em] text-secondary uppercase">
                     Members
                   </p>
-                  <div className="mt-2">
+                  <div className="mt-2 flex justify-center">
                     <MemberRoster
                       compact
                       members={

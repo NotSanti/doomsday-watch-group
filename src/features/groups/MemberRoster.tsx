@@ -57,28 +57,33 @@ export function MemberRoster({
   return (
     <ul
       className={cn(
-        compact ? 'flex flex-wrap gap-x-3 gap-y-1' : 'space-y-2',
+        'flex flex-wrap items-center gap-2',
+        compact ? 'justify-center' : 'justify-start',
       )}
     >
       {members.map((member) => (
         <li key={`${member.group_id}:${member.user_id}`}>
-          <MemberName member={member} />
+          <MemberPill member={member} />
         </li>
       ))}
     </ul>
   )
 }
 
-function MemberName({ member }: { member: GroupMember }) {
+function MemberPill({ member }: { member: GroupMember }) {
   const isOwner = member.role === 'owner'
 
   return (
-    <span className="inline-flex items-center gap-1.5 text-sm text-heading">
+    <span
+      className={cn(
+        'inline-flex h-8 items-center gap-1.5 rounded-full border px-2.5 text-sm leading-none',
+        isOwner
+          ? 'border-accent/40 bg-accent/15 text-heading'
+          : 'border-border bg-surface-elevated text-heading',
+      )}
+    >
       {isOwner ? (
-        <Crown
-          className="size-3.5 shrink-0 text-gold"
-          aria-hidden="true"
-        />
+        <Crown className="size-3.5 shrink-0 text-gold" aria-hidden="true" />
       ) : null}
       <span>{member.display_name}</span>
       {isOwner ? <span className="sr-only"> (owner)</span> : null}

@@ -191,6 +191,9 @@ describe('groups', () => {
     expect(await within(tile!).findByText('Owner A')).toBeInTheDocument()
     expect(within(tile!).getByText('(owner)')).toBeInTheDocument()
     expect(within(tile!).getByText('Member B')).toBeInTheDocument()
+    expect(within(tile!).getByText('Owner A').parentElement).toHaveClass(
+      'rounded-full',
+    )
 
     await user.click(within(tile!).getByRole('link', { name: 'Open group' }))
 
