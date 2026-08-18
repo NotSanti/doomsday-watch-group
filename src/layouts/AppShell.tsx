@@ -1,16 +1,20 @@
 import { Link, NavLink, Outlet, useParams } from 'react-router'
 import { Button } from '@/components/ui/button'
 import { useAuth } from '@/features/auth/use-auth'
+import { GroupSwitcher } from '@/features/groups/GroupSwitcher'
+import { useGroup } from '@/features/groups/use-groups'
 import { cn } from '@/lib/utils'
 
 export function AppShell() {
   const { groupId } = useParams()
   const { signOut } = useAuth()
-  const base = groupId ? `/groups/${groupId}` : '/app'
+  const groupQuery = useGroup(groupId ?? '')
+  const isMember = Boolean(groupId && groupQuery.data)
+  const base = isMember ? `/groups/${groupId}` : '/app'
 
   const links = [
     { to: '/app', label: 'Groups', end: true },
-    ...(groupId
+    ...(isMember
       ? [
           { to: base, label: 'Dashboard', end: true },
           { to: `${base}/watchlist`, label: 'Watchlist', end: false },
@@ -31,12 +35,15 @@ export function AppShell() {
       </a>
       <header className="border-b border-border bg-surface/90 backdrop-blur-md">
         <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4 px-4 py-4">
-          <Link
-            to="/app"
-            className="font-display text-lg tracking-[0.16em] text-heading uppercase"
-          >
-            Doomsday Watch Group
-          </Link>
+          <div className="flex flex-wrap items-center gap-4">
+            <Link
+              to="/app"
+              className="font-display text-lg tracking-[0.16em] text-heading uppercase"
+            >
+              Doomsday Watch Group
+            </Link>
+            <GroupSwitcher />
+          </div>
           <nav aria-label="App">
             <ul className="flex flex-wrap items-center gap-3">
               {links.map((link) => (
