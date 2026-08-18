@@ -5,6 +5,7 @@ import { useAuth } from '@/features/auth/use-auth'
 import {
   createGroup,
   fetchGroup,
+  listGroupMembers,
   listGroups,
 } from '@/features/groups/group-api'
 import { groupKeys } from '@/features/groups/group-keys'
@@ -33,6 +34,26 @@ export function useGroup(groupId: string) {
   })
 }
 
+export function useGroupMembers(groupId: string) {
+  return useQuery({
+    queryKey: groupKeys.members(groupId),
+    queryFn: () => listGroupMembers(getSupabaseClient(), [groupId]),
+    enabled: isGroupId(groupId),
+  })
+}
+
+export function useGroupMemberLists(groupIds: string[]) {
+  const { user } = useAuth()
+  const userId = user?.id ?? ''
+  const ids = [...groupIds].sort()
+
+  return useQuery({
+    queryKey: [...groupKeys.memberLists(userId), ids.join(',')],
+    queryFn: () => listGroupMembers(getSupabaseClient(), ids),
+    enabled: Boolean(userId) && ids.length > 0,
+  })
+}
+
 export function useCreateGroup() {
   const { user } = useAuth()
   const queryClient = useQueryClient()
@@ -48,7 +69,14 @@ export function useCreateGroup() {
         void queryClient.invalidateQueries({
           queryKey: groupKeys.list(user.id),
         })
+        void queryClient.invalidateQueries({
+          queryKey: groupKeys.memberLists(user.id),
+        })
       }
+
+      void queryClient.invalidateQueries({
+        queryKey: groupKeys.members(group.id),
+      })
 
       toast.success('Group created')
       void navigate(`/groups/${group.id}`)

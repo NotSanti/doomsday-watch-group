@@ -5,10 +5,12 @@ import { groupKeys } from '@/features/groups/group-keys'
 import { renderApp } from '@/test/render-app'
 import {
   makeGroup,
+  makeMember,
   makeProfile,
   makeSession,
   setCreateGroupError,
   setMockGroups,
+  setMockMembers,
   setMockProfile,
   setMockSession,
   supabaseFromMock,
@@ -16,6 +18,7 @@ import {
 } from '@/test/supabase-mock'
 
 const USER_ID = '11111111-1111-4111-8111-111111111111'
+const MEMBER_ID = '55555555-5555-4555-8555-555555555555'
 const GROUP_A = '22222222-2222-4222-8222-222222222222'
 const GROUP_B = '33333333-3333-4333-8333-333333333333'
 const UNKNOWN_GROUP = '44444444-4444-4444-8444-444444444444'
@@ -92,6 +95,9 @@ describe('groups', () => {
     ).toBeInTheDocument()
     expect(screen.getByText('Owner')).toBeInTheDocument()
     expect(screen.getByText('Private MCU run')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Members' })).toBeInTheDocument()
+    expect(await screen.findByText('Owner A')).toBeInTheDocument()
+    expect(screen.getByText('(owner)')).toBeInTheDocument()
   })
 
   it('shows a friendly error when group creation fails', async () => {
@@ -138,6 +144,8 @@ describe('groups', () => {
     ).toBeInTheDocument()
     expect(screen.getByText('First room')).toBeInTheDocument()
     expect(screen.getByText('Owner')).toBeInTheDocument()
+    expect(await screen.findByText('Owner A')).toBeInTheDocument()
+    expect(screen.getByText('(owner)')).toBeInTheDocument()
 
     await user.click(screen.getByRole('link', { name: 'Open group' }))
 
@@ -145,6 +153,72 @@ describe('groups', () => {
       await screen.findByRole('heading', { name: 'Alpha Watch' }),
     ).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'Dashboard' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Members' })).toBeInTheDocument()
+    expect(await screen.findByText('Owner A')).toBeInTheDocument()
+  })
+
+  it('lists each group’s members and marks the owner with a crown', async () => {
+    const user = userEvent.setup()
+    signInAsOwner()
+    setMockGroups([
+      makeGroup({
+        id: GROUP_A,
+        name: 'Alpha Watch',
+      }),
+    ])
+    setMockMembers([
+      makeMember({
+        group_id: GROUP_A,
+        user_id: USER_ID,
+        role: 'owner',
+        display_name: 'Owner A',
+      }),
+      makeMember({
+        group_id: GROUP_A,
+        user_id: MEMBER_ID,
+        role: 'member',
+        display_name: 'Member B',
+        joined_at: '2026-08-19T00:00:00.000Z',
+      }),
+    ])
+    renderApp('/app')
+
+    const tileHeading = await screen.findByRole('heading', {
+      name: 'Alpha Watch',
+    })
+    const tile = tileHeading.closest('li')
+    expect(tile).not.toBeNull()
+    expect(await within(tile!).findByText('Owner A')).toBeInTheDocument()
+    expect(within(tile!).getByText('(owner)')).toBeInTheDocument()
+    expect(within(tile!).getByText('Member B')).toBeInTheDocument()
+
+    await user.click(within(tile!).getByRole('link', { name: 'Open group' }))
+
+    const membersHeading = await screen.findByRole('heading', {
+      name: 'Members',
+    })
+    const roster = membersHeading.closest('section')
+    expect(roster).not.toBeNull()
+    expect(await within(roster!).findByText('Owner A')).toBeInTheDocument()
+    expect(within(roster!).getByText('(owner)')).toBeInTheDocument()
+    expect(within(roster!).getByText('Member B')).toBeInTheDocument()
+  })
+
+  it('keeps the group list visible if members cannot load', async () => {
+    signInAsOwner()
+    setMockGroups([makeGroup({ id: GROUP_A, name: 'Alpha Watch' })])
+    setMockMembers([], { message: 'relation group_members exploded' })
+    renderApp('/app')
+
+    expect(
+      await screen.findByRole('heading', { name: 'Alpha Watch' }),
+    ).toBeInTheDocument()
+    expect(
+      await screen.findByText('Members could not be loaded. Please try again.'),
+    ).toBeInTheDocument()
+    expect(
+      screen.queryByText('relation group_members exploded'),
+    ).not.toBeInTheDocument()
   })
 
   it('switches between groups without mixing query data', async () => {

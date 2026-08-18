@@ -68,10 +68,16 @@ export function useRedeemInvite(token: string) {
         void queryClient.invalidateQueries({
           queryKey: groupKeys.list(user.id),
         })
+        void queryClient.invalidateQueries({
+          queryKey: groupKeys.memberLists(user.id),
+        })
       }
 
       void queryClient.invalidateQueries({
         queryKey: groupKeys.detail(result.group_id),
+      })
+      void queryClient.invalidateQueries({
+        queryKey: groupKeys.members(result.group_id),
       })
 
       toast.success(

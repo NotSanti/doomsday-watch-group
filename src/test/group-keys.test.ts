@@ -8,7 +8,9 @@ describe('group query keys', () => {
 
     expect(groupKeys.list(userId)).toEqual(['groups', 'list', userId])
     expect(groupKeys.detail(groupId)).toEqual(['groups', 'detail', groupId])
+    expect(groupKeys.members(groupId)).toEqual(['groups', 'members', groupId])
     expect(isGroupScopedQueryKey(groupKeys.detail(groupId))).toBe(true)
     expect(isGroupScopedQueryKey(groupKeys.list(userId))).toBe(false)
+    expect(isGroupScopedQueryKey(groupKeys.members(groupId))).toBe(false)
   })
 })

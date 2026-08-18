@@ -9,7 +9,8 @@ import { useAuth } from '@/features/auth/use-auth'
 import { CreateGroupDialog } from '@/features/groups/CreateGroupDialog'
 import { toFriendlyGroupListError } from '@/features/groups/group-errors'
 import { groupRoleForUser } from '@/features/groups/group-schemas'
-import { useGroupList } from '@/features/groups/use-groups'
+import { MemberRoster } from '@/features/groups/MemberRoster'
+import { useGroupList, useGroupMemberLists } from '@/features/groups/use-groups'
 
 function GroupsSkeleton() {
   return (
@@ -25,6 +26,9 @@ function GroupsSkeleton() {
 export function GroupHomePage() {
   const { user } = useAuth()
   const groupsQuery = useGroupList()
+  const groups = groupsQuery.data ?? []
+  const userId = user?.id ?? ''
+  const membersQuery = useGroupMemberLists(groups.map((group) => group.id))
 
   if (groupsQuery.isPending) {
     return <GroupsSkeleton />
@@ -40,9 +44,6 @@ export function GroupHomePage() {
       />
     )
   }
-
-  const groups = groupsQuery.data ?? []
-  const userId = user?.id ?? ''
 
   if (groups.length === 0) {
     return (
@@ -83,6 +84,26 @@ export function GroupHomePage() {
                 {group.description ? (
                   <p className="mt-3 text-sm text-muted">{group.description}</p>
                 ) : null}
+                <div className="mt-4">
+                  <p className="text-xs tracking-[0.14em] text-secondary uppercase">
+                    Members
+                  </p>
+                  <div className="mt-2">
+                    <MemberRoster
+                      compact
+                      members={
+                        membersQuery.data?.filter(
+                          (member) => member.group_id === group.id,
+                        ) ?? []
+                      }
+                      isPending={membersQuery.isLoading}
+                      isError={membersQuery.isError}
+                      onRetry={() => {
+                        void membersQuery.refetch()
+                      }}
+                    />
+                  </div>
+                </div>
                 <Button asChild className="mt-6" variant="secondary">
                   <Link to={`/groups/${group.id}`}>Open group</Link>
                 </Button>

@@ -26,8 +26,30 @@ export const createGroupSchema = z.object({
     .pipe(z.string().max(280, 'Use 280 characters or fewer.')),
 })
 
+export const groupMemberRoleSchema = z.enum(['owner', 'member'])
+
+export const groupMemberQueryRowSchema = z.object({
+  group_id: z.string().uuid(),
+  user_id: z.string().uuid(),
+  role: groupMemberRoleSchema,
+  joined_at: z.string(),
+  profiles: z
+    .object({
+      display_name: z.string().min(1),
+    })
+    .nullable(),
+})
+
 export type GroupRow = z.infer<typeof groupRowSchema>
 export type CreateGroupValues = z.infer<typeof createGroupSchema>
+export type GroupMemberRole = z.infer<typeof groupMemberRoleSchema>
+export type GroupMember = {
+  group_id: string
+  user_id: string
+  role: GroupMemberRole
+  joined_at: string
+  display_name: string
+}
 
 export function isGroupId(value: string): boolean {
   return groupIdSchema.safeParse(value).success
