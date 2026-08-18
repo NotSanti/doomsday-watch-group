@@ -21,6 +21,7 @@ export const inviteRowSchema = z.object({
   max_uses: z.number().int().nullable(),
   use_count: z.number().int().nonnegative(),
   revoked_at: z.string().nullable(),
+  token: z.string().min(16).nullable(),
 })
 
 export const createdInviteSchema = z.object({

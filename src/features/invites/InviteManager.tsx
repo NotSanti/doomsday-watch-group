@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Dialog, DialogContent } from '@/components/ui/dialog'
+import { CopyInviteLink } from '@/features/invites/CopyInviteLink'
 import { CreateInviteDialog } from '@/features/invites/CreateInviteDialog'
 import {
   toFriendlyInviteListError,
@@ -74,7 +75,8 @@ export function InviteManager({ groupId }: { groupId: string }) {
             Invites
           </h2>
           <p className="mt-1 text-sm text-muted">
-            Share a link once, then revoke it if it should stop working.
+            Copy a link as often as you need, then revoke it if it should stop
+            working.
           </p>
         </div>
         <CreateInviteDialog groupId={groupId} />
@@ -125,15 +127,20 @@ function InviteRowCard({
             Expires {formatStamp(invite.expires_at)} · {usesLabel(invite)}
           </p>
         </div>
-        {status === 'active' ? (
-          <Button
-            variant="secondary"
-            size="sm"
-            onClick={() => setConfirmOpen(true)}
-          >
-            Revoke
-          </Button>
-        ) : null}
+        <div className="flex flex-wrap items-center gap-2">
+          {invite.token && !invite.revoked_at ? (
+            <CopyInviteLink token={invite.token} size="sm" />
+          ) : null}
+          {status === 'active' ? (
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => setConfirmOpen(true)}
+            >
+              Revoke
+            </Button>
+          ) : null}
+        </div>
       </div>
       <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
         <DialogContent title="Revoke invite">

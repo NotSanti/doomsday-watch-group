@@ -15,7 +15,7 @@ import {
 } from '@/features/invites/invite-schemas'
 
 const INVITE_COLUMNS =
-  'id, group_id, created_at, expires_at, max_uses, use_count, revoked_at'
+  'id, group_id, created_at, expires_at, max_uses, use_count, revoked_at, token'
 
 function firstRpcRow<T>(data: T[] | T | null | undefined): T | null {
   if (data == null) {

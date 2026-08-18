@@ -11,7 +11,7 @@ import {
 type AuthListener = (event: AuthChangeEvent, session: Session | null) => void
 
 export type MockInvite = InviteRow & {
-  token: string
+  secret: string
   group_name?: string
   owner_display_name?: string
   member_count?: number
@@ -87,7 +87,9 @@ export function makeGroup(overrides: Partial<GroupRow> = {}): GroupRow {
 }
 
 export function makeInvite(overrides: Partial<MockInvite> = {}): MockInvite {
-  return {
+  const token =
+    overrides.token === undefined ? 'ab'.repeat(32) : overrides.token
+  const invite: MockInvite = {
     id: '66666666-6666-4666-8666-666666666666',
     group_id: '22222222-2222-4222-8222-222222222222',
     created_at: new Date().toISOString(),
@@ -95,9 +97,13 @@ export function makeInvite(overrides: Partial<MockInvite> = {}): MockInvite {
     max_uses: null,
     use_count: 0,
     revoked_at: null,
-    token: 'ab'.repeat(32),
+    token,
+    secret: token ?? 'ab'.repeat(32),
     ...overrides,
   }
+
+  invite.secret = overrides.secret ?? invite.token ?? invite.secret
+  return invite
 }
 
 export function setMockSession(next: Session | null): void {
@@ -193,6 +199,7 @@ function inviteToRow(invite: MockInvite): InviteRow {
     max_uses: invite.max_uses,
     use_count: invite.use_count,
     revoked_at: invite.revoked_at,
+    token: invite.token,
   }
 }
 
@@ -253,12 +260,14 @@ async function createInviteImpl(args: {
     }
   }
 
+  const token =
+    crypto.randomUUID().replaceAll('-', '') +
+    crypto.randomUUID().replaceAll('-', '')
   const invite = makeInvite({
     id: crypto.randomUUID(),
     group_id: args.p_group_id,
-    token:
-      crypto.randomUUID().replaceAll('-', '') +
-      crypto.randomUUID().replaceAll('-', ''),
+    token,
+    secret: token,
     expires_at: args.p_expires_at ?? null,
     max_uses: args.p_max_uses ?? null,
   })
@@ -267,7 +276,7 @@ async function createInviteImpl(args: {
     data: [
       {
         invite_id: invite.id,
-        token: invite.token,
+        token: invite.token ?? invite.secret,
         expires_at: invite.expires_at,
         max_uses: invite.max_uses,
       },
@@ -284,7 +293,7 @@ async function previewInviteImpl(args: { p_token: string }) {
   return {
     data: [
       previewFromInvite(
-        invites.find((invite) => invite.token === args.p_token),
+        invites.find((invite) => invite.secret === args.p_token),
       ),
     ],
     error: null,
@@ -303,7 +312,7 @@ async function redeemInviteImpl(args: { p_token: string }) {
     }
   }
 
-  const invite = invites.find((item) => item.token === args.p_token)
+  const invite = invites.find((item) => item.secret === args.p_token)
   if (!invite) {
     return {
       data: null,
@@ -373,6 +382,7 @@ async function revokeInviteImpl(args: { p_invite_id: string }) {
   }
 
   invite.revoked_at = new Date().toISOString()
+  invite.token = null
   return { data: null, error: null }
 }
 

@@ -183,7 +183,7 @@ describe('invites', () => {
     expect(getMockInvites()[0]?.use_count).toBe(0)
   })
 
-  it('lets an owner create and copy an invite link once', async () => {
+  it('lets an owner create an invite and copy the link again from the list', async () => {
     const user = userEvent.setup()
     const writeText = vi.fn().mockResolvedValue(undefined)
     Object.defineProperty(navigator, 'clipboard', {
@@ -216,6 +216,17 @@ describe('invites', () => {
       within(createdDialog).getByRole('button', { name: 'Copy link' }),
     )
     expect(writeText).toHaveBeenCalledWith(linkField.value)
+
+    await user.keyboard('{Escape}')
+    await waitFor(() => {
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    })
+
+    await user.click(screen.getByRole('button', { name: 'Copy link' }))
+    expect(writeText).toHaveBeenLastCalledWith(linkField.value)
+    expect(
+      screen.queryByText(getMockInvites()[0]?.secret ?? ''),
+    ).not.toBeInTheDocument()
   })
 
   it('lets an owner revoke an active invite', async () => {
@@ -231,6 +242,7 @@ describe('invites', () => {
     renderApp(`/groups/${GROUP_A}/settings`)
 
     expect(await screen.findByText('Active')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Copy link' })).toBeInTheDocument()
     expect(screen.queryByText(TOKEN)).not.toBeInTheDocument()
 
     await user.click(screen.getByRole('button', { name: 'Revoke' }))
@@ -245,6 +257,54 @@ describe('invites', () => {
       })
     })
     expect(await screen.findByText('Revoked')).toBeInTheDocument()
+    expect(
+      screen.queryByRole('button', { name: 'Copy link' }),
+    ).not.toBeInTheDocument()
+  })
+
+  it('lets an owner recopy an expired invite until it is revoked', async () => {
+    const user = userEvent.setup()
+    const writeText = vi.fn().mockResolvedValue(undefined)
+    Object.defineProperty(navigator, 'clipboard', {
+      configurable: true,
+      value: { writeText },
+    })
+    signInAsOwner()
+    setMockInvites([
+      makeInvite({
+        token: TOKEN,
+        group_id: GROUP_A,
+        expires_at: '2020-01-01T00:00:00.000Z',
+      }),
+    ])
+    renderApp(`/groups/${GROUP_A}/settings`)
+
+    expect(await screen.findByText('Expired')).toBeInTheDocument()
+    expect(
+      screen.queryByRole('button', { name: 'Revoke' }),
+    ).not.toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'Copy link' }))
+    expect(writeText).toHaveBeenCalledWith(
+      `http://127.0.0.1:5173/invite/${TOKEN}`,
+    )
+  })
+
+  it('hides copy for legacy invites that have no stored token', async () => {
+    signInAsOwner()
+    setMockInvites([
+      makeInvite({
+        token: null,
+        secret: TOKEN,
+        group_id: GROUP_A,
+      }),
+    ])
+    renderApp(`/groups/${GROUP_A}/settings`)
+
+    expect(await screen.findByText('Active')).toBeInTheDocument()
+    expect(
+      screen.queryByRole('button', { name: 'Copy link' }),
+    ).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Revoke' })).toBeInTheDocument()
   })
 
   it('hides invite management from non-owners', async () => {
