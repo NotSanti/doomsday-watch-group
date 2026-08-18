@@ -58,6 +58,7 @@ Documented in `.env.example`:
 ## Hosting
 
 - GitHub is the source of truth: https://github.com/NotSanti/doomsday-watch-group
+- Production: https://doomsday-watch-group.vercel.app
 - Vercel deploys `main` to production and pull requests to preview URLs.
 - `vercel.json` rewrites unknown paths to `index.html` so React Router nested URLs work.
 - Register local, preview, and production auth callback URLs in Supabase (Milestone 3 / 12).

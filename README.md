@@ -19,7 +19,7 @@ Unofficial fan project. Not affiliated with or endorsed by Marvel or Disney.
 ## Links
 
 - GitHub: https://github.com/NotSanti/doomsday-watch-group
-- Vercel production: pending first deploy
+- Vercel production: https://doomsday-watch-group.vercel.app
 
 ## Local setup
 
