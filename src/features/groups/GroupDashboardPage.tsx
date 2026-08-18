@@ -6,7 +6,8 @@ import { Badge } from '@/components/ui/badge'
 import { useAuth } from '@/features/auth/use-auth'
 import { toFriendlyGroupDetailError } from '@/features/groups/group-errors'
 import { groupRoleForUser } from '@/features/groups/group-schemas'
-import { useGroup } from '@/features/groups/use-groups'
+import { MemberRoster } from '@/features/groups/MemberRoster'
+import { useGroup, useGroupMembers } from '@/features/groups/use-groups'
 
 function formatTargetDate(iso: string, timeZone: string): string {
   try {
@@ -25,6 +26,7 @@ export function GroupDashboardPage() {
   const { groupId = '' } = useParams()
   const { user } = useAuth()
   const groupQuery = useGroup(groupId)
+  const membersQuery = useGroupMembers(groupId)
 
   if (groupQuery.isPending) {
     return (
@@ -69,6 +71,19 @@ export function GroupDashboardPage() {
           ({group.timezone})
         </p>
       </header>
+      <section className="space-y-3">
+        <h2 className="font-display text-2xl tracking-[0.08em] text-heading uppercase">
+          Members
+        </h2>
+        <MemberRoster
+          members={membersQuery.data ?? []}
+          isPending={membersQuery.isLoading}
+          isError={membersQuery.isError}
+          onRetry={() => {
+            void membersQuery.refetch()
+          }}
+        />
+      </section>
       <EmptyState
         title="Up next"
         description="Current title, progress, activity, and standings will appear here."

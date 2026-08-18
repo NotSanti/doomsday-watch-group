@@ -1,6 +1,7 @@
 const CREATE_FALLBACK = 'Your group could not be saved. Please try again.'
 const LIST_FALLBACK = 'Your groups could not be loaded. Please try again.'
 const DETAIL_FALLBACK = 'This group could not be loaded. Please try again.'
+const MEMBERS_FALLBACK = 'Members could not be loaded. Please try again.'
 
 type ErrorLike = {
   code?: string | null
@@ -35,4 +36,8 @@ export function toFriendlyGroupListError(): string {
 
 export function toFriendlyGroupDetailError(): string {
   return DETAIL_FALLBACK
+}
+
+export function toFriendlyGroupMembersError(): string {
+  return MEMBERS_FALLBACK
 }

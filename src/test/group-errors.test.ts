@@ -3,6 +3,7 @@ import {
   toFriendlyCreateGroupError,
   toFriendlyGroupDetailError,
   toFriendlyGroupListError,
+  toFriendlyGroupMembersError,
 } from '@/features/groups/group-errors'
 
 describe('group errors', () => {
@@ -34,6 +35,9 @@ describe('group errors', () => {
     )
     expect(toFriendlyGroupDetailError()).toBe(
       'This group could not be loaded. Please try again.',
+    )
+    expect(toFriendlyGroupMembersError()).toBe(
+      'Members could not be loaded. Please try again.',
     )
   })
 })

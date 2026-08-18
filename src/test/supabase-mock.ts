@@ -1,7 +1,7 @@
 import type { AuthChangeEvent, Session, User } from '@supabase/supabase-js'
 import { vi } from 'vitest'
 import type { ProfileRow } from '@/features/auth/auth-schemas'
-import type { GroupRow } from '@/features/groups/group-schemas'
+import type { GroupMember, GroupRow } from '@/features/groups/group-schemas'
 import {
   inviteStatus,
   type InvitePreview,
@@ -17,12 +17,16 @@ export type MockInvite = InviteRow & {
   member_count?: number
 }
 
+export type MockMember = GroupMember
+
 let session: Session | null = null
 let profile: ProfileRow | null = null
 let profileError: { message: string } | null = null
 let groups: GroupRow[] = []
 let groupsError: { message: string } | null = null
 let createGroupError: { code?: string; message: string } | null = null
+let members: MockMember[] = []
+let membersError: { message: string } | null = null
 let invites: MockInvite[] = []
 let invitesError: { message: string } | null = null
 let createInviteError: { code?: string; message: string } | null = null
@@ -86,6 +90,17 @@ export function makeGroup(overrides: Partial<GroupRow> = {}): GroupRow {
   }
 }
 
+export function makeMember(overrides: Partial<MockMember> = {}): MockMember {
+  return {
+    group_id: '22222222-2222-4222-8222-222222222222',
+    user_id: '11111111-1111-4111-8111-111111111111',
+    role: 'owner',
+    joined_at: new Date().toISOString(),
+    display_name: 'Owner A',
+    ...overrides,
+  }
+}
+
 export function makeInvite(overrides: Partial<MockInvite> = {}): MockInvite {
   const token =
     overrides.token === undefined ? 'ab'.repeat(32) : overrides.token
@@ -124,6 +139,26 @@ export function setMockGroups(
 ): void {
   groups = next
   groupsError = error
+  members = next.map((group) =>
+    makeMember({
+      group_id: group.id,
+      user_id: group.owner_id,
+      role: 'owner',
+      joined_at: group.created_at,
+      display_name:
+        profile?.id === group.owner_id
+          ? profile.display_name
+          : 'Group owner',
+    }),
+  )
+}
+
+export function setMockMembers(
+  next: MockMember[],
+  error: { message: string } | null = null,
+): void {
+  members = next
+  membersError = error
 }
 
 export function setCreateGroupError(
@@ -190,6 +225,16 @@ function isOwnerOf(groupId: string): boolean {
   return Boolean(session && group && group.owner_id === session.user.id)
 }
 
+function memberToRow(member: MockMember) {
+  return {
+    group_id: member.group_id,
+    user_id: member.user_id,
+    role: member.role,
+    joined_at: member.joined_at,
+    profiles: { display_name: member.display_name },
+  }
+}
+
 function inviteToRow(invite: MockInvite): InviteRow {
   return {
     id: invite.id,
@@ -241,6 +286,16 @@ async function createGroupImpl(args: {
     owner_id: session?.user.id ?? '11111111-1111-4111-8111-111111111111',
   })
   groups = [...groups, group]
+  members = [
+    ...members,
+    makeMember({
+      group_id: group.id,
+      user_id: group.owner_id,
+      role: 'owner',
+      joined_at: group.created_at,
+      display_name: profile?.display_name ?? 'Owner A',
+    }),
+  ]
   return { data: group, error: null }
 }
 
@@ -477,6 +532,27 @@ export const supabaseFromMock = vi.fn((table: string) => {
     }
   }
 
+  if (table === 'group_members') {
+    return {
+      select: () => ({
+        in: async (_column: string, groupIds: string[]) => {
+          if (membersError) {
+            return { data: null, error: membersError }
+          }
+
+          const allowed = new Set(groupIds)
+
+          return {
+            data: members
+              .filter((member) => allowed.has(member.group_id))
+              .map(memberToRow),
+            error: null,
+          }
+        },
+      }),
+    }
+  }
+
   if (table === 'group_invites') {
     return {
       select: () => ({
@@ -550,6 +626,8 @@ export function resetSupabaseClient(): void {
   groups = []
   groupsError = null
   createGroupError = null
+  members = []
+  membersError = null
   invites = []
   invitesError = null
   createInviteError = null
