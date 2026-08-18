@@ -94,7 +94,7 @@ Do not build in MVP: public groups, chat/comments/reactions/notifications, multi
 - [x] 2 — Supabase schema, seed, and RLS
 - [x] 3 — Authentication and profile onboarding
 - [x] 4 — Group creation, switcher, membership
-- [ ] 5 — Secure invitations
+- [x] 5 — Secure invitations
 - [ ] 6 — Curated catalog and watchlist UI
 - [ ] 7 — Personal progress and current title
 - [ ] 8 — Ratings, reviews, spoiler protection

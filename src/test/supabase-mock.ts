@@ -2,8 +2,20 @@ import type { AuthChangeEvent, Session, User } from '@supabase/supabase-js'
 import { vi } from 'vitest'
 import type { ProfileRow } from '@/features/auth/auth-schemas'
 import type { GroupRow } from '@/features/groups/group-schemas'
+import {
+  inviteStatus,
+  type InvitePreview,
+  type InviteRow,
+} from '@/features/invites/invite-schemas'
 
 type AuthListener = (event: AuthChangeEvent, session: Session | null) => void
+
+export type MockInvite = InviteRow & {
+  token: string
+  group_name?: string
+  owner_display_name?: string
+  member_count?: number
+}
 
 let session: Session | null = null
 let profile: ProfileRow | null = null
@@ -11,6 +23,12 @@ let profileError: { message: string } | null = null
 let groups: GroupRow[] = []
 let groupsError: { message: string } | null = null
 let createGroupError: { code?: string; message: string } | null = null
+let invites: MockInvite[] = []
+let invitesError: { message: string } | null = null
+let createInviteError: { code?: string; message: string } | null = null
+let previewError: { code?: string; message: string } | null = null
+let redeemError: { code?: string; message: string } | null = null
+let revokeError: { code?: string; message: string } | null = null
 const listeners = new Set<AuthListener>()
 
 export function makeUser(overrides: Partial<User> = {}): User {
@@ -68,6 +86,20 @@ export function makeGroup(overrides: Partial<GroupRow> = {}): GroupRow {
   }
 }
 
+export function makeInvite(overrides: Partial<MockInvite> = {}): MockInvite {
+  return {
+    id: '66666666-6666-4666-8666-666666666666',
+    group_id: '22222222-2222-4222-8222-222222222222',
+    created_at: new Date().toISOString(),
+    expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+    max_uses: null,
+    use_count: 0,
+    revoked_at: null,
+    token: 'ab'.repeat(32),
+    ...overrides,
+  }
+}
+
 export function setMockSession(next: Session | null): void {
   session = next
 }
@@ -94,6 +126,42 @@ export function setCreateGroupError(
   createGroupError = error
 }
 
+export function setMockInvites(
+  next: MockInvite[],
+  error: { message: string } | null = null,
+): void {
+  invites = next
+  invitesError = error
+}
+
+export function setCreateInviteError(
+  error: { code?: string; message: string } | null,
+): void {
+  createInviteError = error
+}
+
+export function setPreviewInviteError(
+  error: { code?: string; message: string } | null,
+): void {
+  previewError = error
+}
+
+export function setRedeemInviteError(
+  error: { code?: string; message: string } | null,
+): void {
+  redeemError = error
+}
+
+export function setRevokeInviteError(
+  error: { code?: string; message: string } | null,
+): void {
+  revokeError = error
+}
+
+export function getMockInvites(): MockInvite[] {
+  return invites
+}
+
 export function emitAuthEvent(
   event: AuthChangeEvent,
   next: Session | null,
@@ -109,14 +177,52 @@ type AuthResponse = {
   error: { code?: string; message?: string } | null
 }
 
-type CreateGroupArgs = {
-  p_name: string
-  p_description?: string
-  p_target_date?: string
-  p_timezone?: string
+type RpcError = { code?: string; message: string }
+
+function isOwnerOf(groupId: string): boolean {
+  const group = groups.find((item) => item.id === groupId)
+  return Boolean(session && group && group.owner_id === session.user.id)
 }
 
-async function createGroupImpl(args: CreateGroupArgs) {
+function inviteToRow(invite: MockInvite): InviteRow {
+  return {
+    id: invite.id,
+    group_id: invite.group_id,
+    created_at: invite.created_at,
+    expires_at: invite.expires_at,
+    max_uses: invite.max_uses,
+    use_count: invite.use_count,
+    revoked_at: invite.revoked_at,
+  }
+}
+
+function previewFromInvite(invite: MockInvite | undefined): InvitePreview {
+  if (!invite) {
+    return {
+      group_name: null,
+      owner_display_name: null,
+      member_count: null,
+      is_valid: false,
+      invalid_reason: 'invalid',
+    }
+  }
+
+  const status = inviteStatus(invite)
+  const isValid = status === 'active'
+
+  return {
+    group_name: invite.group_name ?? 'Alpha Watch',
+    owner_display_name: invite.owner_display_name ?? 'Owner A',
+    member_count: invite.member_count ?? 1,
+    is_valid: isValid,
+    invalid_reason: isValid ? null : status,
+  }
+}
+
+async function createGroupImpl(args: {
+  p_name: string
+  p_description?: string
+}) {
   if (createGroupError) {
     return { data: null, error: createGroupError }
   }
@@ -129,6 +235,145 @@ async function createGroupImpl(args: CreateGroupArgs) {
   })
   groups = [...groups, group]
   return { data: group, error: null }
+}
+
+async function createInviteImpl(args: {
+  p_group_id: string
+  p_expires_at?: string
+  p_max_uses?: number
+}) {
+  if (createInviteError) {
+    return { data: null, error: createInviteError }
+  }
+
+  if (!session || !isOwnerOf(args.p_group_id)) {
+    return {
+      data: null,
+      error: { code: '42501', message: 'Only owners can create invites' },
+    }
+  }
+
+  const invite = makeInvite({
+    id: crypto.randomUUID(),
+    group_id: args.p_group_id,
+    token:
+      crypto.randomUUID().replaceAll('-', '') +
+      crypto.randomUUID().replaceAll('-', ''),
+    expires_at: args.p_expires_at ?? null,
+    max_uses: args.p_max_uses ?? null,
+  })
+  invites = [invite, ...invites]
+  return {
+    data: [
+      {
+        invite_id: invite.id,
+        token: invite.token,
+        expires_at: invite.expires_at,
+        max_uses: invite.max_uses,
+      },
+    ],
+    error: null,
+  }
+}
+
+async function previewInviteImpl(args: { p_token: string }) {
+  if (previewError) {
+    return { data: null, error: previewError }
+  }
+
+  return {
+    data: [
+      previewFromInvite(
+        invites.find((invite) => invite.token === args.p_token),
+      ),
+    ],
+    error: null,
+  }
+}
+
+async function redeemInviteImpl(args: { p_token: string }) {
+  if (redeemError) {
+    return { data: null, error: redeemError }
+  }
+
+  if (!session) {
+    return {
+      data: null,
+      error: { code: '42501', message: 'Not authenticated' } satisfies RpcError,
+    }
+  }
+
+  const invite = invites.find((item) => item.token === args.p_token)
+  if (!invite) {
+    return {
+      data: null,
+      error: { code: '22023', message: 'Invite is not valid' },
+    }
+  }
+
+  const status = inviteStatus(invite)
+  if (status === 'revoked') {
+    return {
+      data: null,
+      error: { code: '22023', message: 'Invite is revoked' },
+    }
+  }
+  if (status === 'expired') {
+    return {
+      data: null,
+      error: { code: '22023', message: 'Invite is expired' },
+    }
+  }
+
+  const alreadyMember = groups.some((group) => group.id === invite.group_id)
+  if (alreadyMember) {
+    return {
+      data: [{ group_id: invite.group_id, already_member: true }],
+      error: null,
+    }
+  }
+
+  if (status === 'exhausted') {
+    return {
+      data: null,
+      error: { code: '22023', message: 'Invite has no remaining uses' },
+    }
+  }
+
+  invite.use_count += 1
+  const group = makeGroup({
+    id: invite.group_id,
+    owner_id: '11111111-1111-4111-8111-111111111111',
+  })
+  groups = [...groups, group]
+  return {
+    data: [{ group_id: invite.group_id, already_member: false }],
+    error: null,
+  }
+}
+
+async function revokeInviteImpl(args: { p_invite_id: string }) {
+  if (revokeError) {
+    return { data: null, error: revokeError }
+  }
+
+  const invite = invites.find((item) => item.id === args.p_invite_id)
+  if (!invite) {
+    return {
+      data: null,
+      error: { code: '22023', message: 'Invite not found' },
+    }
+  }
+
+  if (!isOwnerOf(invite.group_id)) {
+    return {
+      data: null,
+      error: { code: '42501', message: 'Only owners can revoke invites' },
+    }
+  }
+
+  invite.revoked_at = new Date().toISOString()
+  return { data: null, error: null }
 }
 
 export const supabaseAuthMock = {
@@ -156,6 +401,7 @@ export const supabaseAuthMock = {
   signOut: vi.fn(async () => {
     profile = null
     groups = []
+    invites = []
     emitAuthEvent('SIGNED_OUT', null)
     return { error: null }
   }),
@@ -168,6 +414,10 @@ export const supabaseAuthMock = {
 
 export const supabaseRpcMock = {
   create_group: vi.fn(createGroupImpl),
+  create_invite: vi.fn(createInviteImpl),
+  preview_invite: vi.fn(previewInviteImpl),
+  redeem_invite: vi.fn(redeemInviteImpl),
+  revoke_invite: vi.fn(revokeInviteImpl),
 }
 
 export const supabaseFromMock = vi.fn((table: string) => {
@@ -217,6 +467,31 @@ export const supabaseFromMock = vi.fn((table: string) => {
     }
   }
 
+  if (table === 'group_invites') {
+    return {
+      select: () => ({
+        eq: (_column: string, groupId: string) => ({
+          order: async () => {
+            if (invitesError) {
+              return { data: null, error: invitesError }
+            }
+
+            if (!isOwnerOf(groupId)) {
+              return { data: [], error: null }
+            }
+
+            return {
+              data: invites
+                .filter((invite) => invite.group_id === groupId)
+                .map(inviteToRow),
+              error: null,
+            }
+          },
+        }),
+      }),
+    }
+  }
+
   throw new Error(`Unexpected table ${table}`)
 })
 
@@ -224,9 +499,33 @@ export function getSupabaseClient() {
   return {
     auth: supabaseAuthMock,
     from: supabaseFromMock,
-    rpc(fn: string, args: CreateGroupArgs) {
+    rpc(fn: string, args: Record<string, unknown> = {}) {
       if (fn === 'create_group') {
-        return supabaseRpcMock.create_group(args)
+        return supabaseRpcMock.create_group(
+          args as { p_name: string; p_description?: string },
+        )
+      }
+
+      if (fn === 'create_invite') {
+        return supabaseRpcMock.create_invite(
+          args as {
+            p_group_id: string
+            p_expires_at?: string
+            p_max_uses?: number
+          },
+        )
+      }
+
+      if (fn === 'preview_invite') {
+        return supabaseRpcMock.preview_invite(args as { p_token: string })
+      }
+
+      if (fn === 'redeem_invite') {
+        return supabaseRpcMock.redeem_invite(args as { p_token: string })
+      }
+
+      if (fn === 'revoke_invite') {
+        return supabaseRpcMock.revoke_invite(args as { p_invite_id: string })
       }
 
       throw new Error(`Unexpected rpc ${fn}`)
@@ -241,6 +540,12 @@ export function resetSupabaseClient(): void {
   groups = []
   groupsError = null
   createGroupError = null
+  invites = []
+  invitesError = null
+  createInviteError = null
+  previewError = null
+  redeemError = null
+  revokeError = null
   listeners.clear()
 }
 
@@ -256,4 +561,12 @@ export function resetSupabaseMock(): void {
   supabaseFromMock.mockClear()
   supabaseRpcMock.create_group.mockReset()
   supabaseRpcMock.create_group.mockImplementation(createGroupImpl)
+  supabaseRpcMock.create_invite.mockReset()
+  supabaseRpcMock.create_invite.mockImplementation(createInviteImpl)
+  supabaseRpcMock.preview_invite.mockReset()
+  supabaseRpcMock.preview_invite.mockImplementation(previewInviteImpl)
+  supabaseRpcMock.redeem_invite.mockReset()
+  supabaseRpcMock.redeem_invite.mockImplementation(redeemInviteImpl)
+  supabaseRpcMock.revoke_invite.mockReset()
+  supabaseRpcMock.revoke_invite.mockImplementation(revokeInviteImpl)
 }

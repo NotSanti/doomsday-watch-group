@@ -8,14 +8,15 @@ import { RequireAuth } from '@/features/auth/RequireAuth'
 import { GroupDashboardPage } from '@/features/groups/GroupDashboardPage'
 import { GroupHomePage } from '@/features/groups/GroupHomePage'
 import { RequireGroupMembership } from '@/features/groups/RequireGroupMembership'
+import { GroupSettingsPage } from '@/features/invites/GroupSettingsPage'
+import { InviteCodePage } from '@/features/invites/InviteCodePage'
+import { InvitePage } from '@/features/invites/InvitePage'
 import { AppShell } from '@/layouts/AppShell'
 import { PublicLayout } from '@/layouts/PublicLayout'
 import { LandingPage } from '@/pages/LandingPage'
 import {
   AboutPage,
-  InvitePage,
   MembersPage,
-  SettingsPage,
   TitleDetailPage,
   WatchlistPage,
 } from '@/pages/PlaceholderPages'
@@ -27,6 +28,7 @@ export function AppRoutes() {
         <Route index element={<LandingPage />} />
         <Route path="auth" element={<AuthPage />} />
         <Route path="auth/callback" element={<AuthCallbackPage />} />
+        <Route path="invite" element={<InviteCodePage />} />
         <Route path="invite/:token" element={<InvitePage />} />
         <Route path="about" element={<AboutPage />} />
       </Route>
@@ -39,7 +41,7 @@ export function AppRoutes() {
             <Route path="watchlist" element={<WatchlistPage />} />
             <Route path="titles/:titleId" element={<TitleDetailPage />} />
             <Route path="members" element={<MembersPage />} />
-            <Route path="settings" element={<SettingsPage />} />
+            <Route path="settings" element={<GroupSettingsPage />} />
           </Route>
         </Route>
       </Route>

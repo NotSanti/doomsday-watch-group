@@ -1,29 +1,5 @@
 import { EmptyState } from '@/components/EmptyState'
-import { Button } from '@/components/ui/button'
-import { Card, CardTitle } from '@/components/ui/card'
-import { Link, useParams } from 'react-router'
-
-export function InvitePage() {
-  const { token } = useParams()
-  const returnTo = `/invite/${token ?? ''}`
-
-  return (
-    <main className="mx-auto max-w-lg px-4 py-16">
-      <Card>
-        <CardTitle>Join a watch group</CardTitle>
-        <p className="mt-3 text-muted">
-          Invite token <span className="text-heading">{token}</span> will be
-          validated in Milestone 5. No private reviews are shown here.
-        </p>
-        <Button asChild className="mt-6">
-          <Link to={`/auth?returnTo=${encodeURIComponent(returnTo)}`}>
-            Sign in to join
-          </Link>
-        </Button>
-      </Card>
-    </main>
-  )
-}
+import { useParams } from 'react-router'
 
 export function AboutPage() {
   return (
@@ -69,15 +45,6 @@ export function MembersPage() {
     <EmptyState
       title="Members"
       description="Member progress comparison is a later milestone."
-    />
-  )
-}
-
-export function SettingsPage() {
-  return (
-    <EmptyState
-      title="Group settings"
-      description="Owner-only invites, current title, and destructive actions land later."
     />
   )
 }
