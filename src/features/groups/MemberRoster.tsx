@@ -55,12 +55,7 @@ export function MemberRoster({
   }
 
   return (
-    <ul
-      className={cn(
-        'flex flex-wrap items-center gap-2',
-        compact ? 'justify-center' : 'justify-start',
-      )}
-    >
+    <ul className="flex flex-wrap items-center justify-start gap-2">
       {members.map((member) => (
         <li key={`${member.group_id}:${member.user_id}`}>
           <MemberPill member={member} />

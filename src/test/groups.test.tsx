@@ -207,6 +207,46 @@ describe('groups', () => {
     expect(within(roster!).getByText('Member B')).toBeInTheDocument()
   })
 
+  it('keeps group tile actions aligned when a group has no notes', async () => {
+    signInAsOwner()
+    setMockGroups([
+      makeGroup({
+        id: GROUP_A,
+        name: 'Alpha Watch',
+        description: 'First room',
+      }),
+      makeGroup({
+        id: GROUP_B,
+        name: 'Beta Watch',
+        description: null,
+      }),
+    ])
+    renderApp('/app')
+
+    const alpha = (
+      await screen.findByRole('heading', { name: 'Alpha Watch' })
+    ).closest('li')
+    const beta = (
+      await screen.findByRole('heading', { name: 'Beta Watch' })
+    ).closest('li')
+    expect(alpha).not.toBeNull()
+    expect(beta).not.toBeNull()
+
+    const alphaNotes = alpha!.querySelector('p.min-h-10')
+    const betaNotes = beta!.querySelector('p.min-h-10')
+    expect(alphaNotes).toHaveClass('min-h-10', 'line-clamp-2')
+    expect(betaNotes).toHaveClass('min-h-10', 'line-clamp-2')
+    expect(alphaNotes).toHaveTextContent('First room')
+    expect(betaNotes).toHaveTextContent('')
+    expect(within(alpha!).getByText('Members')).not.toHaveClass('text-center')
+    expect(
+      within(alpha!).getByRole('link', { name: 'Open group' }),
+    ).toBeInTheDocument()
+    expect(
+      within(beta!).getByRole('link', { name: 'Open group' }),
+    ).toBeInTheDocument()
+  })
+
   it('keeps the group list visible if members cannot load', async () => {
     signInAsOwner()
     setMockGroups([makeGroup({ id: GROUP_A, name: 'Alpha Watch' })])
