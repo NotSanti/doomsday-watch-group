@@ -73,22 +73,22 @@ export function GroupHomePage() {
           const role = groupRoleForUser(group, userId)
 
           return (
-            <li key={group.id}>
-              <Card className="h-full">
+            <li key={group.id} className="h-full">
+              <Card className="flex h-full flex-col">
                 <div className="flex items-start justify-between gap-3">
                   <CardTitle>{group.name}</CardTitle>
                   <Badge tone={role === 'owner' ? 'watched' : 'muted'}>
                     {role === 'owner' ? 'Owner' : 'Member'}
                   </Badge>
                 </div>
-                {group.description ? (
-                  <p className="mt-3 text-sm text-muted">{group.description}</p>
-                ) : null}
+                <p className="mt-3 line-clamp-2 min-h-10 text-sm text-muted">
+                  {group.description?.trim() ? group.description : '\u00a0'}
+                </p>
                 <div className="mt-4">
-                  <p className="text-center text-xs tracking-[0.14em] text-secondary uppercase">
+                  <p className="text-xs tracking-[0.14em] text-secondary uppercase">
                     Members
                   </p>
-                  <div className="mt-2 flex justify-center">
+                  <div className="mt-2">
                     <MemberRoster
                       compact
                       members={
@@ -104,9 +104,11 @@ export function GroupHomePage() {
                     />
                   </div>
                 </div>
-                <Button asChild className="mt-6" variant="secondary">
-                  <Link to={`/groups/${group.id}`}>Open group</Link>
-                </Button>
+                <div className="mt-auto pt-6">
+                  <Button asChild variant="secondary">
+                    <Link to={`/groups/${group.id}`}>Open group</Link>
+                  </Button>
+                </div>
               </Card>
             </li>
           )
