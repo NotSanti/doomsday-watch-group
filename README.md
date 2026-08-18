@@ -31,6 +31,10 @@ npx supabase db reset
 npm run dev
 ```
 
+Copy `API_URL` into `VITE_SUPABASE_URL` and the anon/publishable key into `VITE_SUPABASE_PUBLISHABLE_KEY`. Set `VITE_APP_URL` to `http://127.0.0.1:5173`. Restart local Supabase after `config.toml` auth URL changes so callback links work.
+
+Auth emails are not sent on the public internet. Open Mailpit at `http://127.0.0.1:54324` for confirmation and password-reset messages.
+
 Database commands:
 
 ```bash
@@ -66,6 +70,7 @@ TMDB_API_READ_TOKEN
 | ---------------------------------- | ------------- | --------------------------------------- |
 | `/`                                | Public        | Landing, countdown, product explanation |
 | `/auth`                            | Public        | Sign up, sign in, password reset        |
+| `/auth/callback`                   | Public        | Auth email callback                     |
 | `/invite/:token`                   | Public shell  | Validate invite and join                |
 | `/app`                             | Authenticated | Group picker and create/join            |
 | `/groups/:groupId`                 | Member        | Dashboard                               |
@@ -87,7 +92,7 @@ Do not build in MVP: public groups, chat/comments/reactions/notifications, multi
 - [x] 0 — GitHub repo and Vercel hosting
 - [x] 1 — Design foundation and static route shell
 - [x] 2 — Supabase schema, seed, and RLS
-- [ ] 3 — Authentication and profile onboarding
+- [x] 3 — Authentication and profile onboarding
 - [ ] 4 — Group creation, switcher, membership
 - [ ] 5 — Secure invitations
 - [ ] 6 — Curated catalog and watchlist UI

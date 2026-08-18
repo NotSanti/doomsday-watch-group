@@ -1,8 +1,11 @@
 import { Link, NavLink, Outlet, useParams } from 'react-router'
+import { Button } from '@/components/ui/button'
+import { useAuth } from '@/features/auth/use-auth'
 import { cn } from '@/lib/utils'
 
 export function AppShell() {
   const { groupId } = useParams()
+  const { signOut } = useAuth()
   const base = groupId ? `/groups/${groupId}` : '/app'
 
   const links = [
@@ -53,6 +56,17 @@ export function AppShell() {
                   </NavLink>
                 </li>
               ))}
+              <li>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    void signOut()
+                  }}
+                >
+                  Sign out
+                </Button>
+              </li>
             </ul>
           </nav>
         </div>

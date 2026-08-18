@@ -3,24 +3,9 @@ import { Button } from '@/components/ui/button'
 import { Card, CardTitle } from '@/components/ui/card'
 import { Link, useParams } from 'react-router'
 
-export function AuthPage() {
-  return (
-    <main className="mx-auto max-w-md px-4 py-16">
-      <Card>
-        <CardTitle>Sign in</CardTitle>
-        <p className="mt-3 text-muted">
-          Email authentication lands in Milestone 3. This route is a shell.
-        </p>
-        <Button asChild className="mt-6 w-full">
-          <Link to="/app">Continue to app shell</Link>
-        </Button>
-      </Card>
-    </main>
-  )
-}
-
 export function InvitePage() {
   const { token } = useParams()
+  const returnTo = `/invite/${token ?? ''}`
 
   return (
     <main className="mx-auto max-w-lg px-4 py-16">
@@ -31,7 +16,9 @@ export function InvitePage() {
           validated in Milestone 5. No private reviews are shown here.
         </p>
         <Button asChild className="mt-6">
-          <Link to="/auth">Sign in to join</Link>
+          <Link to={`/auth?returnTo=${encodeURIComponent(returnTo)}`}>
+            Sign in to join
+          </Link>
         </Button>
       </Card>
     </main>
@@ -114,15 +101,6 @@ export function SettingsPage() {
     <EmptyState
       title="Group settings"
       description="Owner-only invites, current title, and destructive actions land later."
-    />
-  )
-}
-
-export function ProfilePage() {
-  return (
-    <EmptyState
-      title="Profile"
-      description="Display name and avatar onboarding will be added with authentication."
     />
   )
 }

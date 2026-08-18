@@ -74,3 +74,4 @@ Documented in `.env.example`:
 - Vercel deploys `main` to production and pull requests to preview URLs.
 - `vercel.json` rewrites unknown paths to `index.html` so React Router nested URLs work.
 - Register local, preview, and production auth callback URLs in Supabase (Milestone 3 / 12).
+  Local callback: `http://127.0.0.1:5173/auth/callback`
