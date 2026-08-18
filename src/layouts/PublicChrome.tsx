@@ -1,13 +1,17 @@
 import { Link, NavLink } from 'react-router'
+import { useAuth } from '@/features/auth/use-auth'
 import { cn } from '@/lib/utils'
 
-const publicLinks = [
-  { to: '/', label: 'Home' },
-  { to: '/about', label: 'About' },
-  { to: '/auth', label: 'Sign in' },
-]
-
 export function PublicHeader() {
+  const { status } = useAuth()
+  const links = [
+    { to: '/', label: 'Home' },
+    { to: '/about', label: 'About' },
+    status === 'authenticated'
+      ? { to: '/app', label: 'App' }
+      : { to: '/auth', label: 'Sign in' },
+  ]
+
   return (
     <header className="border-b border-border/80 bg-surface/90 backdrop-blur-md">
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-4">
@@ -19,7 +23,7 @@ export function PublicHeader() {
         </Link>
         <nav aria-label="Public">
           <ul className="flex items-center gap-4">
-            {publicLinks.map((link) => (
+            {links.map((link) => (
               <li key={link.to}>
                 <NavLink
                   to={link.to}
