@@ -19,6 +19,7 @@ test-results
 .env
 .env.*
 !.env.example
+credentials.txt
 
 # Editor directories and files
 .vscode/*

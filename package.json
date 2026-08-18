@@ -11,6 +11,10 @@
     "typecheck": "tsc -b",
     "test": "vitest run",
     "test:watch": "vitest",
+    "db:start": "supabase start",
+    "db:reset": "supabase db reset",
+    "db:test": "supabase test db",
+    "db:types": "supabase gen types --local --lang=typescript > src/types/database.ts",
     "format": "prettier --write .",
     "format:check": "prettier --check ."
   },
@@ -44,6 +48,7 @@
     "globals": "^17.7.0",
     "jsdom": "^27.0.0",
     "prettier": "^3.6.2",
+    "supabase": "^2.115.0",
     "tailwindcss": "^4.3.3",
     "typescript": "~6.0.2",
     "typescript-eslint": "^8.65.0",

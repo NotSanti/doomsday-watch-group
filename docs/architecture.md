@@ -44,7 +44,19 @@ supabase/
 public/
 ```
 
-Keep database access in feature query/mutation modules. Generate TypeScript database types after each schema migration.
+Keep database access in feature query/mutation modules. After schema changes, regenerate TypeScript types:
+
+```bash
+npx supabase gen types --local --lang=typescript > src/types/database.ts
+```
+
+Local database:
+
+```bash
+npx supabase start
+npx supabase db reset
+npx supabase test db
+```
 
 ## Environment
 

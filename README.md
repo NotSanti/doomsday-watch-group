@@ -26,7 +26,18 @@ Unofficial fan project. Not affiliated with or endorsed by Marvel or Disney.
 ```bash
 npm install
 cp .env.example .env
+npx supabase start
+npx supabase db reset
 npm run dev
+```
+
+Database commands:
+
+```bash
+npx supabase start
+npx supabase db reset
+npx supabase test db
+npx supabase gen types --local --lang=typescript > src/types/database.ts
 ```
 
 Required commands:
@@ -75,7 +86,7 @@ Do not build in MVP: public groups, chat/comments/reactions/notifications, multi
 
 - [x] 0 — GitHub repo and Vercel hosting
 - [x] 1 — Design foundation and static route shell
-- [ ] 2 — Supabase schema, seed, and RLS
+- [x] 2 — Supabase schema, seed, and RLS
 - [ ] 3 — Authentication and profile onboarding
 - [ ] 4 — Group creation, switcher, membership
 - [ ] 5 — Secure invitations

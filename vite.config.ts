@@ -7,6 +7,7 @@ import { defineConfig } from 'vitest/config'
 const rootDir = path.dirname(fileURLToPath(import.meta.url))
 
 export default defineConfig({
+  root: rootDir,
   plugins: [react(), tailwindcss()],
   resolve: {
     alias: {
@@ -16,5 +17,7 @@ export default defineConfig({
   test: {
     environment: 'jsdom',
     setupFiles: ['./src/test/setup.ts'],
+    include: ['src/**/*.test.ts', 'src/**/*.test.tsx'],
+    exclude: ['node_modules', 'dist', 'supabase'],
   },
 })

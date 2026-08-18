@@ -1,0 +1,19 @@
+-- Curated MCU catalog structure for Milestone 6.
+-- Populate this file (or a later seed) with reviewed rows that include:
+--   id              uuid (stable internal ID)
+--   tmdb_id         integer (optional, for artwork/metadata refresh)
+--   media_type      movie | series | special
+--   name
+--   release_date
+--   runtime_minutes / episode_count
+--   poster_path / backdrop_path
+--   synopsis        spoiler-safe
+--   phase / saga
+--   importance      essential | recommended | optional
+--   release_order   unique integer
+--   doomsday_order  unique integer (editorial watch order)
+--   is_active
+--
+-- Do not scrape marvelwatchlist.com. Keep TMDB IDs in git as editorial data.
+
+-- insert into public.titles (...) values (...);
