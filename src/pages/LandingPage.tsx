@@ -28,7 +28,7 @@ export function LandingPage() {
                 <Link to="/auth">Create your watch group</Link>
               </Button>
               <Button asChild size="lg" variant="secondary">
-                <Link to="/invite/preview">Join with an invite</Link>
+                <Link to="/invite">Join with an invite</Link>
               </Button>
             </div>
           </div>

@@ -32,7 +32,7 @@ export function CreateGroupForm() {
       })}
     >
       <p className="text-sm text-muted">
-        You will be the owner. Invites for other members come later.
+        You will be the owner. Invite friends from group settings.
       </p>
       {formError ? (
         <p
