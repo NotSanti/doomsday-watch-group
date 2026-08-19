@@ -50,7 +50,7 @@ export function ReviewPreviewBubble({
             type="button"
             aria-label={countLabel}
             className={cn(
-              'review-bubble-glow flex size-7 items-center justify-center rounded-full border border-accent/50 bg-accent text-xs font-semibold text-on-primary',
+              'review-bubble-glow flex size-5 items-center justify-center rounded-full border border-multiverse bg-multiverse text-[10px] font-semibold text-heading',
               className,
             )}
             onClick={(event) => {

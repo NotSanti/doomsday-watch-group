@@ -82,13 +82,16 @@ export function TitleRow({
           <Badge tone="rating">{averageRatingLabel}</Badge>
         </div>
       </Link>
-      <div className="absolute top-2 right-2 z-10">
-        <ReviewPreviewBubble
-          titleName={title.name}
-          reviews={reviews}
-          members={members}
-          currentUserId={currentUserId}
-        />
+      <div className="pointer-events-none absolute inset-0 grid grid-cols-[3rem_4.5rem_minmax(0,1fr)_auto] items-center gap-4 px-3 py-2">
+        <span />
+        <div className="pointer-events-auto relative self-start justify-self-end">
+          <ReviewPreviewBubble
+            titleName={title.name}
+            reviews={reviews}
+            members={members}
+            currentUserId={currentUserId}
+          />
+        </div>
       </div>
     </div>
   )
