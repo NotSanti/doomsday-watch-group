@@ -78,13 +78,15 @@ export function TitleCard({
           </div>
         </div>
       </Link>
-      <div className="absolute top-1.5 right-1.5 z-10">
-        <ReviewPreviewBubble
-          titleName={title.name}
-          reviews={reviews}
-          members={members}
-          currentUserId={currentUserId}
-        />
+      <div className="pointer-events-none absolute inset-0 z-10">
+        <div className="pointer-events-auto absolute top-1.5 right-1.5">
+          <ReviewPreviewBubble
+            titleName={title.name}
+            reviews={reviews}
+            members={members}
+            currentUserId={currentUserId}
+          />
+        </div>
       </div>
     </Card>
   )
