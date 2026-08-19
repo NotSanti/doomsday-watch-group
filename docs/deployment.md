@@ -20,6 +20,8 @@ Prefer a separate Supabase project for preview when practical. Until that exists
 - `vercel.json` rewrites unknown paths to `/index.html` so opening `/groups/:id/watchlist` directly works.
 - Browser isolation headers (`X-Frame-Options`, `nosniff`, referrer policy) are set in `vercel.json`. No secrets.
 
+Preview deployments use Vercel Deployment Protection, so the preview URL may require a Vercel login. After that, nested client routes still rewrite to the SPA. Production (`https://doomsday-watch-group.vercel.app`) is public.
+
 Vercel system variables (`VERCEL_URL`, `VERCEL_ENV`) are provided by the platform. Do not copy them into git.
 
 ## Client environment variables
@@ -59,7 +61,7 @@ http://127.0.0.1:5173/**
 http://localhost:5173/**
 https://doomsday-watch-group.vercel.app/**
 https://doomsday-watch-group-*.vercel.app/**
-https://*-notsanti.vercel.app/**
+https://*-notsantis-projects.vercel.app/**
 ```
 
 Do not allow `https://*.vercel.app/**` — that would accept auth redirects onto any Vercel app.
