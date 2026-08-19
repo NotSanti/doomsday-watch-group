@@ -102,6 +102,7 @@ describe('watchlist', () => {
     expect(screen.getAllByText('WandaVision').length).toBeGreaterThan(0)
     expect(screen.getAllByText('Werewolf by Night').length).toBeGreaterThan(0)
     expect(screen.getAllByText('Iron Man').length).toBeGreaterThan(0)
+    expect(screen.getAllByText('1/1 watched').length).toBeGreaterThan(0)
     expect(
       screen.getByRole('heading', {
         name: 'Phase 4 — The Blip & New Beginnings (2023)',
@@ -172,10 +173,10 @@ describe('watchlist', () => {
       screen.getByText('A sitcom reality begins to crack.'),
     ).toBeInTheDocument()
     expect(screen.getByText(/9 episodes/)).toBeInTheDocument()
+    expect(screen.getByLabelText('My status')).toHaveValue('watching')
+    expect(screen.getByText(/0\/1 watched by the group/i)).toBeInTheDocument()
     expect(
-      screen.getByText(
-        /personal status, ratings, and reviews arrive in later milestones/i,
-      ),
+      screen.getByText(/ratings and reviews arrive in a later milestone/i),
     ).toBeInTheDocument()
 
     await user.click(screen.getByRole('link', { name: 'Back to watchlist' }))
@@ -241,9 +242,8 @@ describe('watchlist', () => {
     expect(
       screen.getByText('An industrialist builds a powered suit of armor.'),
     ).toBeInTheDocument()
-    expect(
-      screen.queryByRole('combobox', { name: 'My status' }),
-    ).not.toBeInTheDocument()
+    expect(screen.getByLabelText('My status')).toHaveValue('watched')
+    expect(screen.getByText(/1\/1 watched by the group/i)).toBeInTheDocument()
   })
 
   it('shows unavailable copy for unknown or inactive titles', async () => {

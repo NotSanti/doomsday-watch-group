@@ -7,7 +7,7 @@ import {
   type InvitePreview,
   type InviteRow,
 } from '@/features/invites/invite-schemas'
-import type { TitleProgress, TitleRow } from '@/features/watchlist/title-schemas'
+import type { TitleRow, TitleStatus } from '@/features/watchlist/title-schemas'
 
 type AuthListener = (event: AuthChangeEvent, session: Session | null) => void
 
@@ -20,9 +20,13 @@ export type MockInvite = InviteRow & {
 
 export type MockMember = GroupMember
 
-export type MockTitleProgress = TitleProgress & {
+export type MockTitleProgress = {
   group_id: string
   user_id: string
+  title_id: string
+  status: TitleStatus
+  started_at: string | null
+  watched_at: string | null
 }
 
 let session: Session | null = null
@@ -43,7 +47,9 @@ let titles: TitleRow[] = []
 let titlesError: { message: string } | null = null
 let progress: MockTitleProgress[] = []
 let progressError: { message: string } | null = null
+let progressWriteError: { code?: string; message: string } | null = null
 const listeners = new Set<AuthListener>()
+const realtimeHandlers: { table: string; callback: () => void }[] = []
 
 export function makeUser(overrides: Partial<User> = {}): User {
   return {
@@ -162,6 +168,8 @@ export function makeTitleProgress(
     user_id: '11111111-1111-4111-8111-111111111111',
     title_id: 'aa000000-0000-4000-8000-000000000001',
     status: 'not_started',
+    started_at: null,
+    watched_at: null,
     ...overrides,
   }
 }
@@ -258,6 +266,16 @@ export function setMockProgress(
 ): void {
   progress = next
   progressError = error
+}
+
+export function setProgressWriteError(
+  error: { code?: string; message: string } | null,
+): void {
+  progressWriteError = error
+}
+
+export function getMockProgress(): MockTitleProgress[] {
+  return progress
 }
 
 export function getMockInvites(): MockInvite[] {
@@ -502,6 +520,74 @@ async function revokeInviteImpl(args: { p_invite_id: string }) {
   return { data: null, error: null }
 }
 
+function timestampsForStatus(
+  status: TitleStatus,
+  existing: MockTitleProgress | undefined,
+): { started_at: string | null; watched_at: string | null } {
+  const now = new Date().toISOString()
+
+  if (status === 'not_started') {
+    return { started_at: null, watched_at: null }
+  }
+
+  if (status === 'watching') {
+    return { started_at: existing?.started_at ?? now, watched_at: null }
+  }
+
+  return {
+    started_at: existing?.started_at ?? now,
+    watched_at: existing?.watched_at ?? now,
+  }
+}
+
+function matchesProgressFilters(
+  row: MockTitleProgress,
+  filters: Record<string, string>,
+): boolean {
+  return Object.entries(filters).every(([column, value]) => {
+    if (column === 'group_id') {
+      return row.group_id === value
+    }
+
+    if (column === 'user_id') {
+      return row.user_id === value
+    }
+
+    if (column === 'title_id') {
+      return row.title_id === value
+    }
+
+    return true
+  })
+}
+
+export const supabaseChannelMock = {
+  channel: vi.fn(() => {
+    const api = {
+      on(
+        _event: string,
+        filter: { table: string },
+        callback: () => void,
+      ) {
+        realtimeHandlers.push({ table: filter.table, callback })
+        return api
+      },
+      subscribe: vi.fn(() => api),
+    }
+
+    return api
+  }),
+  removeChannel: vi.fn(async () => 'ok'),
+}
+
+export function emitRealtimeChange(table: string): void {
+  for (const handler of realtimeHandlers) {
+    if (handler.table === table) {
+      handler.callback()
+    }
+  }
+}
+
 export const supabaseAuthMock = {
   getSession: vi.fn(async () => ({ data: { session }, error: null })),
   onAuthStateChange: vi.fn((callback: AuthListener) => {
@@ -588,6 +674,35 @@ export const supabaseFromMock = vi.fn((table: string) => {
                   data: groups.find((group) => group.id === value) ?? null,
                   error: null,
                 },
+        }),
+      }),
+      update: (values: { current_title_id?: string | null }) => ({
+        eq: (_column: string, groupId: string) => ({
+          select: () => ({
+            maybeSingle: async () => {
+              const group = groups.find((item) => item.id === groupId)
+
+              if (!group || !session || group.owner_id !== session.user.id) {
+                return {
+                  data: null,
+                  error: {
+                    code: '42501',
+                    message: 'Only owners can update this group',
+                  },
+                }
+              }
+
+              const next = {
+                ...group,
+                ...values,
+                updated_at: new Date().toISOString(),
+              }
+              groups = groups.map((item) =>
+                item.id === groupId ? next : item,
+              )
+              return { data: next, error: null }
+            },
+          }),
         }),
       }),
     }
@@ -677,25 +792,98 @@ export const supabaseFromMock = vi.fn((table: string) => {
   }
 
   if (table === 'member_title_progress') {
-    return {
-      select: () => ({
-        eq: (_groupColumn: string, groupId: string) => ({
-          eq: async (_userColumn: string, userId: string) => {
-            if (progressError) {
-              return { data: null, error: progressError }
-            }
-
-            return {
-              data: progress
-                .filter(
-                  (row) => row.group_id === groupId && row.user_id === userId,
-                )
-                .map((row) => ({
-                  title_id: row.title_id,
-                  status: row.status,
-                })),
+    const filters: Record<string, string> = {}
+    const selectApi = {
+      eq(column: string, value: string) {
+        filters[column] = value
+        return selectApi
+      },
+      then(
+        onFulfilled?: (value: {
+          data: MockTitleProgress[] | null
+          error: { message: string } | null
+        }) => unknown,
+        onRejected?: (reason: unknown) => unknown,
+      ) {
+        const result = progressError
+          ? { data: null, error: progressError }
+          : {
+              data: progress.filter((row) =>
+                matchesProgressFilters(row, filters),
+              ),
               error: null,
             }
+
+        return Promise.resolve(result).then(onFulfilled, onRejected)
+      },
+    }
+
+    const deleteApi = {
+      eq(column: string, value: string) {
+        filters[column] = value
+        return deleteApi
+      },
+      then(
+        onFulfilled?: (value: {
+          data: null
+          error: { code?: string; message: string } | null
+        }) => unknown,
+        onRejected?: (reason: unknown) => unknown,
+      ) {
+        if (progressWriteError) {
+          return Promise.resolve({
+            data: null,
+            error: progressWriteError,
+          }).then(onFulfilled, onRejected)
+        }
+
+        progress = progress.filter(
+          (row) => !matchesProgressFilters(row, filters),
+        )
+        return Promise.resolve({ data: null, error: null }).then(
+          onFulfilled,
+          onRejected,
+        )
+      },
+    }
+
+    return {
+      select: () => selectApi,
+      delete: () => deleteApi,
+      upsert: (values: {
+        group_id: string
+        user_id: string
+        title_id: string
+        status: TitleStatus
+      }) => ({
+        select: () => ({
+          maybeSingle: async () => {
+            if (progressWriteError) {
+              return { data: null, error: progressWriteError }
+            }
+
+            const existing = progress.find(
+              (row) =>
+                row.group_id === values.group_id &&
+                row.user_id === values.user_id &&
+                row.title_id === values.title_id,
+            )
+            const row: MockTitleProgress = {
+              ...values,
+              ...timestampsForStatus(values.status, existing),
+            }
+            progress = [
+              ...progress.filter(
+                (item) =>
+                  !(
+                    item.group_id === row.group_id &&
+                    item.user_id === row.user_id &&
+                    item.title_id === row.title_id
+                  ),
+              ),
+              row,
+            ]
+            return { data: row, error: null }
           },
         }),
       }),
@@ -709,6 +897,8 @@ export function getSupabaseClient() {
   return {
     auth: supabaseAuthMock,
     from: supabaseFromMock,
+    channel: supabaseChannelMock.channel,
+    removeChannel: supabaseChannelMock.removeChannel,
     rpc(fn: string, args: Record<string, unknown> = {}) {
       if (fn === 'create_group') {
         return supabaseRpcMock.create_group(
@@ -762,7 +952,9 @@ export function resetSupabaseClient(): void {
   titlesError = null
   progress = []
   progressError = null
+  progressWriteError = null
   listeners.clear()
+  realtimeHandlers.length = 0
 }
 
 export function resetSupabaseMock(): void {
@@ -775,6 +967,8 @@ export function resetSupabaseMock(): void {
   supabaseAuthMock.resetPasswordForEmail.mockClear()
   supabaseAuthMock.updateUser.mockClear()
   supabaseFromMock.mockClear()
+  supabaseChannelMock.channel.mockClear()
+  supabaseChannelMock.removeChannel.mockClear()
   supabaseRpcMock.create_group.mockReset()
   supabaseRpcMock.create_group.mockImplementation(createGroupImpl)
   supabaseRpcMock.create_invite.mockReset()

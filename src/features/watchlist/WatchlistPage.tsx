@@ -2,22 +2,26 @@ import { useParams, useSearchParams } from 'react-router'
 import { EmptyState } from '@/components/EmptyState'
 import { ErrorState } from '@/components/ErrorState'
 import { Skeleton } from '@/components/Skeleton'
+import { useAuth } from '@/features/auth/use-auth'
+import { useGroupMembers } from '@/features/groups/use-groups'
+import {
+  formatWatchedFraction,
+  groupWatchedFraction,
+  progressStatusFor,
+} from '@/features/progress/progress-metrics'
+import { useGroupProgress } from '@/features/progress/use-progress'
 import { toFriendlyTitleListError } from '@/features/watchlist/title-errors'
 import {
   filterTitles,
   parseWatchlistFilters,
   serializeWatchlistFilters,
-  statusForTitle,
   type WatchlistFilters,
 } from '@/features/watchlist/title-filters'
 import { groupTitlesByEra } from '@/features/watchlist/title-groups'
 import { TitleCard } from '@/features/watchlist/TitleCard'
 import { TitleRow } from '@/features/watchlist/TitleRow'
 import { TmdbCredit } from '@/features/watchlist/TmdbCredit'
-import {
-  useMyTitleProgress,
-  useTitleList,
-} from '@/features/watchlist/use-titles'
+import { useTitleList } from '@/features/watchlist/use-titles'
 import { WatchlistFiltersForm } from '@/features/watchlist/WatchlistFilters'
 
 function WatchlistSkeleton() {
@@ -33,13 +37,19 @@ function WatchlistSkeleton() {
 
 export function WatchlistPage() {
   const { groupId = '' } = useParams()
+  const { user } = useAuth()
   const [searchParams, setSearchParams] = useSearchParams()
   const titlesQuery = useTitleList()
-  const progressQuery = useMyTitleProgress(groupId)
+  const progressQuery = useGroupProgress(groupId)
+  const membersQuery = useGroupMembers(groupId)
   const filters = parseWatchlistFilters(searchParams)
   const titles = titlesQuery.data ?? []
   const progress = progressQuery.data ?? []
-  const visible = filterTitles(titles, progress, filters)
+  const memberIds = (membersQuery.data ?? []).map((member) => member.user_id)
+  const myProgress = progress
+    .filter((row) => row.user_id === user?.id)
+    .map((row) => ({ title_id: row.title_id, status: row.status }))
+  const visible = filterTitles(titles, myProgress, filters)
   const groups = groupTitlesByEra(visible)
 
   function updateFilters(next: WatchlistFilters) {
@@ -98,28 +108,60 @@ export function WatchlistPage() {
                 {group.era}
               </h2>
               <ul className="grid gap-3 sm:grid-cols-2 md:hidden">
-                {group.titles.map((title) => (
-                  <li key={title.id}>
-                    <TitleCard
-                      title={title}
-                      status={statusForTitle(title.id, progress)}
-                      sort={filters.sort}
-                      href={`/groups/${groupId}/titles/${title.id}${querySuffix}`}
-                    />
-                  </li>
-                ))}
+                {group.titles.map((title) => {
+                  const fraction = groupWatchedFraction(
+                    title.id,
+                    memberIds,
+                    progress,
+                  )
+
+                  return (
+                    <li key={title.id}>
+                      <TitleCard
+                        title={title}
+                        status={progressStatusFor(
+                          progress,
+                          user?.id ?? '',
+                          title.id,
+                        )}
+                        sort={filters.sort}
+                        href={`/groups/${groupId}/titles/${title.id}${querySuffix}`}
+                        groupWatchedLabel={formatWatchedFraction(
+                          fraction.watched,
+                          fraction.total,
+                        )}
+                      />
+                    </li>
+                  )
+                })}
               </ul>
               <ul className="hidden space-y-2 md:block">
-                {group.titles.map((title) => (
-                  <li key={title.id}>
-                    <TitleRow
-                      title={title}
-                      status={statusForTitle(title.id, progress)}
-                      sort={filters.sort}
-                      href={`/groups/${groupId}/titles/${title.id}${querySuffix}`}
-                    />
-                  </li>
-                ))}
+                {group.titles.map((title) => {
+                  const fraction = groupWatchedFraction(
+                    title.id,
+                    memberIds,
+                    progress,
+                  )
+
+                  return (
+                    <li key={title.id}>
+                      <TitleRow
+                        title={title}
+                        status={progressStatusFor(
+                          progress,
+                          user?.id ?? '',
+                          title.id,
+                        )}
+                        sort={filters.sort}
+                        href={`/groups/${groupId}/titles/${title.id}${querySuffix}`}
+                        groupWatchedLabel={formatWatchedFraction(
+                          fraction.watched,
+                          fraction.total,
+                        )}
+                      />
+                    </li>
+                  )
+                })}
               </ul>
             </section>
           ))}

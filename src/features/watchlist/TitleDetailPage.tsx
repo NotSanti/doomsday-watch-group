@@ -4,6 +4,15 @@ import { ErrorState } from '@/components/ErrorState'
 import { Skeleton } from '@/components/Skeleton'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { useAuth } from '@/features/auth/use-auth'
+import { useGroupMembers } from '@/features/groups/use-groups'
+import { StatusControl } from '@/features/progress/StatusControl'
+import {
+  formatWatchedFraction,
+  groupWatchedFraction,
+  progressStatusFor,
+} from '@/features/progress/progress-metrics'
+import { useGroupProgress, useSetTitleStatus } from '@/features/progress/use-progress'
 import { toFriendlyTitleDetailError } from '@/features/watchlist/title-errors'
 import {
   IMPORTANCE_LABEL,
@@ -19,7 +28,11 @@ import { useTitle } from '@/features/watchlist/use-titles'
 export function TitleDetailPage() {
   const { groupId = '', titleId = '' } = useParams()
   const location = useLocation()
+  const { user } = useAuth()
   const titleQuery = useTitle(titleId)
+  const progressQuery = useGroupProgress(groupId)
+  const membersQuery = useGroupMembers(groupId)
+  const setStatus = useSetTitleStatus(groupId)
   const canFetch = isTitleId(titleId)
   const watchlistHref = `/groups/${groupId}/watchlist${location.search}`
 
@@ -37,7 +50,7 @@ export function TitleDetailPage() {
     )
   }
 
-  if (titleQuery.isPending) {
+  if (titleQuery.isPending || progressQuery.isPending) {
     return (
       <div role="status" aria-live="polite">
         <span className="sr-only">Loading title</span>
@@ -47,12 +60,13 @@ export function TitleDetailPage() {
     )
   }
 
-  if (titleQuery.isError) {
+  if (titleQuery.isError || progressQuery.isError) {
     return (
       <ErrorState
         message={toFriendlyTitleDetailError()}
         onRetry={() => {
           void titleQuery.refetch()
+          void progressQuery.refetch()
         }}
       />
     )
@@ -76,6 +90,11 @@ export function TitleDetailPage() {
 
   const year = titleYear(title.release_date)
   const runtime = titleRuntimeLabel(title)
+  const fraction = groupWatchedFraction(
+    title.id,
+    (membersQuery.data ?? []).map((member) => member.user_id),
+    progressQuery.data ?? [],
+  )
 
   return (
     <article className="space-y-6">
@@ -111,7 +130,22 @@ export function TitleDetailPage() {
             <p className="text-sm text-muted">No synopsis yet.</p>
           )}
           <p className="text-sm text-secondary">
-            Personal status, ratings, and reviews arrive in later milestones.
+            {formatWatchedFraction(fraction.watched, fraction.total)} by the
+            group
+          </p>
+          <StatusControl
+            value={progressStatusFor(
+              progressQuery.data ?? [],
+              user?.id ?? '',
+              title.id,
+            )}
+            disabled={setStatus.isPending}
+            onChange={(status) => {
+              setStatus.mutate({ titleId: title.id, status })
+            }}
+          />
+          <p className="text-sm text-secondary">
+            Ratings and reviews arrive in a later milestone.
           </p>
           <Button asChild variant="secondary">
             <Link to={watchlistHref}>Back to watchlist</Link>

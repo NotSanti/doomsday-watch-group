@@ -18,6 +18,7 @@ type TitleRowProps = {
   status: TitleStatus
   sort: WatchlistSort
   href: string
+  groupWatchedLabel: string
 }
 
 function statusTone(status: TitleStatus) {
@@ -32,7 +33,13 @@ function statusTone(status: TitleStatus) {
   return 'notStarted' as const
 }
 
-export function TitleRow({ title, status, sort, href }: TitleRowProps) {
+export function TitleRow({
+  title,
+  status,
+  sort,
+  href,
+  groupWatchedLabel,
+}: TitleRowProps) {
   const year = titleYear(title.release_date)
   const runtime = titleRuntimeLabel(title)
   const sequence = sequenceForTitle(title, sort)
@@ -63,6 +70,7 @@ export function TitleRow({ title, status, sort, href }: TitleRowProps) {
       <div className="hidden flex-wrap justify-end gap-2 sm:flex">
         <Badge>{IMPORTANCE_LABEL[title.importance]}</Badge>
         <Badge tone={statusTone(status)}>{TITLE_STATUS_LABEL[status]}</Badge>
+        <Badge tone="muted">{groupWatchedLabel}</Badge>
       </div>
     </Link>
   )

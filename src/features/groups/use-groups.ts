@@ -7,12 +7,14 @@ import {
   fetchGroup,
   listGroupMembers,
   listGroups,
+  updateGroupCurrentTitle,
 } from '@/features/groups/group-api'
 import { groupKeys } from '@/features/groups/group-keys'
 import {
   isGroupId,
   type CreateGroupValues,
 } from '@/features/groups/group-schemas'
+import { toFriendlyCurrentTitleError } from '@/features/progress/progress-errors'
 import { getSupabaseClient } from '@/lib/supabase'
 
 export function useGroupList() {
@@ -80,6 +82,30 @@ export function useCreateGroup() {
 
       toast.success('Group created')
       void navigate(`/groups/${group.id}`)
+    },
+  })
+}
+
+export function useSetCurrentTitle(groupId: string) {
+  const { user } = useAuth()
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (titleId: string | null) =>
+      updateGroupCurrentTitle(getSupabaseClient(), groupId, titleId),
+    onSuccess: (group) => {
+      queryClient.setQueryData(groupKeys.detail(group.id), group)
+
+      if (user) {
+        void queryClient.invalidateQueries({
+          queryKey: groupKeys.list(user.id),
+        })
+      }
+
+      toast.success('Current title updated')
+    },
+    onError: (error) => {
+      toast.error(toFriendlyCurrentTitleError(error))
     },
   })
 }
