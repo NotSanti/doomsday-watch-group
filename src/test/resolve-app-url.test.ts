@@ -1,4 +1,3 @@
-import { describe, expect, it } from 'vitest'
 import {
   PRODUCTION_APP_URL_ERROR,
   applyViteAppUrl,

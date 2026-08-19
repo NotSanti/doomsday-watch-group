@@ -1,7 +1,11 @@
 import { screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { describe, expect, it } from 'vitest'
 import { TMDB_CREDIT } from '@/features/watchlist/TmdbCredit'
+import {
+  applyWatchlistFilters,
+  filterDialog,
+  openWatchlistFilters,
+} from '@/test/mobile-ui'
 import { renderApp } from '@/test/render-app'
 import {
   makeGroup,
@@ -28,18 +32,6 @@ function signInAsOwner(): void {
   setMockSession(makeSession())
   setMockProfile(makeProfile())
   setMockGroups([makeGroup({ id: GROUP_A, name: 'Alpha Watch' })])
-}
-
-async function openWatchlistFilters(
-  user: ReturnType<typeof userEvent.setup>,
-): Promise<void> {
-  await user.click(screen.getByRole('button', { name: /open filters/i }))
-}
-
-async function applyWatchlistFilters(
-  user: ReturnType<typeof userEvent.setup>,
-): Promise<void> {
-  await user.click(screen.getByRole('button', { name: /show \d+ results/i }))
 }
 
 function seedCatalog(): void {
@@ -150,12 +142,13 @@ describe('watchlist', () => {
       await screen.findByRole('heading', { name: 'Watchlist' }),
     ).toBeInTheDocument()
     await openWatchlistFilters(user)
-    expect(screen.getByLabelText('Search')).toHaveValue('Iron')
-    expect(screen.getByLabelText('Type')).toHaveValue('movie')
-    expect(screen.getByLabelText('My status')).toHaveValue('watched')
-    expect(screen.getByLabelText('Order')).toHaveValue('release')
-    expect(screen.getByLabelText('Show rating')).toBeChecked()
-    expect(screen.getByLabelText('Show reviews')).toBeChecked()
+    const filters = within(filterDialog())
+    expect(filters.getByLabelText('Search')).toHaveValue('Iron')
+    expect(filters.getByLabelText('Type')).toHaveValue('movie')
+    expect(filters.getByLabelText('My status')).toHaveValue('watched')
+    expect(filters.getByLabelText('Order')).toHaveValue('release')
+    expect(filters.getByLabelText('Show rating')).toBeChecked()
+    expect(filters.getByLabelText('Show reviews')).toBeChecked()
     expect(screen.getByText('4 selected')).toBeInTheDocument()
     expect(screen.getByText('Showing 1 of 3 titles')).toBeInTheDocument()
     expect(screen.getAllByText('Iron Man').length).toBeGreaterThan(0)
@@ -179,8 +172,9 @@ describe('watchlist', () => {
 
     await screen.findByRole('heading', { name: 'Watchlist' })
     await openWatchlistFilters(user)
-    await user.type(screen.getByLabelText('Search'), 'Wanda')
-    await user.selectOptions(screen.getByLabelText('Type'), 'series')
+    const filters = within(filterDialog())
+    await user.type(filters.getByLabelText('Search'), 'Wanda')
+    await user.selectOptions(filters.getByLabelText('Type'), 'series')
     await applyWatchlistFilters(user)
 
     expect(screen.getByText('Showing 1 of 3 titles')).toBeInTheDocument()
@@ -212,8 +206,9 @@ describe('watchlist', () => {
       await screen.findByRole('heading', { name: 'Watchlist' }),
     ).toBeInTheDocument()
     await openWatchlistFilters(user)
-    expect(screen.getByLabelText('Search')).toHaveValue('Wanda')
-    expect(screen.getByLabelText('Type')).toHaveValue('series')
+    const restoredFilters = within(filterDialog())
+    expect(restoredFilters.getByLabelText('Search')).toHaveValue('Wanda')
+    expect(restoredFilters.getByLabelText('Type')).toHaveValue('series')
     expect(screen.getByText('Showing 1 of 3 titles')).toBeInTheDocument()
   })
 
@@ -225,14 +220,15 @@ describe('watchlist', () => {
 
     await screen.findByRole('heading', { name: 'Watchlist' })
     await openWatchlistFilters(user)
-    await user.type(screen.getByLabelText('Search'), 'not-a-title')
+    const emptyFilters = within(filterDialog())
+    await user.type(emptyFilters.getByLabelText('Search'), 'not-a-title')
     await applyWatchlistFilters(user)
 
     expect(
       await screen.findByRole('heading', { name: 'No matching titles' }),
     ).toBeInTheDocument()
     await openWatchlistFilters(user)
-    await user.click(screen.getByRole('button', { name: 'Clear all' }))
+    await user.click(within(filterDialog()).getByRole('button', { name: 'Clear all' }))
     await applyWatchlistFilters(user)
     expect(screen.getByText('Showing 3 of 3 titles')).toBeInTheDocument()
   })
@@ -326,8 +322,9 @@ describe('watchlist', () => {
       await screen.findByRole('heading', { name: 'Watchlist' }),
     ).toBeInTheDocument()
     await openWatchlistFilters(user)
-    expect(screen.getByLabelText('Show rating')).toBeChecked()
-    expect(screen.getByLabelText('Show reviews')).toBeChecked()
+    const toggleFilters = within(filterDialog())
+    expect(toggleFilters.getByLabelText('Show rating')).toBeChecked()
+    expect(toggleFilters.getByLabelText('Show reviews')).toBeChecked()
     await applyWatchlistFilters(user)
     expect(screen.getAllByText('Avg 8.5').length).toBeGreaterThan(0)
     expect(
@@ -335,8 +332,9 @@ describe('watchlist', () => {
     ).toBeGreaterThan(0)
 
     await openWatchlistFilters(user)
-    await user.click(screen.getByLabelText('Show rating'))
-    expect(screen.getByLabelText('Show rating')).not.toBeChecked()
+    const ratingFilters = within(filterDialog())
+    await user.click(ratingFilters.getByLabelText('Show rating'))
+    expect(ratingFilters.getByLabelText('Show rating')).not.toBeChecked()
     await applyWatchlistFilters(user)
     expect(screen.queryByText('Avg 8.5')).not.toBeInTheDocument()
     expect(
@@ -344,8 +342,9 @@ describe('watchlist', () => {
     ).toBeGreaterThan(0)
 
     await openWatchlistFilters(user)
-    await user.click(screen.getByLabelText('Show reviews'))
-    expect(screen.getByLabelText('Show reviews')).not.toBeChecked()
+    const reviewFilters = within(filterDialog())
+    await user.click(reviewFilters.getByLabelText('Show reviews'))
+    expect(reviewFilters.getByLabelText('Show reviews')).not.toBeChecked()
     await applyWatchlistFilters(user)
     expect(
       screen.queryByRole('button', { name: '1 review for Iron Man' }),

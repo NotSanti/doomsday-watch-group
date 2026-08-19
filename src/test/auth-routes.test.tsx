@@ -1,12 +1,12 @@
-import { screen, waitFor } from '@testing-library/react'
+import { screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { describe, expect, it } from 'vitest'
 import {
   makeProfile,
   makeSession,
   setMockProfile,
   setMockSession,
 } from '@/test/supabase-mock'
+import { openMobileNav } from '@/test/mobile-ui'
 import { renderApp } from '@/test/render-app'
 
 describe('auth route guards', () => {
@@ -59,8 +59,8 @@ describe('auth route guards', () => {
     await screen.findByRole('heading', { name: 'Your groups' })
     queryClient.setQueryData(['protected-data'], { secret: 'nope' })
 
-    await user.click(screen.getByRole('button', { name: 'Open menu' }))
-    await user.click(screen.getByRole('button', { name: 'Sign out' }))
+    const mobileNav = await openMobileNav(user, 'App')
+    await user.click(within(mobileNav).getByRole('button', { name: 'Sign out' }))
 
     await waitFor(() => {
       expect(queryClient.getQueryData(['protected-data'])).toBeUndefined()

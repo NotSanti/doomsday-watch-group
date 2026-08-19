@@ -1,10 +1,10 @@
 import { Menu, X } from 'lucide-react'
-import { useEffect, useState } from 'react'
-import { Link, NavLink, Outlet, useLocation, useParams } from 'react-router'
+import { Link, NavLink, Outlet, useParams } from 'react-router'
 import { Button } from '@/components/ui/button'
 import { useAuth } from '@/features/auth/use-auth'
 import { GroupSwitcher } from '@/features/groups/GroupSwitcher'
 import { useGroup } from '@/features/groups/use-groups'
+import { useRouteMenuOpen } from '@/hooks/use-route-menu-open'
 import { cn } from '@/lib/utils'
 
 type AppNavLink = {
@@ -67,10 +67,9 @@ function AppNavLinks({
 
 export function AppShell() {
   const { groupId } = useParams()
-  const location = useLocation()
   const { signOut } = useAuth()
   const groupQuery = useGroup(groupId ?? '')
-  const [menuOpen, setMenuOpen] = useState(false)
+  const [menuOpen, setMenuOpen] = useRouteMenuOpen()
   const isMember = Boolean(groupId && groupQuery.data)
   const base = isMember ? `/groups/${groupId}` : '/app'
 
@@ -86,10 +85,6 @@ export function AppShell() {
       : []),
     { to: '/profile', label: 'Profile', end: false },
   ]
-
-  useEffect(() => {
-    setMenuOpen(false)
-  }, [location.pathname])
 
   return (
     <div className="min-h-screen bg-bg">

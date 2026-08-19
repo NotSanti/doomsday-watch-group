@@ -1,4 +1,3 @@
-import { describe, expect, it } from 'vitest'
 import type { GroupMember } from '@/features/groups/group-schemas'
 import { sortGroupMembers } from '@/features/members/member-sort'
 import type { GroupProgressRow } from '@/features/progress/progress-schemas'

@@ -1,8 +1,8 @@
-import { screen, waitFor } from '@testing-library/react'
+import { screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { afterEach, describe, expect, it, vi } from 'vitest'
 import { reviewKeys } from '@/features/reviews/review-keys'
 import { REALTIME_INVALIDATION_DEBOUNCE_MS } from '@/lib/realtime'
+import { openMobileNav } from '@/test/mobile-ui'
 import { renderApp } from '@/test/render-app'
 import {
   clearRealtimeHandlers,
@@ -107,8 +107,8 @@ describe('group realtime', () => {
       await screen.findByRole('heading', { name: 'Alpha Watch' }),
     ).toBeInTheDocument()
 
-    await user.click(screen.getByRole('button', { name: 'Open menu' }))
-    await user.click(screen.getByRole('link', { name: 'Groups' }))
+    const mobileNav = await openMobileNav(user, 'App')
+    await user.click(within(mobileNav).getByRole('link', { name: 'Groups' }))
     expect(
       await screen.findByRole('heading', { name: 'Your groups' }),
     ).toBeInTheDocument()

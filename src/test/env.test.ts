@@ -1,4 +1,3 @@
-import { describe, expect, it } from 'vitest'
 import { CLIENT_ENV_ERROR, parseClientEnv } from '@/lib/env'
 
 describe('parseClientEnv', () => {

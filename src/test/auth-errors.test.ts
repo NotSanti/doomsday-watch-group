@@ -1,4 +1,3 @@
-import { describe, expect, it } from 'vitest'
 import { toFriendlyAuthError } from '@/features/auth/auth-errors'
 
 describe('toFriendlyAuthError', () => {

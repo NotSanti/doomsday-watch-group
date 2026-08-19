@@ -1,8 +1,8 @@
 import { Menu, X } from 'lucide-react'
-import { useEffect, useState } from 'react'
-import { Link, NavLink, useLocation } from 'react-router'
+import { Link, NavLink } from 'react-router'
 import { Button } from '@/components/ui/button'
 import { useAuth } from '@/features/auth/use-auth'
+import { useRouteMenuOpen } from '@/hooks/use-route-menu-open'
 import { cn } from '@/lib/utils'
 
 type PublicNavLink = {
@@ -46,8 +46,7 @@ function PublicNavLinks({
 
 export function PublicHeader() {
   const { status } = useAuth()
-  const location = useLocation()
-  const [menuOpen, setMenuOpen] = useState(false)
+  const [menuOpen, setMenuOpen] = useRouteMenuOpen()
   const links: PublicNavLink[] = [
     { to: '/', label: 'Home' },
     { to: '/about', label: 'About' },
@@ -55,10 +54,6 @@ export function PublicHeader() {
       ? { to: '/app', label: 'App' }
       : { to: '/auth', label: 'Sign in' },
   ]
-
-  useEffect(() => {
-    setMenuOpen(false)
-  }, [location.pathname])
 
   return (
     <header className="border-b border-border/80 bg-surface/90 backdrop-blur-md">

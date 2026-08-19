@@ -1,5 +1,4 @@
 import { QueryClient } from '@tanstack/react-query'
-import { afterEach, describe, expect, it, vi } from 'vitest'
 import {
   cancelScheduledInvalidations,
   REALTIME_INVALIDATION_DEBOUNCE_MS,

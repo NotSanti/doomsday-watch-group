@@ -1,6 +1,6 @@
 import { screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { describe, expect, it } from 'vitest'
+import { openMobileNav } from '@/test/mobile-ui'
 import { renderApp } from '@/test/render-app'
 
 describe('navigation', () => {
@@ -19,8 +19,7 @@ describe('navigation', () => {
     const user = userEvent.setup()
     renderApp('/')
 
-    await user.click(screen.getByRole('button', { name: 'Open menu' }))
-    const mobileNav = screen.getByRole('navigation', { name: 'Public' })
+    const mobileNav = await openMobileNav(user, 'Public')
     await user.click(within(mobileNav).getByRole('link', { name: 'About' }))
 
     expect(screen.getByRole('heading', { name: 'About' })).toBeInTheDocument()
@@ -33,9 +32,7 @@ describe('navigation', () => {
     const menuButton = screen.getByRole('button', { name: 'Open menu' })
     expect(menuButton).toBeInTheDocument()
 
-    await user.click(menuButton)
-
-    const mobileNav = screen.getByRole('navigation', { name: 'Public' })
+    const mobileNav = await openMobileNav(user, 'Public')
     expect(
       within(mobileNav).getByRole('link', { name: 'About' }),
     ).toBeInTheDocument()

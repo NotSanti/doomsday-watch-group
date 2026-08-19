@@ -1,5 +1,4 @@
 import { fireEvent, screen } from '@testing-library/react'
-import { describe, expect, it } from 'vitest'
 import { TitleArtwork } from '@/features/watchlist/TitleArtwork'
 import { tmdbImageUrl } from '@/lib/tmdb-image'
 import { renderAt } from '@/test/render-app'

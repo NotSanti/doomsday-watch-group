@@ -1,7 +1,8 @@
-import '@testing-library/jest-dom/vitest'
+import * as matchers from '@testing-library/jest-dom/matchers'
 import { cleanup } from '@testing-library/react'
-import { afterEach, vi } from 'vitest'
 import { resetSupabaseMock } from '@/test/supabase-mock'
+
+expect.extend(matchers)
 
 vi.mock('@/lib/supabase', async () => await import('@/test/supabase-mock'))
 

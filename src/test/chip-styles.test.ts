@@ -1,4 +1,3 @@
-import { describe, expect, it } from 'vitest'
 import { chipClasses, chipButtonClasses, chipToneClasses } from '@/lib/chip-styles'
 
 describe('chipStyles', () => {

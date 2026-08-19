@@ -306,12 +306,6 @@ export function WatchlistFilters({
   const draftResultCount = matchCount(draft)
 
   useEffect(() => {
-    if (overlayOpen) {
-      setDraft(filters)
-    }
-  }, [filters, overlayOpen])
-
-  useEffect(() => {
     if (!overlayOpen) {
       return undefined
     }
@@ -343,6 +337,7 @@ export function WatchlistFilters({
           }
           className="gap-2"
           onClick={() => {
+            setDraft(filters)
             setOverlayOpen(true)
           }}
           size="sm"

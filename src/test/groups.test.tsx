@@ -1,7 +1,7 @@
 import { screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { describe, expect, it } from 'vitest'
 import { groupKeys } from '@/features/groups/group-keys'
+import { openMobileNav } from '@/test/mobile-ui'
 import { renderApp } from '@/test/render-app'
 import {
   makeGroup,
@@ -164,8 +164,8 @@ describe('groups', () => {
     expect(
       await screen.findByRole('heading', { name: 'Alpha Watch' }),
     ).toBeInTheDocument()
-    await user.click(screen.getByRole('button', { name: 'Open menu' }))
-    expect(screen.getByRole('link', { name: 'Dashboard' })).toBeInTheDocument()
+    const mobileNav = await openMobileNav(user, 'App')
+    expect(within(mobileNav).getByRole('link', { name: 'Dashboard' })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: 'Members' })).toBeInTheDocument()
     const dashboardRoster = screen
       .getByRole('heading', { name: 'Members' })
