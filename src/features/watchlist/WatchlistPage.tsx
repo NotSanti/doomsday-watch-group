@@ -10,6 +10,12 @@ import {
   progressStatusFor,
 } from '@/features/progress/progress-metrics'
 import { useGroupProgress } from '@/features/progress/use-progress'
+import {
+  averageRating,
+  formatAverageRatingLabel,
+  ratingsForTitle,
+} from '@/features/reviews/review-metrics'
+import { useGroupReviews } from '@/features/reviews/use-reviews'
 import { toFriendlyTitleListError } from '@/features/watchlist/title-errors'
 import {
   filterTitles,
@@ -41,10 +47,12 @@ export function WatchlistPage() {
   const [searchParams, setSearchParams] = useSearchParams()
   const titlesQuery = useTitleList()
   const progressQuery = useGroupProgress(groupId)
+  const reviewsQuery = useGroupReviews(groupId)
   const membersQuery = useGroupMembers(groupId)
   const filters = parseWatchlistFilters(searchParams)
   const titles = titlesQuery.data ?? []
   const progress = progressQuery.data ?? []
+  const reviews = reviewsQuery.data ?? []
   const memberIds = (membersQuery.data ?? []).map((member) => member.user_id)
   const myProgress = progress
     .filter((row) => row.user_id === user?.id)
@@ -56,17 +64,18 @@ export function WatchlistPage() {
     setSearchParams(serializeWatchlistFilters(next), { replace: true })
   }
 
-  if (titlesQuery.isPending || progressQuery.isPending) {
+  if (titlesQuery.isPending || progressQuery.isPending || reviewsQuery.isPending) {
     return <WatchlistSkeleton />
   }
 
-  if (titlesQuery.isError || progressQuery.isError) {
+  if (titlesQuery.isError || progressQuery.isError || reviewsQuery.isError) {
     return (
       <ErrorState
         message={toFriendlyTitleListError()}
         onRetry={() => {
           void titlesQuery.refetch()
           void progressQuery.refetch()
+          void reviewsQuery.refetch()
         }}
       />
     )
@@ -114,6 +123,7 @@ export function WatchlistPage() {
                     memberIds,
                     progress,
                   )
+                  const titleRatings = ratingsForTitle(reviews, title.id)
 
                   return (
                     <li key={title.id}>
@@ -130,6 +140,10 @@ export function WatchlistPage() {
                           fraction.watched,
                           fraction.total,
                         )}
+                        averageRatingLabel={formatAverageRatingLabel(
+                          averageRating(titleRatings),
+                          titleRatings.length,
+                        )}
                       />
                     </li>
                   )
@@ -142,6 +156,7 @@ export function WatchlistPage() {
                     memberIds,
                     progress,
                   )
+                  const titleRatings = ratingsForTitle(reviews, title.id)
 
                   return (
                     <li key={title.id}>
@@ -157,6 +172,10 @@ export function WatchlistPage() {
                         groupWatchedLabel={formatWatchedFraction(
                           fraction.watched,
                           fraction.total,
+                        )}
+                        averageRatingLabel={formatAverageRatingLabel(
+                          averageRating(titleRatings),
+                          titleRatings.length,
                         )}
                       />
                     </li>

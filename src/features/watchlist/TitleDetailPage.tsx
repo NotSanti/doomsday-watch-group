@@ -13,6 +13,8 @@ import {
   progressStatusFor,
 } from '@/features/progress/progress-metrics'
 import { useGroupProgress, useSetTitleStatus } from '@/features/progress/use-progress'
+import { TitleReviews } from '@/features/reviews/TitleReviews'
+import { useGroupReviews, useDeleteReview, useSaveReview } from '@/features/reviews/use-reviews'
 import { toFriendlyTitleDetailError } from '@/features/watchlist/title-errors'
 import {
   IMPORTANCE_LABEL,
@@ -33,6 +35,9 @@ export function TitleDetailPage() {
   const progressQuery = useGroupProgress(groupId)
   const membersQuery = useGroupMembers(groupId)
   const setStatus = useSetTitleStatus(groupId)
+  const reviewsQuery = useGroupReviews(groupId)
+  const saveReview = useSaveReview(groupId, titleId)
+  const deleteReview = useDeleteReview(groupId)
   const canFetch = isTitleId(titleId)
   const watchlistHref = `/groups/${groupId}/watchlist${location.search}`
 
@@ -144,14 +149,35 @@ export function TitleDetailPage() {
               setStatus.mutate({ titleId: title.id, status })
             }}
           />
-          <p className="text-sm text-secondary">
-            Ratings and reviews arrive in a later milestone.
-          </p>
           <Button asChild variant="secondary">
             <Link to={watchlistHref}>Back to watchlist</Link>
           </Button>
         </div>
       </div>
+      <TitleReviews
+        currentUserId={user?.id ?? ''}
+        members={membersQuery.data ?? []}
+        reviews={(reviewsQuery.data ?? []).filter(
+          (review) => review.title_id === title.id,
+        )}
+        isPending={reviewsQuery.isPending}
+        isError={reviewsQuery.isError}
+        isSaving={saveReview.isPending}
+        isDeleting={deleteReview.isPending}
+        onRetry={() => {
+          void reviewsQuery.refetch()
+        }}
+        onSave={(values) =>
+          saveReview.mutateAsync({
+            existingId: reviewsQuery.data?.find(
+              (review) =>
+                review.title_id === title.id && review.user_id === user?.id,
+            )?.id,
+            values,
+          })
+        }
+        onDelete={(reviewId) => deleteReview.mutateAsync(reviewId)}
+      />
       <TmdbCredit className="text-xs text-muted" />
     </article>
   )

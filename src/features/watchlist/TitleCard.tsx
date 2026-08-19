@@ -20,6 +20,7 @@ type TitleCardProps = {
   sort: WatchlistSort
   href: string
   groupWatchedLabel: string
+  averageRatingLabel: string
 }
 
 function statusTone(status: TitleStatus) {
@@ -36,6 +37,7 @@ export function TitleCard({
   sort,
   href,
   groupWatchedLabel,
+  averageRatingLabel,
 }: TitleCardProps) {
   const year = titleYear(title.release_date)
   const runtime = titleRuntimeLabel(title)
@@ -63,6 +65,7 @@ export function TitleCard({
               {TITLE_STATUS_LABEL[status]}
             </Badge>
             <Badge tone="muted">{groupWatchedLabel}</Badge>
+            <Badge tone="rating">{averageRatingLabel}</Badge>
           </div>
         </div>
       </Link>

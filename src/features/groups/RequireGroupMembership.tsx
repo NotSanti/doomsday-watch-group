@@ -7,6 +7,7 @@ import { toFriendlyGroupDetailError } from '@/features/groups/group-errors'
 import { isGroupId } from '@/features/groups/group-schemas'
 import { useGroup } from '@/features/groups/use-groups'
 import { useGroupRealtime } from '@/features/progress/use-progress'
+import { useReviewRealtime } from '@/features/reviews/use-reviews'
 
 function MembershipSkeleton() {
   return (
@@ -37,6 +38,7 @@ export function RequireGroupMembership() {
   const groupQuery = useGroup(groupId)
   const canFetch = isGroupId(groupId)
   useGroupRealtime(canFetch && groupQuery.data ? groupId : '')
+  useReviewRealtime(canFetch && groupQuery.data ? groupId : '')
 
   if (!canFetch) {
     return <GroupUnavailable />
