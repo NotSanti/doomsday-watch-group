@@ -145,6 +145,7 @@ export function makeTitle(overrides: Partial<TitleRow> = {}): TitleRow {
     synopsis: 'An industrialist builds a powered suit of armor.',
     phase: 1,
     saga: 'Infinity Saga',
+    era: 'Phase 1 — The Avengers Initiative (2008–2012)',
     importance: 'essential',
     release_order: 1,
     doomsday_order: 3,

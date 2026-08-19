@@ -1,5 +1,5 @@
 begin;
-select plan(32);
+select plan(33);
 
 create temp table test_users (
   label text primary key,
@@ -451,6 +451,12 @@ select is(
   (select doomsday_order from public.titles where id = 'aa000000-0000-4000-8000-000000000005'),
   1,
   'doomsday order starts with Captain America: The First Avenger'
+);
+
+select is(
+  (select era from public.titles where id = 'aa000000-0000-4000-8000-000000000005'),
+  'Legacy: WWII & The 1940s',
+  'era labels group wartime titles together'
 );
 
 select is(

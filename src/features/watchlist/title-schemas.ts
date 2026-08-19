@@ -19,6 +19,7 @@ export const titleRowSchema = z.object({
   synopsis: z.string().nullable(),
   phase: z.number().int().nullable(),
   saga: z.string().nullable(),
+  era: z.string().min(1).nullable(),
   importance: importanceSchema,
   release_order: z.number().int(),
   doomsday_order: z.number().int().nullable(),

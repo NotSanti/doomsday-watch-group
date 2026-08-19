@@ -352,6 +352,7 @@ export type Database = {
           backdrop_path: string | null
           doomsday_order: number | null
           episode_count: number | null
+          era: string | null
           id: string
           importance: string
           is_active: boolean
@@ -371,6 +372,7 @@ export type Database = {
           backdrop_path?: string | null
           doomsday_order?: number | null
           episode_count?: number | null
+          era?: string | null
           id?: string
           importance: string
           is_active?: boolean
@@ -390,6 +392,7 @@ export type Database = {
           backdrop_path?: string | null
           doomsday_order?: number | null
           episode_count?: number | null
+          era?: string | null
           id?: string
           importance?: string
           is_active?: boolean
