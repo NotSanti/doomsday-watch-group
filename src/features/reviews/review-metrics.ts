@@ -1,5 +1,3 @@
-export const RATING_STEPS_COUNT = 19
-
 export function averageRating(ratings: readonly number[]): number | null {
   if (ratings.length === 0) {
     return null
@@ -9,20 +7,16 @@ export function averageRating(ratings: readonly number[]): number | null {
   return Math.round((total / ratings.length) * 10) / 10
 }
 
-export function ratingDistribution(
-  ratings: readonly number[],
-): { value: number; count: number }[] {
-  const counts = new Map<number, number>()
-
-  for (const rating of ratings) {
-    const key = Math.round(rating * 2) / 2
-    counts.set(key, (counts.get(key) ?? 0) + 1)
+export function starFill(star: number, rating: number | null): 0 | 0.5 | 1 {
+  if (rating === null || rating < star - 0.5) {
+    return 0
   }
 
-  return Array.from({ length: RATING_STEPS_COUNT }, (_, index) => {
-    const value = 1 + index * 0.5
-    return { value, count: counts.get(value) ?? 0 }
-  })
+  if (rating >= star) {
+    return 1
+  }
+
+  return 0.5
 }
 
 export function formatRating(value: number): string {

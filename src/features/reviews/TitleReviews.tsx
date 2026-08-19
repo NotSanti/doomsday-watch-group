@@ -2,7 +2,6 @@ import { EmptyState } from '@/components/EmptyState'
 import { ErrorState } from '@/components/ErrorState'
 import { Skeleton } from '@/components/Skeleton'
 import type { GroupMember } from '@/features/groups/group-schemas'
-import { RatingDistribution } from '@/features/reviews/RatingDistribution'
 import { ReviewCard } from '@/features/reviews/ReviewCard'
 import { ReviewForm } from '@/features/reviews/ReviewForm'
 import {
@@ -87,8 +86,6 @@ export function TitleReviews({
           </p>
         )}
       </header>
-
-      <RatingDistribution ratings={ratings} />
 
       <div className="space-y-3">
         <h3 className="font-display text-xl tracking-[0.08em] text-heading uppercase">

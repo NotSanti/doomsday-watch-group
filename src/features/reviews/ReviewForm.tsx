@@ -7,6 +7,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { RatingInput } from '@/features/reviews/RatingInput'
 import {
   REVIEW_BODY_MAX,
+  isReviewFormUnchanged,
   reviewFormSchema,
   type ReviewFormValues,
   type ReviewRow,
@@ -29,15 +30,32 @@ export function ReviewForm({
 }: ReviewFormProps) {
   const [confirmOpen, setConfirmOpen] = useState(false)
   const [bodyLength, setBodyLength] = useState((existing?.body ?? '').length)
+  const [canSave, setCanSave] = useState(existing === null)
   const form = useForm<ReviewFormValues>({
     resolver: zodResolver(reviewFormSchema),
-    values: {
+    defaultValues: {
       rating: existing?.rating ?? (undefined as unknown as number),
       body: existing?.body ?? '',
       contains_spoilers: existing?.contains_spoilers ?? false,
     },
   })
   const busy = isSaving || isDeleting || form.formState.isSubmitting
+
+  function syncDirty(next: Partial<ReviewFormValues>) {
+    if (!existing) {
+      setCanSave(true)
+      return
+    }
+
+    const current = form.getValues()
+    setCanSave(
+      !isReviewFormUnchanged(existing, {
+        rating: next.rating ?? current.rating,
+        body: next.body ?? current.body,
+        contains_spoilers: next.contains_spoilers ?? current.contains_spoilers,
+      }),
+    )
+  }
 
   return (
     <form
@@ -53,7 +71,10 @@ export function ReviewForm({
           <RatingInput
             value={typeof field.value === 'number' ? field.value : null}
             disabled={busy}
-            onChange={field.onChange}
+            onChange={(value) => {
+              field.onChange(value)
+              syncDirty({ rating: value })
+            }}
           />
         )}
       />
@@ -74,6 +95,7 @@ export function ReviewForm({
           {...form.register('body', {
             onChange: (event) => {
               setBodyLength(event.target.value.length)
+              syncDirty({ body: event.target.value })
             },
           })}
         />
@@ -92,13 +114,17 @@ export function ReviewForm({
           type="checkbox"
           className="size-4 accent-accent"
           disabled={busy}
-          {...form.register('contains_spoilers')}
+          {...form.register('contains_spoilers', {
+            onChange: (event) => {
+              syncDirty({ contains_spoilers: event.target.checked })
+            },
+          })}
         />
         Contains spoilers
       </label>
 
       <div className="flex flex-wrap gap-3">
-        <Button type="submit" disabled={busy}>
+        <Button type="submit" disabled={busy || !canSave}>
           {isSaving ? 'Saving…' : existing ? 'Update review' : 'Save review'}
         </Button>
         {existing && onDelete ? (
