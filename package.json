@@ -16,7 +16,12 @@
     "db:test": "supabase test db",
     "db:types": "supabase gen types --local --lang=typescript > src/types/database.ts",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "audit:deps": "npm audit --audit-level=high",
+    "check:bundle": "node scripts/check-client-bundle.mjs",
+    "verify": "npm run lint && npm run format:check && npm run typecheck && npm test && npm run build && npm run check:bundle && npm run audit:deps"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.9.1",
@@ -37,7 +42,9 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.13.0",
     "@eslint/js": "^10.0.1",
+    "@playwright/test": "^1.62.1",
     "@tailwindcss/vite": "^4.3.3",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.0",
@@ -46,6 +53,7 @@
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.4",
+    "dotenv": "^17.4.2",
     "eslint": "^10.8.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-react-hooks": "^7.1.1",
