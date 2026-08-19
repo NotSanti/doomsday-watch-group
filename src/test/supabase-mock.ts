@@ -56,7 +56,12 @@ let groupWriteError: { code?: string; message: string } | null = null
 let leaveGroupError: { code?: string; message: string } | null = null
 let transferOwnershipError: { code?: string; message: string } | null = null
 const listeners = new Set<AuthListener>()
-const realtimeHandlers: { table: string; callback: () => void }[] = []
+const realtimeHandlers: {
+  table: string
+  channelName: string
+  callback: () => void
+}[] = []
+const activeRealtimeChannelNames = new Set<string>()
 
 export function makeUser(overrides: Partial<User> = {}): User {
   return {
@@ -725,14 +730,21 @@ function matchesProgressFilters(
 }
 
 export const supabaseChannelMock = {
-  channel: vi.fn(() => {
+  channel: vi.fn((name: string) => {
+    activeRealtimeChannelNames.add(name)
+
     const api = {
+      channelName: name,
       on(
         _event: string,
         filter: { table: string },
         callback: () => void,
       ) {
-        realtimeHandlers.push({ table: filter.table, callback })
+        realtimeHandlers.push({
+          table: filter.table,
+          channelName: name,
+          callback,
+        })
         return api
       },
       subscribe: vi.fn(() => api),
@@ -740,7 +752,23 @@ export const supabaseChannelMock = {
 
     return api
   }),
-  removeChannel: vi.fn(async () => 'ok'),
+  removeChannel: vi.fn(async (channel: { channelName?: string }) => {
+    if (channel.channelName) {
+      activeRealtimeChannelNames.delete(channel.channelName)
+
+      for (let index = realtimeHandlers.length - 1; index >= 0; index -= 1) {
+        if (realtimeHandlers[index]?.channelName === channel.channelName) {
+          realtimeHandlers.splice(index, 1)
+        }
+      }
+    }
+
+    return 'ok'
+  }),
+}
+
+export function getActiveRealtimeChannelNames(): string[] {
+  return [...activeRealtimeChannelNames]
 }
 
 export function emitRealtimeChange(table: string): void {
@@ -749,6 +777,10 @@ export function emitRealtimeChange(table: string): void {
       handler.callback()
     }
   }
+}
+
+export function clearRealtimeHandlers(): void {
+  realtimeHandlers.length = 0
 }
 
 export const supabaseAuthMock = {
@@ -1381,6 +1413,7 @@ export function resetSupabaseClient(): void {
   transferOwnershipError = null
   listeners.clear()
   realtimeHandlers.length = 0
+  activeRealtimeChannelNames.clear()
 }
 
 export function resetSupabaseMock(): void {

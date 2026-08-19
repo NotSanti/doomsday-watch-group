@@ -1,8 +1,6 @@
-import { useEffect } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { useAuth } from '@/features/auth/use-auth'
-import { groupKeys } from '@/features/groups/group-keys'
 import { isGroupId } from '@/features/groups/group-schemas'
 import {
   listGroupProgress,
@@ -64,54 +62,6 @@ export function useSetTitleStatus(groupId: string) {
       })
     },
   })
-}
-
-export function useGroupRealtime(groupId: string) {
-  const queryClient = useQueryClient()
-  const enabled = isGroupId(groupId)
-
-  useEffect(() => {
-    if (!enabled) {
-      return
-    }
-
-    const client = getSupabaseClient()
-    const channel = client
-      .channel(`group-progress:${groupId}`)
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'member_title_progress',
-          filter: `group_id=eq.${groupId}`,
-        },
-        () => {
-          void queryClient.invalidateQueries({
-            queryKey: progressKeys.group(groupId),
-          })
-        },
-      )
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'groups',
-          filter: `id=eq.${groupId}`,
-        },
-        () => {
-          void queryClient.invalidateQueries({
-            queryKey: groupKeys.detail(groupId),
-          })
-        },
-      )
-      .subscribe()
-
-    return () => {
-      void client.removeChannel(channel)
-    }
-  }, [enabled, groupId, queryClient])
 }
 
 function applyLocalStatus(

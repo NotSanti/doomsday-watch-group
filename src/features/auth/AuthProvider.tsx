@@ -15,6 +15,7 @@ import {
 import { AuthContext, type ProfileStatus } from '@/features/auth/auth-context'
 import { toFriendlyProfileError } from '@/features/auth/auth-errors'
 import { needsDisplayNameOnboarding } from '@/features/auth/auth-schemas'
+import { removeAllRealtimeChannels } from '@/lib/realtime'
 import { getSupabaseClient } from '@/lib/supabase'
 
 type AuthProviderProps = {
@@ -52,6 +53,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
       if (event === 'SIGNED_OUT') {
         setIsPasswordRecovery(false)
+        void removeAllRealtimeChannels(client)
         queryClient.clear()
       }
 
@@ -82,7 +84,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }, [queryClient, userId])
 
   const handleSignOut = useCallback(async () => {
-    await signOutRequest(getSupabaseClient())
+    const client = getSupabaseClient()
+    await signOutRequest(client)
+    await removeAllRealtimeChannels(client)
     queryClient.clear()
     setSession(null)
     setStatus('anonymous')

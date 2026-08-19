@@ -31,6 +31,7 @@ src/
     progress/
     reviews/
     members/
+    realtime/
   layouts/
   pages/
   lib/                 # Supabase client, env parsing, utilities
