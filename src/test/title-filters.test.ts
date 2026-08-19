@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import {
+  countActiveWatchlistFilters,
   DEFAULT_WATCHLIST_FILTERS,
   filterTitles,
   parseWatchlistFilters,
@@ -84,6 +85,18 @@ const progress: TitleProgress[] = [
 ]
 
 describe('watchlist URL filters', () => {
+  it('counts active filters against defaults', () => {
+    expect(countActiveWatchlistFilters(DEFAULT_WATCHLIST_FILTERS)).toBe(0)
+    expect(
+      countActiveWatchlistFilters({
+        ...DEFAULT_WATCHLIST_FILTERS,
+        q: 'Iron',
+        type: 'movie',
+        showRating: false,
+      }),
+    ).toBe(3)
+  })
+
   it('parses known params and ignores invalid values', () => {
     expect(
       parseWatchlistFilters(

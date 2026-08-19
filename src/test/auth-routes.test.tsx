@@ -37,7 +37,7 @@ describe('auth route guards', () => {
     expect(
       await screen.findByRole('heading', { name: 'Your groups' }),
     ).toBeInTheDocument()
-    expect(screen.getByRole('navigation', { name: 'App' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Open menu' })).toBeInTheDocument()
   })
 
   it('gates first-time users on a display name before the app', async () => {
@@ -59,6 +59,7 @@ describe('auth route guards', () => {
     await screen.findByRole('heading', { name: 'Your groups' })
     queryClient.setQueryData(['protected-data'], { secret: 'nope' })
 
+    await user.click(screen.getByRole('button', { name: 'Open menu' }))
     await user.click(screen.getByRole('button', { name: 'Sign out' }))
 
     await waitFor(() => {

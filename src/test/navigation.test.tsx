@@ -19,10 +19,27 @@ describe('navigation', () => {
     const user = userEvent.setup()
     renderApp('/')
 
-    const publicNav = screen.getByRole('navigation', { name: 'Public' })
-    await user.click(within(publicNav).getByRole('link', { name: 'About' }))
+    await user.click(screen.getByRole('button', { name: 'Open menu' }))
+    const mobileNav = screen.getByRole('navigation', { name: 'Public' })
+    await user.click(within(mobileNav).getByRole('link', { name: 'About' }))
 
     expect(screen.getByRole('heading', { name: 'About' })).toBeInTheDocument()
+  })
+
+  it('exposes a hamburger menu for small-screen public navigation', async () => {
+    const user = userEvent.setup()
+    renderApp('/')
+
+    const menuButton = screen.getByRole('button', { name: 'Open menu' })
+    expect(menuButton).toBeInTheDocument()
+
+    await user.click(menuButton)
+
+    const mobileNav = screen.getByRole('navigation', { name: 'Public' })
+    expect(
+      within(mobileNav).getByRole('link', { name: 'About' }),
+    ).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Close menu' })).toBeInTheDocument()
   })
 
   it('renders invite, app, and group shells for nested routes', async () => {

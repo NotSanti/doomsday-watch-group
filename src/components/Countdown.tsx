@@ -35,16 +35,16 @@ function Unit({
       {separator ? (
         <span
           aria-hidden="true"
-          className="metallic-text font-display text-3xl leading-none tracking-[0.08em] sm:text-4xl"
+          className="metallic-text font-display text-[clamp(1.25rem,5vw,2.25rem)] leading-none tracking-[0.08em]"
         >
           :
         </span>
       ) : null}
-      <div className="min-w-[4.25rem] text-center sm:min-w-[4.75rem]">
-        <div className="metallic-text font-display text-3xl tracking-[0.08em] sm:text-4xl">
+      <div className="min-w-[clamp(2.5rem,14vw,4.75rem)] text-center">
+        <div className="metallic-text font-display text-[clamp(1.25rem,5vw,2.25rem)] tracking-[0.08em]">
           {value}
         </div>
-        <div className="mt-1 text-[0.65rem] tracking-[0.18em] text-secondary uppercase">
+        <div className="mt-1 text-[clamp(0.55rem,2.5vw,0.65rem)] tracking-[0.18em] text-secondary uppercase">
           {label}
         </div>
       </div>
@@ -78,7 +78,7 @@ export function Countdown({
   return (
     <div
       className={cn(
-        'flex flex-wrap items-end justify-center gap-1 sm:gap-2',
+        'mx-auto flex w-full max-w-full flex-wrap items-end justify-center gap-0.5 sm:gap-2',
         className,
       )}
       aria-live="polite"

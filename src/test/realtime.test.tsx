@@ -107,6 +107,7 @@ describe('group realtime', () => {
       await screen.findByRole('heading', { name: 'Alpha Watch' }),
     ).toBeInTheDocument()
 
+    await user.click(screen.getByRole('button', { name: 'Open menu' }))
     await user.click(screen.getByRole('link', { name: 'Groups' }))
     expect(
       await screen.findByRole('heading', { name: 'Your groups' }),

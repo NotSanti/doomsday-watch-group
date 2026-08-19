@@ -1,10 +1,54 @@
-import { Link, NavLink } from 'react-router'
+import { Menu, X } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { Link, NavLink, useLocation } from 'react-router'
+import { Button } from '@/components/ui/button'
 import { useAuth } from '@/features/auth/use-auth'
 import { cn } from '@/lib/utils'
 
+type PublicNavLink = {
+  to: string
+  label: string
+}
+
+function PublicNavLinks({
+  links,
+  className,
+  linkClassName,
+  onNavigate,
+}: {
+  links: PublicNavLink[]
+  className?: string
+  linkClassName?: string
+  onNavigate?: () => void
+}) {
+  return (
+    <ul className={className}>
+      {links.map((link) => (
+        <li key={link.to}>
+          <NavLink
+            to={link.to}
+            onClick={onNavigate}
+            className={({ isActive }) =>
+              cn(
+                'block text-sm text-secondary hover:text-heading',
+                linkClassName,
+                isActive && 'text-primary-emphasis',
+              )
+            }
+          >
+            {link.label}
+          </NavLink>
+        </li>
+      ))}
+    </ul>
+  )
+}
+
 export function PublicHeader() {
   const { status } = useAuth()
-  const links = [
+  const location = useLocation()
+  const [menuOpen, setMenuOpen] = useState(false)
+  const links: PublicNavLink[] = [
     { to: '/', label: 'Home' },
     { to: '/about', label: 'About' },
     status === 'authenticated'
@@ -12,35 +56,60 @@ export function PublicHeader() {
       : { to: '/auth', label: 'Sign in' },
   ]
 
+  useEffect(() => {
+    setMenuOpen(false)
+  }, [location.pathname])
+
   return (
     <header className="border-b border-border/80 bg-surface/90 backdrop-blur-md">
-      <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-4">
+      <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-4">
         <Link
           to="/"
-          className="font-display text-lg tracking-[0.16em] text-heading uppercase"
+          className="min-w-0 break-words font-display text-base tracking-[0.16em] text-heading uppercase sm:text-lg"
         >
           Doomsday Watch Group
         </Link>
-        <nav aria-label="Public">
-          <ul className="flex items-center gap-4">
-            {links.map((link) => (
-              <li key={link.to}>
-                <NavLink
-                  to={link.to}
-                  className={({ isActive }) =>
-                    cn(
-                      'text-sm text-secondary hover:text-heading',
-                      isActive && 'text-primary-emphasis',
-                    )
-                  }
-                >
-                  {link.label}
-                </NavLink>
-              </li>
-            ))}
-          </ul>
+        <nav aria-label="Public" className="hidden md:block">
+          <PublicNavLinks
+            className="flex items-center gap-4"
+            links={links}
+          />
         </nav>
+        <Button
+          aria-controls="public-mobile-nav"
+          aria-expanded={menuOpen}
+          aria-label={menuOpen ? 'Close menu' : 'Open menu'}
+          className="shrink-0 md:hidden"
+          onClick={() => {
+            setMenuOpen((open) => !open)
+          }}
+          size="sm"
+          type="button"
+          variant="ghost"
+        >
+          {menuOpen ? (
+            <X aria-hidden="true" className="size-5" />
+          ) : (
+            <Menu aria-hidden="true" className="size-5" />
+          )}
+        </Button>
       </div>
+      {menuOpen ? (
+        <nav
+          aria-label="Public"
+          className="border-t border-border/80 md:hidden"
+          id="public-mobile-nav"
+        >
+          <PublicNavLinks
+            className="mx-auto flex max-w-6xl flex-col gap-1 px-4 py-3"
+            linkClassName="rounded-md px-2 py-2 hover:bg-surface-hover"
+            links={links}
+            onNavigate={() => {
+              setMenuOpen(false)
+            }}
+          />
+        </nav>
+      ) : null}
     </header>
   )
 }
@@ -49,11 +118,11 @@ export function PublicFooter() {
   return (
     <footer className="border-t border-border/80">
       <div className="mx-auto max-w-6xl px-4 py-8 text-sm text-muted">
-        <p>
+        <p className="break-words">
           Unofficial fan project. Not affiliated with or endorsed by Marvel or
           Disney.
         </p>
-        <p className="mt-2">
+        <p className="mt-2 break-words">
           This product uses the TMDB API but is not endorsed or certified by
           TMDB.
         </p>

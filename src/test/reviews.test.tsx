@@ -240,7 +240,7 @@ describe('reviews', () => {
     expect(screen.getAllByText('Avg 8.5').length).toBeGreaterThan(0)
   })
 
-  it('shows a glowing review bubble on the watchlist and previews reviews on hover', async () => {
+  it('shows a glowing review bubble on the watchlist and previews reviews on click', async () => {
     const user = userEvent.setup()
     seedGroup()
     setMockReviews([
@@ -278,7 +278,7 @@ describe('reviews', () => {
     if (!bubble) {
       throw new Error('expected a review bubble')
     }
-    await user.hover(bubble)
+    await user.click(bubble)
 
     expect(await screen.findByText('Owner A (you)')).toBeInTheDocument()
     expect(screen.getAllByText('A strong start.').length).toBeGreaterThan(0)

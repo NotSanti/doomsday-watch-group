@@ -47,6 +47,40 @@ export const DEFAULT_WATCHLIST_FILTERS: WatchlistFilters = {
   showReviews: true,
 }
 
+export function countActiveWatchlistFilters(filters: WatchlistFilters): number {
+  let count = 0
+
+  if (filters.q.trim()) {
+    count += 1
+  }
+
+  if (filters.type !== DEFAULT_WATCHLIST_FILTERS.type) {
+    count += 1
+  }
+
+  if (filters.importance !== DEFAULT_WATCHLIST_FILTERS.importance) {
+    count += 1
+  }
+
+  if (filters.status !== DEFAULT_WATCHLIST_FILTERS.status) {
+    count += 1
+  }
+
+  if (filters.sort !== DEFAULT_WATCHLIST_FILTERS.sort) {
+    count += 1
+  }
+
+  if (filters.showRating !== DEFAULT_WATCHLIST_FILTERS.showRating) {
+    count += 1
+  }
+
+  if (filters.showReviews !== DEFAULT_WATCHLIST_FILTERS.showReviews) {
+    count += 1
+  }
+
+  return count
+}
+
 function readBoolean(value: string | null, fallback: boolean): boolean {
   if (value === '0' || value === 'false') {
     return false

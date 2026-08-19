@@ -13,12 +13,12 @@ export function LandingPage() {
           className="pointer-events-none absolute inset-0 opacity-20 [background-image:radial-gradient(#929b94_1px,transparent_1px)] [background-size:28px_28px]"
         />
         <div className="relative mx-auto grid max-w-6xl gap-10 px-4 py-16 lg:grid-cols-[1.1fr_0.9fr] lg:items-center lg:py-24">
-          <div>
+          <div className="min-w-0">
             <Badge tone="watching">Private watch group</Badge>
-            <h1 className="metallic-text mt-4 font-display text-5xl tracking-[0.08em] uppercase sm:text-6xl lg:text-7xl">
+            <h1 className="metallic-text mt-4 text-balance break-words font-display text-4xl tracking-[0.08em] uppercase sm:text-5xl md:text-6xl lg:text-7xl">
               Watch together on the road to Doomsday
             </h1>
-            <p className="mt-4 max-w-xl text-lg text-secondary">
+            <p className="mt-4 max-w-xl text-pretty break-words text-base text-secondary sm:text-lg">
               Create a private MCU watch group, invite friends, follow a shared
               order, and compare everyone’s progress and opinions.
             </p>
@@ -31,8 +31,8 @@ export function LandingPage() {
               </Button>
             </div>
           </div>
-          <div className="w-max max-w-full justify-self-center text-center lg:justify-self-end">
-            <h2 className="gold-text font-display text-xl font-bold tracking-[0.18em] uppercase sm:text-2xl">
+          <div className="min-w-0 w-full max-w-full justify-self-center text-center lg:justify-self-end">
+            <h2 className="gold-text text-balance break-words font-display text-lg font-bold tracking-[0.18em] uppercase sm:text-xl md:text-2xl">
               Doomsday is coming
             </h2>
             <Countdown className="mt-5" />
@@ -41,7 +41,7 @@ export function LandingPage() {
       </section>
 
       <section className="mx-auto max-w-6xl px-4 py-12">
-        <h2 className="font-display text-3xl tracking-[0.1em] text-heading uppercase">
+        <h2 className="text-balance break-words font-display text-2xl tracking-[0.1em] text-heading uppercase sm:text-3xl">
           Three steps
         </h2>
         <div className="mt-6 grid gap-4 md:grid-cols-3">
@@ -74,7 +74,7 @@ export function LandingPage() {
       </section>
 
       <section className="mx-auto max-w-6xl px-4 pb-16">
-        <h2 className="font-display text-3xl tracking-[0.1em] text-heading uppercase">
+        <h2 className="text-balance break-words font-display text-2xl tracking-[0.1em] text-heading uppercase sm:text-3xl">
           Dashboard preview
         </h2>
         <div className="mt-6 grid gap-4 lg:grid-cols-2">
@@ -92,16 +92,16 @@ export function LandingPage() {
               A shared MCU order with personal status and group completion.
             </p>
             <ul className="mt-4 space-y-2 text-sm">
-              <li className="flex justify-between border-b border-border pb-2">
-                <span>01 · Iron Man</span>
+              <li className="flex flex-wrap items-center justify-between gap-2 border-b border-border pb-2">
+                <span className="min-w-0 break-words">01 · Iron Man</span>
                 <Badge tone="watched">Watched</Badge>
               </li>
-              <li className="flex justify-between border-b border-border pb-2">
-                <span>02 · The Incredible Hulk</span>
+              <li className="flex flex-wrap items-center justify-between gap-2 border-b border-border pb-2">
+                <span className="min-w-0 break-words">02 · The Incredible Hulk</span>
                 <Badge tone="notStarted">Not watching</Badge>
               </li>
-              <li className="flex justify-between">
-                <span>03 · Iron Man 2</span>
+              <li className="flex flex-wrap items-center justify-between gap-2">
+                <span className="min-w-0 break-words">03 · Iron Man 2</span>
                 <Badge tone="rating">Rated 8.5</Badge>
               </li>
             </ul>

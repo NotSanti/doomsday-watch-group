@@ -6,12 +6,11 @@ import {
 } from '@/features/reviews/review-metrics'
 import type { ReviewRow } from '@/features/reviews/review-schemas'
 import {
-  Tooltip,
-  TooltipContent,
-  TooltipLabel,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip'
+  Popover,
+  PopoverContent,
+  PopoverLabel,
+  PopoverTrigger,
+} from '@/components/ui/popover'
 import { cn } from '@/lib/utils'
 
 type ReviewPreviewBubbleProps = {
@@ -43,53 +42,52 @@ export function ReviewPreviewBubble({
   const countLabel = `${String(reviews.length)} ${reviews.length === 1 ? 'review' : 'reviews'} for ${titleName}`
 
   return (
-    <TooltipProvider>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <button
-            type="button"
-            aria-label={countLabel}
-            className={cn(
-              'review-bubble-glow flex size-5 items-center justify-center rounded-full bg-chip-violet-fg text-[10px] font-semibold text-on-primary',
-              className,
-            )}
-            onClick={(event) => {
-              event.preventDefault()
-              event.stopPropagation()
-            }}
-            onPointerDown={(event) => {
-              event.stopPropagation()
-            }}
-          >
-            {reviews.length}
-          </button>
-        </TooltipTrigger>
-        <TooltipContent side="top" align="end">
-          <TooltipLabel>{countLabel}</TooltipLabel>
-          <ul className="max-h-64 space-y-3 overflow-y-auto">
-            {reviews.map((review) => {
-              const isOwn = review.user_id === currentUserId
+    <Popover>
+      <PopoverTrigger asChild>
+        <button
+          type="button"
+          aria-label={countLabel}
+          className={cn(
+            'review-bubble-glow flex size-5 items-center justify-center rounded-full bg-chip-violet-fg text-[10px] font-semibold text-on-primary',
+            className,
+          )}
+          onClick={(event) => {
+            event.stopPropagation()
+          }}
+          onPointerDown={(event) => {
+            event.stopPropagation()
+          }}
+        >
+          {reviews.length}
+        </button>
+      </PopoverTrigger>
+      <PopoverContent side="top" align="end" onOpenAutoFocus={(event) => {
+        event.preventDefault()
+      }}>
+        <PopoverLabel>{countLabel}</PopoverLabel>
+        <ul className="max-h-64 space-y-3 overflow-y-auto">
+          {reviews.map((review) => {
+            const isOwn = review.user_id === currentUserId
 
-              return (
-                <li key={review.id} className="space-y-1">
-                  <p className="flex items-baseline justify-between gap-3">
-                    <span className="text-heading">
-                      {nameFor(members, review.user_id)}
-                      {isOwn ? ' (you)' : ''}
-                    </span>
-                    <span className="gold-text text-xs">
-                      {formatRating(review.rating)} / 10
-                    </span>
-                  </p>
-                  <p className="text-muted">
-                    {reviewHoverPreview(review, isOwn)}
-                  </p>
-                </li>
-              )
-            })}
-          </ul>
-        </TooltipContent>
-      </Tooltip>
-    </TooltipProvider>
+            return (
+              <li key={review.id} className="space-y-1">
+                <p className="flex items-baseline justify-between gap-3">
+                  <span className="text-heading">
+                    {nameFor(members, review.user_id)}
+                    {isOwn ? ' (you)' : ''}
+                  </span>
+                  <span className="gold-text text-xs">
+                    {formatRating(review.rating)} / 10
+                  </span>
+                </p>
+                <p className="text-muted">
+                  {reviewHoverPreview(review, isOwn)}
+                </p>
+              </li>
+            )
+          })}
+        </ul>
+      </PopoverContent>
+    </Popover>
   )
 }

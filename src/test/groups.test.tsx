@@ -164,6 +164,7 @@ describe('groups', () => {
     expect(
       await screen.findByRole('heading', { name: 'Alpha Watch' }),
     ).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'Open menu' }))
     expect(screen.getByRole('link', { name: 'Dashboard' })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: 'Members' })).toBeInTheDocument()
     const dashboardRoster = screen

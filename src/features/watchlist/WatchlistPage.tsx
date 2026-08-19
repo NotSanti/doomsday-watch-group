@@ -29,7 +29,7 @@ import { TitleCard } from '@/features/watchlist/TitleCard'
 import { TitleRow } from '@/features/watchlist/TitleRow'
 import { TmdbCredit } from '@/features/watchlist/TmdbCredit'
 import { useTitleList } from '@/features/watchlist/use-titles'
-import { WatchlistFiltersForm } from '@/features/watchlist/WatchlistFilters'
+import { WatchlistFilters as WatchlistFiltersPanel } from '@/features/watchlist/WatchlistFilters'
 
 function WatchlistSkeleton() {
   return (
@@ -96,7 +96,13 @@ export function WatchlistPage() {
           entry each, not per episode.
         </p>
       </header>
-      <WatchlistFiltersForm filters={filters} onChange={updateFilters} />
+      <WatchlistFiltersPanel
+        filters={filters}
+        matchCount={(candidate: WatchlistFilters) =>
+          filterTitles(titles, myProgress, candidate).length
+        }
+        onChange={updateFilters}
+      />
       <p className="text-sm text-secondary">
         Showing {visible.length} of {titles.length} titles
       </p>
