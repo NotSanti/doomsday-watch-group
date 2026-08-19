@@ -15,7 +15,6 @@ import {
   type TitleRow,
   type TitleStatus,
 } from '@/features/watchlist/title-schemas'
-import { cn } from '@/lib/utils'
 
 type TitleRowProps = {
   title: TitleRow
@@ -76,25 +75,22 @@ export function TitleRow({
               .join(' · ')}
           </p>
         </div>
-        <div
-          className={cn(
-            'hidden flex-wrap justify-end gap-2 sm:flex',
-            reviews.length > 0 && 'pr-7',
-          )}
-        >
+        <div className="hidden flex-wrap justify-end gap-2 sm:flex">
           <Badge>{IMPORTANCE_LABEL[title.importance]}</Badge>
           <Badge tone={statusTone(status)}>{TITLE_STATUS_LABEL[status]}</Badge>
           <Badge tone="muted">{groupWatchedLabel}</Badge>
           <Badge tone="rating">{averageRatingLabel}</Badge>
         </div>
       </Link>
-      <div className="absolute top-1.5 right-1.5 z-10">
-        <ReviewPreviewBubble
-          titleName={title.name}
-          reviews={reviews}
-          members={members}
-          currentUserId={currentUserId}
-        />
+      <div className="pointer-events-none absolute inset-0 z-10">
+        <div className="pointer-events-auto absolute top-1.5 right-1.5">
+          <ReviewPreviewBubble
+            titleName={title.name}
+            reviews={reviews}
+            members={members}
+            currentUserId={currentUserId}
+          />
+        </div>
       </div>
     </div>
   )
