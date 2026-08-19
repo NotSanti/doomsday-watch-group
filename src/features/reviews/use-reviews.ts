@@ -1,4 +1,3 @@
-import { useEffect } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { useAuth } from '@/features/auth/use-auth'
@@ -68,38 +67,4 @@ export function useDeleteReview(groupId: string) {
       toast.error(toFriendlyReviewDeleteError())
     },
   })
-}
-
-export function useReviewRealtime(groupId: string) {
-  const queryClient = useQueryClient()
-  const enabled = isGroupId(groupId)
-
-  useEffect(() => {
-    if (!enabled) {
-      return
-    }
-
-    const client = getSupabaseClient()
-    const channel = client
-      .channel(`group-reviews:${groupId}`)
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'reviews',
-          filter: `group_id=eq.${groupId}`,
-        },
-        () => {
-          void queryClient.invalidateQueries({
-            queryKey: reviewKeys.group(groupId),
-          })
-        },
-      )
-      .subscribe()
-
-    return () => {
-      void client.removeChannel(channel)
-    }
-  }, [enabled, groupId, queryClient])
 }

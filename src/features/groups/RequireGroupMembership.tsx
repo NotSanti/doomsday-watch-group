@@ -3,11 +3,11 @@ import { EmptyState } from '@/components/EmptyState'
 import { ErrorState } from '@/components/ErrorState'
 import { Skeleton } from '@/components/Skeleton'
 import { Button } from '@/components/ui/button'
+import { useAuth } from '@/features/auth/use-auth'
 import { toFriendlyGroupDetailError } from '@/features/groups/group-errors'
 import { isGroupId } from '@/features/groups/group-schemas'
 import { useGroup } from '@/features/groups/use-groups'
-import { useGroupRealtime } from '@/features/progress/use-progress'
-import { useReviewRealtime } from '@/features/reviews/use-reviews'
+import { useActiveGroupRealtime } from '@/features/realtime/use-active-group-realtime'
 
 function MembershipSkeleton() {
   return (
@@ -35,10 +35,13 @@ function GroupUnavailable() {
 
 export function RequireGroupMembership() {
   const { groupId = '' } = useParams()
+  const { user } = useAuth()
   const groupQuery = useGroup(groupId)
   const canFetch = isGroupId(groupId)
-  useGroupRealtime(canFetch && groupQuery.data ? groupId : '')
-  useReviewRealtime(canFetch && groupQuery.data ? groupId : '')
+  useActiveGroupRealtime(
+    canFetch && groupQuery.data ? groupId : '',
+    user?.id,
+  )
 
   if (!canFetch) {
     return <GroupUnavailable />
