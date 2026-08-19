@@ -5,10 +5,13 @@ import {
   createGroupSchema,
   groupMemberQueryRowSchema,
   groupRowSchema,
+  updateGroupSettingsSchema,
   type CreateGroupValues,
   type GroupMember,
   type GroupRow,
+  type UpdateGroupSettingsValues,
 } from '@/features/groups/group-schemas'
+import { zonedStartOfDayIso } from '@/lib/timezone'
 
 const GROUP_COLUMNS =
   'id, name, description, owner_id, current_title_id, target_date, timezone, created_at, updated_at'
@@ -145,4 +148,86 @@ export async function updateGroupCurrentTitle(
   }
 
   return groupRowSchema.parse(data)
+}
+
+export async function updateGroupSettings(
+  client: BrowserSupabaseClient,
+  groupId: string,
+  values: UpdateGroupSettingsValues,
+): Promise<GroupRow> {
+  const parsed = updateGroupSettingsSchema.parse(values)
+  const { data, error } = await client
+    .from('groups')
+    .update({
+      name: parsed.name,
+      description: parsed.description.length > 0 ? parsed.description : null,
+      target_date: zonedStartOfDayIso(parsed.targetDate, parsed.timezone),
+      timezone: parsed.timezone,
+    })
+    .eq('id', groupId)
+    .select(GROUP_COLUMNS)
+    .maybeSingle()
+
+  if (error) {
+    throw error
+  }
+
+  if (!data) {
+    throw new Error('GROUP_SETTINGS_UPDATE_FAILED')
+  }
+
+  return groupRowSchema.parse(data)
+}
+
+export async function removeGroupMember(
+  client: BrowserSupabaseClient,
+  groupId: string,
+  userId: string,
+): Promise<void> {
+  const { error } = await client
+    .from('group_members')
+    .delete()
+    .eq('group_id', groupId)
+    .eq('user_id', userId)
+
+  if (error) {
+    throw error
+  }
+}
+
+export async function leaveGroup(
+  client: BrowserSupabaseClient,
+  groupId: string,
+): Promise<void> {
+  const { error } = await client.rpc('leave_group', { p_group_id: groupId })
+
+  if (error) {
+    throw error
+  }
+}
+
+export async function transferGroupOwnership(
+  client: BrowserSupabaseClient,
+  groupId: string,
+  newOwnerId: string,
+): Promise<void> {
+  const { error } = await client.rpc('transfer_ownership', {
+    p_group_id: groupId,
+    p_new_owner_id: newOwnerId,
+  })
+
+  if (error) {
+    throw error
+  }
+}
+
+export async function deleteGroup(
+  client: BrowserSupabaseClient,
+  groupId: string,
+): Promise<void> {
+  const { error } = await client.from('groups').delete().eq('id', groupId)
+
+  if (error) {
+    throw error
+  }
 }

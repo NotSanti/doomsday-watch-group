@@ -1,9 +1,13 @@
 import { describe, expect, it } from 'vitest'
 import {
   toFriendlyCreateGroupError,
+  toFriendlyDeleteGroupError,
   toFriendlyGroupDetailError,
   toFriendlyGroupListError,
   toFriendlyGroupMembersError,
+  toFriendlyLeaveGroupError,
+  toFriendlyRemoveMemberError,
+  toFriendlyTransferOwnershipError,
 } from '@/features/groups/group-errors'
 
 describe('group errors', () => {
@@ -38,6 +42,21 @@ describe('group errors', () => {
     )
     expect(toFriendlyGroupMembersError()).toBe(
       'Members could not be loaded. Please try again.',
+    )
+    expect(
+      toFriendlyLeaveGroupError({
+        code: '42501',
+        message: 'Transfer ownership or delete the group before leaving',
+      }),
+    ).toBe('Transfer ownership or delete the group before leaving.')
+    expect(toFriendlyRemoveMemberError({ code: '42501' })).toBe(
+      'Only the group owner can remove members.',
+    )
+    expect(toFriendlyTransferOwnershipError({ code: '22023' })).toBe(
+      'Choose a current member to become the new owner.',
+    )
+    expect(toFriendlyDeleteGroupError({ code: '42501' })).toBe(
+      'Only the group owner can delete this group.',
     )
   })
 })

@@ -17,7 +17,7 @@ import { AppShell } from '@/layouts/AppShell'
 import { PublicLayout } from '@/layouts/PublicLayout'
 import { LandingPage } from '@/pages/LandingPage'
 import { AboutPage } from '@/pages/AboutPage'
-import { MembersPage } from '@/pages/PlaceholderPages'
+import { MembersPage } from '@/features/members/MembersPage'
 
 export function AppRoutes() {
   return (

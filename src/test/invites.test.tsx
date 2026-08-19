@@ -313,7 +313,7 @@ describe('invites', () => {
     renderApp(`/groups/${GROUP_A}/settings`)
 
     expect(
-      await screen.findByRole('heading', { name: 'Owner only' }),
+      await screen.findByRole('heading', { name: 'Owner-only controls' }),
     ).toBeInTheDocument()
     expect(
       screen.queryByRole('button', { name: 'Create invite' }),

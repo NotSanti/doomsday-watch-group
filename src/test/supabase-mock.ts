@@ -9,6 +9,7 @@ import {
 } from '@/features/invites/invite-schemas'
 import type { ReviewRow } from '@/features/reviews/review-schemas'
 import type { TitleRow, TitleStatus } from '@/features/watchlist/title-schemas'
+import type { ActivityEventType } from '@/features/activity/activity-schemas'
 
 type AuthListener = (event: AuthChangeEvent, session: Session | null) => void
 
@@ -28,6 +29,18 @@ export type MockTitleProgress = {
   status: TitleStatus
   started_at: string | null
   watched_at: string | null
+}
+
+export type MockActivity = {
+  id: number
+  group_id: string
+  actor_id: string
+  event_type: ActivityEventType
+  title_id: string | null
+  metadata: unknown
+  created_at: string
+  actor_name: string
+  title_name: string | null
 }
 
 let session: Session | null = null
@@ -52,6 +65,12 @@ let progressWriteError: { code?: string; message: string } | null = null
 let reviews: ReviewRow[] = []
 let reviewsError: { message: string } | null = null
 let reviewWriteError: { code?: string; message: string } | null = null
+let activity: MockActivity[] = []
+let activityError: { message: string } | null = null
+let groupWriteError: { code?: string; message: string } | null = null
+let leaveGroupError: { code?: string; message: string } | null = null
+let transferOwnershipError: { code?: string; message: string } | null = null
+let activityId = 1
 const listeners = new Set<AuthListener>()
 const realtimeHandlers: { table: string; callback: () => void }[] = []
 
@@ -315,6 +334,49 @@ export function getMockReviews(): ReviewRow[] {
   return reviews
 }
 
+export function makeActivity(
+  overrides: Partial<MockActivity> = {},
+): MockActivity {
+  return {
+    id: activityId++,
+    group_id: '22222222-2222-4222-8222-222222222222',
+    actor_id: '11111111-1111-4111-8111-111111111111',
+    event_type: 'joined',
+    title_id: null,
+    metadata: {},
+    created_at: new Date().toISOString(),
+    actor_name: 'Owner A',
+    title_name: null,
+    ...overrides,
+  }
+}
+
+export function setMockActivity(
+  next: MockActivity[],
+  error: { message: string } | null = null,
+): void {
+  activity = next
+  activityError = error
+}
+
+export function setGroupWriteError(
+  error: { code?: string; message: string } | null,
+): void {
+  groupWriteError = error
+}
+
+export function setLeaveGroupError(
+  error: { code?: string; message: string } | null,
+): void {
+  leaveGroupError = error
+}
+
+export function setTransferOwnershipError(
+  error: { code?: string; message: string } | null,
+): void {
+  transferOwnershipError = error
+}
+
 export function getMockInvites(): MockInvite[] {
   return invites
 }
@@ -339,6 +401,32 @@ type RpcError = { code?: string; message: string }
 function isOwnerOf(groupId: string): boolean {
   const group = groups.find((item) => item.id === groupId)
   return Boolean(session && group && group.owner_id === session.user.id)
+}
+
+function pushJoinedActivity(groupId: string, userId: string, name: string): void {
+  activity = [
+    makeActivity({
+      group_id: groupId,
+      actor_id: userId,
+      event_type: 'joined',
+      actor_name: name,
+    }),
+    ...activity,
+  ]
+}
+
+function activityToRow(event: MockActivity) {
+  return {
+    id: event.id,
+    group_id: event.group_id,
+    actor_id: event.actor_id,
+    event_type: event.event_type,
+    title_id: event.title_id,
+    metadata: event.metadata,
+    created_at: event.created_at,
+    profiles: { display_name: event.actor_name },
+    titles: event.title_name ? { name: event.title_name } : null,
+  }
 }
 
 function memberToRow(member: MockMember) {
@@ -412,6 +500,7 @@ async function createGroupImpl(args: {
       display_name: profile?.display_name ?? 'Owner A',
     }),
   ]
+  pushJoinedActivity(group.id, group.owner_id, profile?.display_name ?? 'Owner A')
   return { data: group, error: null }
 }
 
@@ -526,6 +615,20 @@ async function redeemInviteImpl(args: { p_token: string }) {
     owner_id: '11111111-1111-4111-8111-111111111111',
   })
   groups = [...groups, group]
+  members = [
+    ...members,
+    makeMember({
+      group_id: group.id,
+      user_id: session?.user.id ?? '55555555-5555-4555-8555-555555555555',
+      role: 'member',
+      display_name: profile?.display_name ?? 'Member B',
+    }),
+  ]
+  pushJoinedActivity(
+    group.id,
+    session?.user.id ?? '55555555-5555-4555-8555-555555555555',
+    profile?.display_name ?? 'Member B',
+  )
   return {
     data: [{ group_id: invite.group_id, already_member: false }],
     error: null,
@@ -554,6 +657,102 @@ async function revokeInviteImpl(args: { p_invite_id: string }) {
 
   invite.revoked_at = new Date().toISOString()
   invite.token = null
+  return { data: null, error: null }
+}
+
+async function leaveGroupImpl(args: { p_group_id: string }) {
+  if (leaveGroupError) {
+    return { data: null, error: leaveGroupError }
+  }
+
+  if (!session) {
+    return {
+      data: null,
+      error: { code: '42501', message: 'Not authenticated' },
+    }
+  }
+
+  const membership = members.find(
+    (member) =>
+      member.group_id === args.p_group_id && member.user_id === session?.user.id,
+  )
+
+  if (!membership) {
+    return {
+      data: null,
+      error: { code: '42501', message: 'Not a group member' },
+    }
+  }
+
+  if (membership.role === 'owner') {
+    return {
+      data: null,
+      error: {
+        code: '42501',
+        message: 'Transfer ownership or delete the group before leaving',
+      },
+    }
+  }
+
+  members = members.filter(
+    (member) =>
+      !(
+        member.group_id === args.p_group_id &&
+        member.user_id === session?.user.id
+      ),
+  )
+  groups = groups.filter((group) => group.id !== args.p_group_id)
+  return { data: null, error: null }
+}
+
+async function transferOwnershipImpl(args: {
+  p_group_id: string
+  p_new_owner_id: string
+}) {
+  if (transferOwnershipError) {
+    return { data: null, error: transferOwnershipError }
+  }
+
+  if (!session || !isOwnerOf(args.p_group_id)) {
+    return {
+      data: null,
+      error: { code: '42501', message: 'Only the owner can transfer ownership' },
+    }
+  }
+
+  const nextOwner = members.find(
+    (member) =>
+      member.group_id === args.p_group_id &&
+      member.user_id === args.p_new_owner_id,
+  )
+
+  if (!nextOwner) {
+    return {
+      data: null,
+      error: { code: '22023', message: 'New owner must already be a group member' },
+    }
+  }
+
+  members = members.map((member) => {
+    if (member.group_id !== args.p_group_id) {
+      return member
+    }
+
+    if (member.user_id === session?.user.id) {
+      return { ...member, role: 'member' as const }
+    }
+
+    if (member.user_id === args.p_new_owner_id) {
+      return { ...member, role: 'owner' as const }
+    }
+
+    return member
+  })
+  groups = groups.map((group) =>
+    group.id === args.p_group_id
+      ? { ...group, owner_id: args.p_new_owner_id }
+      : group,
+  )
   return { data: null, error: null }
 }
 
@@ -667,6 +866,8 @@ export const supabaseRpcMock = {
   preview_invite: vi.fn(previewInviteImpl),
   redeem_invite: vi.fn(redeemInviteImpl),
   revoke_invite: vi.fn(revokeInviteImpl),
+  leave_group: vi.fn(leaveGroupImpl),
+  transfer_ownership: vi.fn(transferOwnershipImpl),
 }
 
 export const supabaseFromMock = vi.fn((table: string) => {
@@ -713,16 +914,21 @@ export const supabaseFromMock = vi.fn((table: string) => {
                 },
         }),
       }),
-      update: (values: { current_title_id?: string | null }) => ({
+      update: (values: Partial<GroupRow>) => ({
         eq: (_column: string, groupId: string) => ({
           select: () => ({
             maybeSingle: async () => {
               const group = groups.find((item) => item.id === groupId)
 
-              if (!group || !session || group.owner_id !== session.user.id) {
+              if (
+                groupWriteError ||
+                !group ||
+                !session ||
+                group.owner_id !== session.user.id
+              ) {
                 return {
                   data: null,
-                  error: {
+                  error: groupWriteError ?? {
                     code: '42501',
                     message: 'Only owners can update this group',
                   },
@@ -742,10 +948,75 @@ export const supabaseFromMock = vi.fn((table: string) => {
           }),
         }),
       }),
+      delete: () => ({
+        eq: async (_column: string, groupId: string) => {
+          if (groupWriteError) {
+            return { data: null, error: groupWriteError }
+          }
+
+          if (!session || !isOwnerOf(groupId)) {
+            return {
+              data: null,
+              error: {
+                code: '42501',
+                message: 'Only owners can delete this group',
+              },
+            }
+          }
+
+          groups = groups.filter((group) => group.id !== groupId)
+          members = members.filter((member) => member.group_id !== groupId)
+          return { data: null, error: null }
+        },
+      }),
     }
   }
 
   if (table === 'group_members') {
+    const deleteFilters: Record<string, string> = {}
+    const deleteApi = {
+      eq(column: string, value: string) {
+        deleteFilters[column] = value
+        return deleteApi
+      },
+      then(
+        onFulfilled?: (value: {
+          data: null
+          error: { code?: string; message: string } | null
+        }) => unknown,
+        onRejected?: (reason: unknown) => unknown,
+      ) {
+        const groupId = deleteFilters.group_id
+        const userId = deleteFilters.user_id
+
+        if (groupWriteError) {
+          return Promise.resolve({ data: null, error: groupWriteError }).then(
+            onFulfilled,
+            onRejected,
+          )
+        }
+
+        if (!session || !groupId || !userId || !isOwnerOf(groupId) || userId === session.user.id) {
+          return Promise.resolve({
+            data: null,
+            error: {
+              code: '42501',
+              message: 'Only owners can remove other members',
+            },
+          }).then(onFulfilled, onRejected)
+        }
+
+        members = members.filter(
+          (member) =>
+            !(member.group_id === groupId && member.user_id === userId),
+        )
+        return Promise.resolve({ data: null, error: null }).then(
+          onFulfilled,
+          onRejected,
+        )
+      },
+    }
+
     return {
       select: () => ({
         in: async (_column: string, groupIds: string[]) => {
@@ -763,6 +1034,7 @@ export const supabaseFromMock = vi.fn((table: string) => {
           }
         },
       }),
+      delete: () => deleteApi,
     }
   }
 
@@ -1101,6 +1373,29 @@ export const supabaseFromMock = vi.fn((table: string) => {
     }
   }
 
+  if (table === 'activity_events') {
+    return {
+      select: () => ({
+        eq: (_column: string, groupId: string) => ({
+          order: () => ({
+            limit: async () => {
+              if (activityError) {
+                return { data: null, error: activityError }
+              }
+
+              return {
+                data: activity
+                  .filter((event) => event.group_id === groupId)
+                  .map(activityToRow),
+                error: null,
+              }
+            },
+          }),
+        }),
+      }),
+    }
+  }
+
   throw new Error(`Unexpected table ${table}`)
 })
 
@@ -1139,6 +1434,16 @@ export function getSupabaseClient() {
         return supabaseRpcMock.revoke_invite(args as { p_invite_id: string })
       }
 
+      if (fn === 'leave_group') {
+        return supabaseRpcMock.leave_group(args as { p_group_id: string })
+      }
+
+      if (fn === 'transfer_ownership') {
+        return supabaseRpcMock.transfer_ownership(
+          args as { p_group_id: string; p_new_owner_id: string },
+        )
+      }
+
       throw new Error(`Unexpected rpc ${fn}`)
     },
   }
@@ -1167,6 +1472,12 @@ export function resetSupabaseClient(): void {
   reviews = []
   reviewsError = null
   reviewWriteError = null
+  activity = []
+  activityError = null
+  groupWriteError = null
+  leaveGroupError = null
+  transferOwnershipError = null
+  activityId = 1
   listeners.clear()
   realtimeHandlers.length = 0
 }
@@ -1193,4 +1504,8 @@ export function resetSupabaseMock(): void {
   supabaseRpcMock.redeem_invite.mockImplementation(redeemInviteImpl)
   supabaseRpcMock.revoke_invite.mockReset()
   supabaseRpcMock.revoke_invite.mockImplementation(revokeInviteImpl)
+  supabaseRpcMock.leave_group.mockReset()
+  supabaseRpcMock.leave_group.mockImplementation(leaveGroupImpl)
+  supabaseRpcMock.transfer_ownership.mockReset()
+  supabaseRpcMock.transfer_ownership.mockImplementation(transferOwnershipImpl)
 }

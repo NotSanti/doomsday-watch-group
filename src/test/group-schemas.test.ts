@@ -3,6 +3,7 @@ import {
   createGroupSchema,
   groupRoleForUser,
   isGroupId,
+  updateGroupSettingsSchema,
 } from '@/features/groups/group-schemas'
 
 describe('group schemas', () => {
@@ -41,6 +42,25 @@ describe('group schemas', () => {
   it('accepts only uuid group ids', () => {
     expect(isGroupId('22222222-2222-4222-8222-222222222222')).toBe(true)
     expect(isGroupId('demo')).toBe(false)
+  })
+
+  it('requires a target date and timezone for group settings', () => {
+    expect(
+      updateGroupSettingsSchema.safeParse({
+        name: 'Alpha Watch',
+        description: '',
+        targetDate: '2026-12-18',
+        timezone: 'America/Toronto',
+      }).success,
+    ).toBe(true)
+    expect(
+      updateGroupSettingsSchema.safeParse({
+        name: 'Alpha Watch',
+        description: '',
+        targetDate: 'soon',
+        timezone: 'America/Toronto',
+      }).success,
+    ).toBe(false)
   })
 
   it('treats the creator as owner', () => {

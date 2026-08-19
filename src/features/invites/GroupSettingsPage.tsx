@@ -2,9 +2,16 @@ import { EmptyState } from '@/components/EmptyState'
 import { ErrorState } from '@/components/ErrorState'
 import { Skeleton } from '@/components/Skeleton'
 import { useAuth } from '@/features/auth/use-auth'
-import { toFriendlyGroupDetailError } from '@/features/groups/group-errors'
+import {
+  DeleteGroupSection,
+  LeaveGroupSection,
+  MemberAdminList,
+  TransferOwnershipForm,
+} from '@/features/groups/GroupAdminControls'
+import { GroupSettingsForm } from '@/features/groups/GroupSettingsForm'
+import { toFriendlyGroupDetailError, toFriendlyGroupMembersError } from '@/features/groups/group-errors'
 import { groupRoleForUser } from '@/features/groups/group-schemas'
-import { useGroup, useSetCurrentTitle } from '@/features/groups/use-groups'
+import { useGroup, useGroupMembers, useSetCurrentTitle } from '@/features/groups/use-groups'
 import { CurrentTitleForm } from '@/features/progress/ChangeCurrentTitleDialog'
 import { InviteManager } from '@/features/invites/InviteManager'
 import { toFriendlyTitleListError } from '@/features/watchlist/title-errors'
@@ -15,6 +22,7 @@ export function GroupSettingsPage() {
   const { groupId = '' } = useParams()
   const { user } = useAuth()
   const groupQuery = useGroup(groupId)
+  const membersQuery = useGroupMembers(groupId)
   const titlesQuery = useTitleList()
   const setCurrentTitle = useSetCurrentTitle(groupId)
   const group = groupQuery.data
@@ -43,6 +51,8 @@ export function GroupSettingsPage() {
     )
   }
 
+  const members = membersQuery.data ?? []
+
   return (
     <div className="space-y-8">
       <header>
@@ -50,12 +60,19 @@ export function GroupSettingsPage() {
           Group settings
         </h1>
         <p className="mt-2 text-muted">
-          Current title and invite links are owner-only. Other group controls
-          land in a later milestone.
+          {isOwner
+            ? 'Rename the group, manage invites, and handle membership.'
+            : 'Members can leave from here. Only the owner can change group details.'}
         </p>
       </header>
       {isOwner ? (
         <>
+          <section className="space-y-3">
+            <h2 className="font-display text-2xl tracking-[0.08em] text-heading uppercase">
+              Group details
+            </h2>
+            <GroupSettingsForm key={`${group.name}:${group.updated_at}`} group={group} />
+          </section>
           <section className="space-y-3">
             <h2 className="font-display text-2xl tracking-[0.08em] text-heading uppercase">
               Current title
@@ -80,12 +97,31 @@ export function GroupSettingsPage() {
             )}
           </section>
           <InviteManager groupId={group.id} />
+          {membersQuery.isError ? (
+            <ErrorState
+              message={toFriendlyGroupMembersError()}
+              onRetry={() => {
+                void membersQuery.refetch()
+              }}
+            />
+          ) : (
+            <MemberAdminList groupId={group.id} members={members} />
+          )}
+          <TransferOwnershipForm
+            groupId={group.id}
+            members={members}
+            ownerId={group.owner_id}
+          />
+          <DeleteGroupSection group={group} />
         </>
       ) : (
-        <EmptyState
-          title="Owner only"
-          description="Only the group owner can change the current title and manage invites."
-        />
+        <>
+          <EmptyState
+            title="Owner-only controls"
+            description="Only the group owner can rename the group, change the current title, or manage invites."
+          />
+          <LeaveGroupSection groupId={group.id} />
+        </>
       )}
     </div>
   )

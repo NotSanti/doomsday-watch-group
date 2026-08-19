@@ -1,5 +1,5 @@
 begin;
-select plan(47);
+select plan(64);
 
 create temp table test_users (
   label text primary key,
@@ -671,6 +671,198 @@ select is(
   'doomsday path has 62 full titles'
 );
 
+select set_config('request.jwt.claim.sub', (select id::text from test_users where label = 'member-a'), true);
+select set_config(
+  'request.jwt.claims',
+  json_build_object(
+    'sub', (select id::text from test_users where label = 'member-a'),
+    'role', 'authenticated'
+  )::text,
+  true
+);
+
+select lives_ok(
+  format(
+    $$update public.groups set timezone = 'UTC' where id = %L$$,
+    (select id from test_groups where label = 'alpha')
+  ),
+  'non-owner group update is silently skipped by RLS'
+);
+
+select is(
+  (
+    select timezone
+    from public.groups
+    where id = (select id from test_groups where label = 'alpha')
+  ),
+  'America/Toronto',
+  'group timezone is unchanged after a non-owner update'
+);
+
+select lives_ok(
+  format(
+    $$delete from public.groups where id = %L$$,
+    (select id from test_groups where label = 'alpha')
+  ),
+  'non-owner group delete is silently skipped by RLS'
+);
+
+select is(
+  (
+    select count(*)::integer
+    from public.groups
+    where id = (select id from test_groups where label = 'alpha')
+  ),
+  1,
+  'non-owner cannot delete a group'
+);
+
+select lives_ok(
+  format(
+    $$delete from public.group_members
+      where group_id = %L
+        and user_id = %L$$,
+    (select id from test_groups where label = 'alpha'),
+    (select id from test_users where label = 'owner-a')
+  ),
+  'member removal of another member is silently skipped by RLS'
+);
+
+select is(
+  (
+    select count(*)::integer
+    from public.group_members
+    where group_id = (select id from test_groups where label = 'alpha')
+      and user_id = (select id from test_users where label = 'owner-a')
+  ),
+  1,
+  'members cannot remove other members'
+);
+
+select set_config('request.jwt.claim.sub', (select id::text from test_users where label = 'owner-a'), true);
+select set_config(
+  'request.jwt.claims',
+  json_build_object(
+    'sub', (select id::text from test_users where label = 'owner-a'),
+    'role', 'authenticated'
+  )::text,
+  true
+);
+
+select lives_ok(
+  format(
+    $$update public.groups
+      set timezone = 'America/Vancouver',
+          target_date = timestamptz '2026-12-18 00:00:00-08'
+      where id = %L$$,
+    (select id from test_groups where label = 'alpha')
+  ),
+  'owner can change timezone and target date'
+);
+
+select is(
+  (
+    select timezone
+    from public.groups
+    where id = (select id from test_groups where label = 'alpha')
+  ),
+  'America/Vancouver',
+  'owner timezone update persists'
+);
+
+select throws_ok(
+  format($$select public.leave_group(%L)$$, (select id from test_groups where label = 'alpha')),
+  '42501',
+  null,
+  'owner cannot leave without transferring or deleting'
+);
+
+select lives_ok(
+  format(
+    $$delete from public.group_members
+      where group_id = %L
+        and user_id = %L$$,
+    (select id from test_groups where label = 'alpha'),
+    (select id from test_users where label = 'owner-a')
+  ),
+  'owner self-removal is silently skipped by RLS'
+);
+
+select is(
+  (
+    select count(*)::integer
+    from public.group_members
+    where group_id = (select id from test_groups where label = 'alpha')
+      and user_id = (select id from test_users where label = 'owner-a')
+      and role = 'owner'
+  ),
+  1,
+  'owner cannot remove their own membership'
+);
+
+create temp table extra_invite as
+select * from public.create_invite(
+  (select id from test_groups where label = 'alpha'),
+  now() + interval '7 days',
+  1
+);
+
+select set_config('request.jwt.claim.sub', (select id::text from test_users where label = 'outsider'), true);
+select set_config(
+  'request.jwt.claims',
+  json_build_object(
+    'sub', (select id::text from test_users where label = 'outsider'),
+    'role', 'authenticated'
+  )::text,
+  true
+);
+
+select lives_ok(
+  format($$select * from public.redeem_invite(%L)$$, (select token from extra_invite)),
+  'outsider can join so the owner can test removal'
+);
+
+select set_config('request.jwt.claim.sub', (select id::text from test_users where label = 'owner-a'), true);
+select set_config(
+  'request.jwt.claims',
+  json_build_object(
+    'sub', (select id::text from test_users where label = 'owner-a'),
+    'role', 'authenticated'
+  )::text,
+  true
+);
+
+select lives_ok(
+  format(
+    $$delete from public.group_members
+      where group_id = %L
+        and user_id = %L$$,
+    (select id from test_groups where label = 'alpha'),
+    (select id from test_users where label = 'outsider')
+  ),
+  'owner can remove a member'
+);
+
+select set_config('request.jwt.claim.sub', (select id::text from test_users where label = 'outsider'), true);
+select set_config(
+  'request.jwt.claims',
+  json_build_object(
+    'sub', (select id::text from test_users where label = 'outsider'),
+    'role', 'authenticated'
+  )::text,
+  true
+);
+
+select is(
+  (
+    select count(*)::integer
+    from public.groups
+    where id = (select id from test_groups where label = 'alpha')
+  ),
+  0,
+  'removed members immediately lose group access'
+);
+
 select set_config('request.jwt.claim.sub', (select id::text from test_users where label = 'owner-a'), true);
 select set_config(
   'request.jwt.claims',
@@ -694,10 +886,40 @@ select is(
   (
     select owner_id = (select id from test_users where label = 'member-a')
     from public.groups
-    where name = 'Alpha Watch'
+    where id = (select id from test_groups where label = 'alpha')
   ),
   true,
   'groups.owner_id matches transferred owner'
+);
+
+select lives_ok(
+  format($$select public.leave_group(%L)$$, (select id from test_groups where label = 'alpha')),
+  'former owner can leave after transferring'
+);
+
+select is(
+  (
+    select count(*)::integer
+    from public.groups
+    where id = (select id from test_groups where label = 'alpha')
+  ),
+  0,
+  'members who leave immediately lose group access'
+);
+
+select set_config('request.jwt.claim.sub', (select id::text from test_users where label = 'member-a'), true);
+select set_config(
+  'request.jwt.claims',
+  json_build_object(
+    'sub', (select id::text from test_users where label = 'member-a'),
+    'role', 'authenticated'
+  )::text,
+  true
+);
+
+select lives_ok(
+  format($$delete from public.groups where id = %L$$, (select id from test_groups where label = 'alpha')),
+  'owner can delete the group'
 );
 
 select * from finish();
