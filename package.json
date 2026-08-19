@@ -21,6 +21,7 @@
     "test:e2e:ui": "playwright test --ui",
     "audit:deps": "npm audit --audit-level=high",
     "check:bundle": "node scripts/check-client-bundle.mjs",
+    "ci": "npm run lint && npm run typecheck && npm test && npm run build && npm run check:bundle && npm run audit:deps",
     "verify": "npm run lint && npm run format:check && npm run typecheck && npm test && npm run build && npm run check:bundle && npm run audit:deps"
   },
   "dependencies": {

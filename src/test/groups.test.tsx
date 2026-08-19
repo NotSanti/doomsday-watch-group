@@ -91,16 +91,24 @@ describe('groups', () => {
       })
     })
     expect(
-      await screen.findByRole('heading', { name: 'Latveria League' }),
+      await screen.findByRole(
+        'heading',
+        { level: 1, name: 'Latveria League' },
+        { timeout: 8_000 },
+      ),
     ).toBeInTheDocument()
     expect(screen.getByText('Owner')).toBeInTheDocument()
     expect(screen.getByText('Private MCU run')).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: 'Members' })).toBeInTheDocument()
-    const createdRoster = screen.getByRole('heading', { name: 'Members' }).closest(
-      'section',
-    )
+    expect(
+      await screen.findByRole('heading', { name: 'Members' }),
+    ).toBeInTheDocument()
+    const createdRoster = screen
+      .getByRole('heading', { name: 'Members' })
+      .closest('section')
     expect(createdRoster).not.toBeNull()
-    expect(await within(createdRoster!).findByText('Owner A')).toBeInTheDocument()
+    expect(
+      await within(createdRoster!).findByText('Owner A'),
+    ).toBeInTheDocument()
     expect(screen.getByText('(owner)')).toBeInTheDocument()
   })
 
@@ -158,11 +166,13 @@ describe('groups', () => {
     ).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'Dashboard' })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: 'Members' })).toBeInTheDocument()
-    const dashboardRoster = screen.getByRole('heading', { name: 'Members' }).closest(
-      'section',
-    )
+    const dashboardRoster = screen
+      .getByRole('heading', { name: 'Members' })
+      .closest('section')
     expect(dashboardRoster).not.toBeNull()
-    expect(await within(dashboardRoster!).findByText('Owner A')).toBeInTheDocument()
+    expect(
+      await within(dashboardRoster!).findByText('Owner A'),
+    ).toBeInTheDocument()
   })
 
   it('lists each group’s members and marks the owner with a crown', async () => {

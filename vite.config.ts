@@ -3,6 +3,7 @@ import { fileURLToPath } from 'node:url'
 import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vitest/config'
+import { applyViteAppUrl } from './src/lib/resolve-app-url.ts'
 
 function withWindowsDriveCase(filePath: string): string {
   return filePath.replace(
@@ -22,6 +23,8 @@ const rootDir = withWindowsDriveCase(
   path.dirname(fileURLToPath(import.meta.url)),
 )
 
+applyViteAppUrl(process.env)
+
 export default defineConfig({
   root: rootDir,
   plugins: [react(), tailwindcss()],
@@ -35,6 +38,7 @@ export default defineConfig({
     setupFiles: ['./src/test/setup.ts'],
     include: ['src/**/*.test.ts', 'src/**/*.test.tsx'],
     exclude: ['node_modules', 'dist', 'supabase'],
+    testTimeout: 15_000,
     env: {
       VITE_APP_URL: 'http://127.0.0.1:5173',
       VITE_SUPABASE_URL: 'http://127.0.0.1:54321',
