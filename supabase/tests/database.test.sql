@@ -1,5 +1,5 @@
 begin;
-select plan(28);
+select plan(30);
 
 create temp table test_users (
   label text primary key,
@@ -220,7 +220,7 @@ select set_config(
 select throws_ok(
   format(
     $$insert into public.member_title_progress (group_id, user_id, title_id, status)
-      values (%L, %L, '11111111-1111-1111-1111-111111111111', 'watching')$$,
+      values (%L, %L, 'aa000000-0000-4000-8000-000000000001', 'watching')$$,
     (select id from test_groups where label = 'beta'),
     (select id from test_users where label = 'member-a')
   ),
@@ -248,7 +248,7 @@ select is(
 select lives_ok(
   format(
     $$insert into public.member_title_progress (group_id, user_id, title_id, status, started_at)
-      values (%L, %L, '11111111-1111-1111-1111-111111111111', 'watching', now())$$,
+      values (%L, %L, 'aa000000-0000-4000-8000-000000000001', 'watching', now())$$,
     (select id from test_groups where label = 'alpha'),
     (select id from test_users where label = 'member-a')
   ),
@@ -258,7 +258,7 @@ select lives_ok(
 select throws_ok(
   format(
     $$insert into public.member_title_progress (group_id, user_id, title_id, status)
-      values (%L, %L, '22222222-2222-2222-2222-222222222222', 'watching')$$,
+      values (%L, %L, 'aa000000-0000-4000-8000-000000000002', 'watching')$$,
     (select id from test_groups where label = 'alpha'),
     (select id from test_users where label = 'owner-a')
   ),
@@ -290,7 +290,7 @@ select throws_ok(
 select lives_ok(
   format(
     $$insert into public.reviews (group_id, user_id, title_id, rating, body)
-      values (%L, %L, '11111111-1111-1111-1111-111111111111', 8.5, 'Solid')$$,
+      values (%L, %L, 'aa000000-0000-4000-8000-000000000001', 8.5, 'Solid')$$,
     (select id from test_groups where label = 'alpha'),
     (select id from test_users where label = 'member-a')
   ),
@@ -300,7 +300,7 @@ select lives_ok(
 select throws_ok(
   format(
     $$insert into public.reviews (group_id, user_id, title_id, rating)
-      values (%L, %L, '11111111-1111-1111-1111-111111111111', 9.0)$$,
+      values (%L, %L, 'aa000000-0000-4000-8000-000000000001', 9.0)$$,
     (select id from test_groups where label = 'alpha'),
     (select id from test_users where label = 'member-a')
   ),
@@ -312,7 +312,7 @@ select throws_ok(
 select throws_ok(
   format(
     $$insert into public.reviews (group_id, user_id, title_id, rating)
-      values (%L, %L, '22222222-2222-2222-2222-222222222222', 8.3)$$,
+      values (%L, %L, 'aa000000-0000-4000-8000-000000000002', 8.3)$$,
     (select id from test_groups where label = 'alpha'),
     (select id from test_users where label = 'member-a')
   ),
@@ -424,10 +424,27 @@ select throws_ok(
 
 select throws_ok(
   $$insert into public.titles (media_type, name, importance, release_order)
-    values ('movie', 'Illicit Title', 'optional', 99)$$,
+    values ('movie', 'Illicit Title', 'optional', 9999)$$,
   '42501',
   null,
   'authenticated clients cannot insert titles'
+);
+
+select is(
+  (select name from public.titles where id = 'aa000000-0000-4000-8000-000000000001'),
+  'Iron Man',
+  'catalog seed includes Iron Man with a stable id'
+);
+
+select ok(
+  not exists (
+    select 1
+    from public.titles
+    where doomsday_order is not null
+    group by doomsday_order
+    having count(*) > 1
+  ),
+  'doomsday_order values are unique when present'
 );
 
 select set_config('request.jwt.claim.sub', (select id::text from test_users where label = 'owner-a'), true);

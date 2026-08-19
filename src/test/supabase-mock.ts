@@ -7,6 +7,7 @@ import {
   type InvitePreview,
   type InviteRow,
 } from '@/features/invites/invite-schemas'
+import type { TitleProgress, TitleRow } from '@/features/watchlist/title-schemas'
 
 type AuthListener = (event: AuthChangeEvent, session: Session | null) => void
 
@@ -18,6 +19,11 @@ export type MockInvite = InviteRow & {
 }
 
 export type MockMember = GroupMember
+
+export type MockTitleProgress = TitleProgress & {
+  group_id: string
+  user_id: string
+}
 
 let session: Session | null = null
 let profile: ProfileRow | null = null
@@ -33,6 +39,10 @@ let createInviteError: { code?: string; message: string } | null = null
 let previewError: { code?: string; message: string } | null = null
 let redeemError: { code?: string; message: string } | null = null
 let revokeError: { code?: string; message: string } | null = null
+let titles: TitleRow[] = []
+let titlesError: { message: string } | null = null
+let progress: MockTitleProgress[] = []
+let progressError: { message: string } | null = null
 const listeners = new Set<AuthListener>()
 
 export function makeUser(overrides: Partial<User> = {}): User {
@@ -121,6 +131,40 @@ export function makeInvite(overrides: Partial<MockInvite> = {}): MockInvite {
   return invite
 }
 
+export function makeTitle(overrides: Partial<TitleRow> = {}): TitleRow {
+  return {
+    id: 'aa000000-0000-4000-8000-000000000001',
+    tmdb_id: 1726,
+    media_type: 'movie',
+    name: 'Iron Man',
+    release_date: '2008-05-02',
+    runtime_minutes: 126,
+    episode_count: null,
+    poster_path: '/78lPtwv72eTNqFW9COYM7C5Tl7.jpg',
+    backdrop_path: '/cyecB5K0or8jv4n3oRMePqHLkhC.jpg',
+    synopsis: 'An industrialist builds a powered suit of armor.',
+    phase: 1,
+    saga: 'Infinity Saga',
+    importance: 'essential',
+    release_order: 1,
+    doomsday_order: 3,
+    is_active: true,
+    ...overrides,
+  }
+}
+
+export function makeTitleProgress(
+  overrides: Partial<MockTitleProgress> = {},
+): MockTitleProgress {
+  return {
+    group_id: '22222222-2222-4222-8222-222222222222',
+    user_id: '11111111-1111-4111-8111-111111111111',
+    title_id: 'aa000000-0000-4000-8000-000000000001',
+    status: 'not_started',
+    ...overrides,
+  }
+}
+
 export function setMockSession(next: Session | null): void {
   session = next
 }
@@ -197,6 +241,22 @@ export function setRevokeInviteError(
   error: { code?: string; message: string } | null,
 ): void {
   revokeError = error
+}
+
+export function setMockTitles(
+  next: TitleRow[],
+  error: { message: string } | null = null,
+): void {
+  titles = next
+  titlesError = error
+}
+
+export function setMockProgress(
+  next: MockTitleProgress[],
+  error: { message: string } | null = null,
+): void {
+  progress = next
+  progressError = error
 }
 
 export function getMockInvites(): MockInvite[] {
@@ -578,6 +638,69 @@ export const supabaseFromMock = vi.fn((table: string) => {
     }
   }
 
+  if (table === 'titles') {
+    return {
+      select: () => ({
+        eq: (column: string, value: string | boolean) => ({
+          order: async () => {
+            if (titlesError) {
+              return { data: null, error: titlesError }
+            }
+
+            return {
+              data: titles.filter((title) => {
+                if (column === 'is_active') {
+                  return title.is_active === value
+                }
+
+                return true
+              }),
+              error: null,
+            }
+          },
+          maybeSingle: async () => {
+            if (titlesError) {
+              return { data: null, error: titlesError }
+            }
+
+            const title =
+              column === 'id'
+                ? (titles.find((row) => row.id === value) ?? null)
+                : null
+
+            return { data: title, error: null }
+          },
+        }),
+      }),
+    }
+  }
+
+  if (table === 'member_title_progress') {
+    return {
+      select: () => ({
+        eq: (_groupColumn: string, groupId: string) => ({
+          eq: async (_userColumn: string, userId: string) => {
+            if (progressError) {
+              return { data: null, error: progressError }
+            }
+
+            return {
+              data: progress
+                .filter(
+                  (row) => row.group_id === groupId && row.user_id === userId,
+                )
+                .map((row) => ({
+                  title_id: row.title_id,
+                  status: row.status,
+                })),
+              error: null,
+            }
+          },
+        }),
+      }),
+    }
+  }
+
   throw new Error(`Unexpected table ${table}`)
 })
 
@@ -634,6 +757,10 @@ export function resetSupabaseClient(): void {
   previewError = null
   redeemError = null
   revokeError = null
+  titles = []
+  titlesError = null
+  progress = []
+  progressError = null
   listeners.clear()
 }
 

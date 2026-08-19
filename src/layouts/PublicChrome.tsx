@@ -53,6 +53,10 @@ export function PublicFooter() {
           Unofficial fan project. Not affiliated with or endorsed by Marvel or
           Disney.
         </p>
+        <p className="mt-2">
+          This product uses the TMDB API but is not endorsed or certified by
+          TMDB.
+        </p>
       </div>
     </footer>
   )
