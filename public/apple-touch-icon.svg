@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title">
+  <title id="title">Doomsday Watch Group</title>
+  <defs>
+    <linearGradient id="doomGreen" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0ac80a"/>
+      <stop offset="1" stop-color="#079207"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" fill="#0d1210"/>
+  <circle cx="256" cy="256" r="244" fill="#001800" stroke="url(#doomGreen)" stroke-width="16"/>
+  <path fill="url(#doomGreen)" d="M61 220 171 71 140 190 242 267 179 442 150 318Z"/>
+  <path fill="url(#doomGreen)" d="M451 220 341 71 372 190 270 267 333 442 362 318Z"/>
+  <path fill="url(#doomGreen)" d="m256 276 23 62h-46Z"/>
+</svg>
