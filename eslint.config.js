@@ -7,7 +7,13 @@ import tseslint from 'typescript-eslint'
 import { defineConfig, globalIgnores } from 'eslint/config'
 
 export default defineConfig([
-  globalIgnores(['dist', 'coverage', 'src/types/database.ts', 'supabase']),
+  globalIgnores([
+    'dist',
+    'coverage',
+    'scripts',
+    'src/types/database.ts',
+    'supabase',
+  ]),
   {
     files: ['**/*.{ts,tsx}'],
     extends: [

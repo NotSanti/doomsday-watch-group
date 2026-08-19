@@ -51,7 +51,12 @@ npm run lint
 npm run typecheck
 npm run test
 npm run build
+npm run verify          # lint + format + typecheck + test + build + bundle scan + audit
+npm run test:e2e        # Playwright (requires local Supabase + .env)
+npx supabase test db
 ```
+
+Playwright needs `E2E_SUPABASE_SERVICE_ROLE_KEY` from `npx supabase status` in `.env` alongside the Vite Supabase vars. See `docs/qa-checklist.md`.
 
 Environment variable names only (values stay in `.env` / Vercel, never in git):
 
@@ -96,11 +101,11 @@ Do not build in MVP: public groups, chat/comments/reactions/notifications, multi
 - [x] 4 — Group creation, switcher, membership
 - [x] 5 — Secure invitations
 - [x] 6 — Curated catalog and watchlist UI
-- [ ] 7 — Personal progress and current title
-- [ ] 8 — Ratings, reviews, spoiler protection
-- [ ] 9 — Activity, members, and group administration
-- [ ] 10 — Realtime polish
-- [ ] 11 — End-to-end quality and security
+- [x] 7 — Personal progress and current title
+- [x] 8 — Ratings, reviews, spoiler protection
+- [x] 9 — Activity, members, and group administration
+- [x] 10 — Realtime polish
+- [x] 11 — End-to-end quality and security
 - [ ] 12 — Production hardening and CI
 
 Work one numbered milestone at a time. See `AGENTS.md` and `docs/architecture.md`.
