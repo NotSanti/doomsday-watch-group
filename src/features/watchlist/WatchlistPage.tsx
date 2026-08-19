@@ -14,6 +14,7 @@ import {
   averageRating,
   formatAverageRatingLabel,
   ratingsForTitle,
+  reviewsForTitle,
 } from '@/features/reviews/review-metrics'
 import { useGroupReviews } from '@/features/reviews/use-reviews'
 import { toFriendlyTitleListError } from '@/features/watchlist/title-errors'
@@ -124,6 +125,7 @@ export function WatchlistPage() {
                     progress,
                   )
                   const titleRatings = ratingsForTitle(reviews, title.id)
+                  const titleReviews = reviewsForTitle(reviews, title.id)
 
                   return (
                     <li key={title.id}>
@@ -144,6 +146,9 @@ export function WatchlistPage() {
                           averageRating(titleRatings),
                           titleRatings.length,
                         )}
+                        reviews={titleReviews}
+                        members={membersQuery.data ?? []}
+                        currentUserId={user?.id ?? ''}
                       />
                     </li>
                   )
@@ -157,6 +162,7 @@ export function WatchlistPage() {
                     progress,
                   )
                   const titleRatings = ratingsForTitle(reviews, title.id)
+                  const titleReviews = reviewsForTitle(reviews, title.id)
 
                   return (
                     <li key={title.id}>
@@ -177,6 +183,9 @@ export function WatchlistPage() {
                           averageRating(titleRatings),
                           titleRatings.length,
                         )}
+                        reviews={titleReviews}
+                        members={membersQuery.data ?? []}
+                        currentUserId={user?.id ?? ''}
                       />
                     </li>
                   )

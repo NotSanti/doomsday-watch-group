@@ -38,7 +38,33 @@ export function ratingsForTitle(
   reviews: readonly { title_id: string; rating: number }[],
   titleId: string,
 ): number[] {
-  return reviews
-    .filter((review) => review.title_id === titleId)
-    .map((review) => review.rating)
+  return reviewsForTitle(reviews, titleId).map((review) => review.rating)
+}
+
+export function reviewsForTitle<T extends { title_id: string }>(
+  reviews: readonly T[],
+  titleId: string,
+): T[] {
+  return reviews.filter((review) => review.title_id === titleId)
+}
+
+export function reviewHoverPreview(
+  review: { body: string | null; contains_spoilers: boolean },
+  isOwn: boolean,
+): string {
+  if (!review.body) {
+    return 'Rated without a written review.'
+  }
+
+  if (review.contains_spoilers && !isOwn) {
+    return 'This review contains spoilers.'
+  }
+
+  const trimmed = review.body.trim()
+
+  if (trimmed.length <= 140) {
+    return trimmed
+  }
+
+  return `${trimmed.slice(0, 139).trimEnd()}…`
 }

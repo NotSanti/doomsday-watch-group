@@ -5,6 +5,14 @@ import { resetSupabaseMock } from '@/test/supabase-mock'
 
 vi.mock('@/lib/supabase', async () => await import('@/test/supabase-mock'))
 
+class ResizeObserverStub {
+  observe(): void {}
+  unobserve(): void {}
+  disconnect(): void {}
+}
+
+globalThis.ResizeObserver = ResizeObserverStub
+
 afterEach(() => {
   cleanup()
   resetSupabaseMock()
