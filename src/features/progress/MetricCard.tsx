@@ -16,7 +16,9 @@ export function MetricCard({ label, value, description }: MetricCardProps) {
       <p className="mt-2 font-display text-2xl tracking-[0.06em] text-heading">
         {value}
       </p>
-      <p className="mt-2 text-xs text-muted">{description}</p>
+      <p className="mt-2 text-xs tracking-[0.08em] text-muted uppercase">
+        {description}
+      </p>
     </article>
   )
 }

@@ -22,6 +22,9 @@
   --color-accent-muted: #855a2c;
   --color-accent-light: #e5c990;
   --color-gold: #c49a50;
+  --color-gold-gradient-start: #f0d8a5;
+  --color-gold-gradient-mid: #c49a50;
+  --color-gold-gradient-end: #855a2c;
 
   --color-text: #e6ebe5;
   --color-heading: #e6ebe5;
@@ -38,6 +41,17 @@
   --color-danger: #a94b42;
   --color-multiverse: #493b5e;
   --color-metal: #929b94;
+
+  --color-chip-gold-fg: #c49a50;
+  --color-chip-gold-bg: #2a2010;
+  --color-chip-green-fg: #74b85a;
+  --color-chip-green-bg: #1a2818;
+  --color-chip-violet-fg: #a894c8;
+  --color-chip-violet-bg: #2a2238;
+  --color-chip-metal-fg: #929b94;
+  --color-chip-metal-bg: #282c2a;
+  --color-chip-danger-fg: #c46a62;
+  --color-chip-danger-bg: #2e1a18;
 
   --color-doom-950: #0d1210;
   --color-doom-900: #171e1a;
@@ -97,14 +111,14 @@
   0%,
   100% {
     box-shadow:
-      0 0 0 1px rgba(73, 59, 94, 0.55),
-      0 0 10px rgba(73, 59, 94, 0.5);
+      0 0 0 1px color-mix(in srgb, var(--color-chip-violet-fg) 55%, transparent),
+      0 0 10px color-mix(in srgb, var(--color-chip-violet-fg) 45%, transparent);
   }
 
   50% {
     box-shadow:
-      0 0 0 2px rgba(73, 59, 94, 0.85),
-      0 0 16px rgba(73, 59, 94, 0.7);
+      0 0 0 2px color-mix(in srgb, var(--color-chip-violet-fg) 85%, transparent),
+      0 0 16px color-mix(in srgb, var(--color-chip-violet-fg) 65%, transparent);
   }
 }
 
@@ -141,9 +155,9 @@
     color: transparent;
     background: linear-gradient(
       180deg,
-      #f0d8a5 0%,
-      #c49a50 48%,
-      #855a2c 100%
+      var(--color-gold-gradient-start) 0%,
+      var(--color-gold-gradient-mid) 48%,
+      var(--color-gold-gradient-end) 100%
     );
     background-clip: text;
     -webkit-background-clip: text;
@@ -163,8 +177,8 @@
 
   .review-bubble-glow {
     box-shadow:
-      0 0 0 1px rgba(73, 59, 94, 0.55),
-      0 0 10px rgba(73, 59, 94, 0.5);
+      0 0 0 1px color-mix(in srgb, var(--color-chip-violet-fg) 55%, transparent),
+      0 0 10px color-mix(in srgb, var(--color-chip-violet-fg) 45%, transparent);
     animation: review-bubble-pulse 2.4s ease-in-out infinite;
   }
 

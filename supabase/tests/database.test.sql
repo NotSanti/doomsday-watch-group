@@ -1,5 +1,5 @@
 begin;
-select plan(63);
+select plan(70);
 
 create temp table test_users (
   label text primary key,
@@ -563,6 +563,68 @@ select is(
   'revoked invite token is cleared'
 );
 
+select set_config('request.jwt.claim.sub', (select id::text from test_users where label = 'owner-a'), true);
+select set_config(
+  'request.jwt.claims',
+  json_build_object(
+    'sub', (select id::text from test_users where label = 'owner-a'),
+    'role', 'authenticated'
+  )::text,
+  true
+);
+
+select throws_ok(
+  format($$select public.delete_invite(%L)$$, (select invite_id from alpha_invite)),
+  '22023',
+  null,
+  'active invites cannot be deleted'
+);
+
+select throws_ok(
+  format($$select public.delete_invite(%L)$$, (select invite_id from revoked_invite)),
+  '42501',
+  null,
+  'owners cannot delete invites for groups they do not own'
+);
+
+select set_config('request.jwt.claim.sub', (select id::text from test_users where label = 'member-a'), true);
+select set_config(
+  'request.jwt.claims',
+  json_build_object(
+    'sub', (select id::text from test_users where label = 'member-a'),
+    'role', 'authenticated'
+  )::text,
+  true
+);
+
+select throws_ok(
+  format($$select public.delete_invite(%L)$$, (select invite_id from revoked_invite)),
+  '42501',
+  null,
+  'non-owner cannot delete invites'
+);
+
+select set_config('request.jwt.claim.sub', (select id::text from test_users where label = 'owner-b'), true);
+select set_config(
+  'request.jwt.claims',
+  json_build_object(
+    'sub', (select id::text from test_users where label = 'owner-b'),
+    'role', 'authenticated'
+  )::text,
+  true
+);
+
+select lives_ok(
+  format($$select public.delete_invite(%L)$$, (select invite_id from revoked_invite)),
+  'owner can delete a revoked invite'
+);
+
+select is(
+  (select count(*)::integer from public.group_invites where id = (select invite_id from revoked_invite)),
+  0,
+  'deleted revoked invite is removed from the list'
+);
+
 create temp table exhausted_invite as
 select * from public.create_invite(
   (select id from test_groups where label = 'beta'),
@@ -657,6 +719,18 @@ select is(
   (select count(*)::integer from public.titles where doomsday_order is not null),
   62,
   'doomsday path has 62 full titles'
+);
+
+select is(
+  (select count(*)::integer from public.titles where poster_path is null or poster_path not like '/%'),
+  0,
+  'every catalog title stores a TMDB poster path'
+);
+
+select is(
+  (select count(*)::integer from public.titles where backdrop_path is null or backdrop_path not like '/%'),
+  0,
+  'every catalog title stores a TMDB backdrop path'
 );
 
 select set_config('request.jwt.claim.sub', (select id::text from test_users where label = 'member-a'), true);

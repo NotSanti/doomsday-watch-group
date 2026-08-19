@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react'
 import {
+  DOOMSDAY_TARGET_ISO,
+  formatCountdownClock,
   getCountdownParts,
   padUnit,
   type CountdownParts,
@@ -7,22 +9,53 @@ import {
 import { cn } from '@/lib/utils'
 
 type CountdownProps = {
-  targetIso: string
+  targetIso?: string
   className?: string
 }
 
-function Unit({ label, value }: { label: string; value: string }) {
+const UNITS = [
+  { key: 'Month', field: 'months' },
+  { key: 'Day', field: 'days' },
+  { key: 'Hour', field: 'hours' },
+  { key: 'Minute', field: 'minutes' },
+  { key: 'Second', field: 'seconds' },
+] as const
+
+function Unit({
+  label,
+  value,
+  separator,
+}: {
+  label: string
+  value: string
+  separator: boolean
+}) {
   return (
-    <div className="min-w-[4.5rem] rounded-lg border border-border bg-surface-elevated px-3 py-3 text-center">
-      <div className="metallic-text font-display text-3xl tracking-[0.12em] sm:text-4xl">
-        {value}
+    <>
+      {separator ? (
+        <span
+          aria-hidden="true"
+          className="metallic-text font-display text-3xl leading-none tracking-[0.08em] sm:text-4xl"
+        >
+          :
+        </span>
+      ) : null}
+      <div className="min-w-[4.25rem] text-center sm:min-w-[4.75rem]">
+        <div className="metallic-text font-display text-3xl tracking-[0.08em] sm:text-4xl">
+          {value}
+        </div>
+        <div className="mt-1 text-[0.65rem] tracking-[0.18em] text-secondary uppercase">
+          {label}
+        </div>
       </div>
-      <div className="mt-1 text-xs text-secondary uppercase">{label}</div>
-    </div>
+    </>
   )
 }
 
-export function Countdown({ targetIso, className }: CountdownProps) {
+export function Countdown({
+  targetIso = DOOMSDAY_TARGET_ISO,
+  className,
+}: CountdownProps) {
   const [now, setNow] = useState<Date | null>(null)
 
   useEffect(() => {
@@ -44,20 +77,33 @@ export function Countdown({ targetIso, className }: CountdownProps) {
 
   return (
     <div
-      className={cn('flex flex-wrap justify-center gap-3', className)}
+      className={cn(
+        'flex flex-wrap items-end justify-center gap-1 sm:gap-2',
+        className,
+      )}
       aria-live="polite"
+      role="timer"
+      aria-label={
+        parts
+          ? parts.elapsed
+            ? 'The date has arrived'
+            : formatCountdownClock(parts)
+          : 'Loading countdown'
+      }
     >
       {parts?.elapsed ? (
         <p className="gold-text font-display text-2xl tracking-[0.12em] uppercase">
           The date has arrived
         </p>
       ) : (
-        <>
-          <Unit label="Days" value={parts ? String(parts.days) : '--'} />
-          <Unit label="Hours" value={parts ? padUnit(parts.hours) : '--'} />
-          <Unit label="Minutes" value={parts ? padUnit(parts.minutes) : '--'} />
-          <Unit label="Seconds" value={parts ? padUnit(parts.seconds) : '--'} />
-        </>
+        UNITS.map((unit, index) => (
+          <Unit
+            key={unit.key}
+            label={unit.key}
+            separator={index > 0}
+            value={parts ? padUnit(parts[unit.field]) : '--'}
+          />
+        ))
       )}
     </div>
   )

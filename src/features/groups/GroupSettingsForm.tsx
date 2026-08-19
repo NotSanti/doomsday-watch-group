@@ -11,13 +11,6 @@ import {
   type UpdateGroupSettingsValues,
 } from '@/features/groups/group-schemas'
 import { useUpdateGroupSettings } from '@/features/groups/use-groups'
-import { GROUP_TIMEZONES, calendarDateInTimeZone, isGroupTimezone } from '@/lib/timezone'
-import { cn } from '@/lib/utils'
-
-const selectClassName = cn(
-  'h-11 w-full rounded-md border border-border bg-surface px-3 text-sm text-heading',
-  'hover:border-border-strong focus-visible:outline-none',
-)
 
 type GroupSettingsFormProps = {
   group: GroupRow
@@ -31,10 +24,6 @@ export function GroupSettingsForm({ group }: GroupSettingsFormProps) {
     defaultValues: {
       name: group.name,
       description: group.description ?? '',
-      targetDate: calendarDateInTimeZone(group.target_date, group.timezone),
-      timezone: isGroupTimezone(group.timezone)
-        ? group.timezone
-        : 'America/Toronto',
     },
   })
 
@@ -59,7 +48,10 @@ export function GroupSettingsForm({ group }: GroupSettingsFormProps) {
         </p>
       ) : null}
       <div>
-        <label className="mb-1 block text-sm text-secondary" htmlFor="settings-name">
+        <label
+          className="mb-1 block text-sm text-secondary"
+          htmlFor="settings-name"
+        >
           Group name
         </label>
         <Input id="settings-name" maxLength={60} {...form.register('name')} />
@@ -86,45 +78,6 @@ export function GroupSettingsForm({ group }: GroupSettingsFormProps) {
             {form.formState.errors.description.message}
           </p>
         ) : null}
-      </div>
-      <div className="grid gap-4 sm:grid-cols-2">
-        <div>
-          <label
-            className="mb-1 block text-sm text-secondary"
-            htmlFor="settings-target-date"
-          >
-            Target date
-          </label>
-          <Input
-            id="settings-target-date"
-            type="date"
-            {...form.register('targetDate')}
-          />
-          {form.formState.errors.targetDate ? (
-            <p className="mt-1 text-sm text-danger" role="alert">
-              {form.formState.errors.targetDate.message}
-            </p>
-          ) : null}
-        </div>
-        <div>
-          <label
-            className="mb-1 block text-sm text-secondary"
-            htmlFor="settings-timezone"
-          >
-            Timezone
-          </label>
-          <select
-            id="settings-timezone"
-            className={selectClassName}
-            {...form.register('timezone')}
-          >
-            {GROUP_TIMEZONES.map((zone) => (
-              <option key={zone} value={zone}>
-                {zone.replaceAll('_', ' ')}
-              </option>
-            ))}
-          </select>
-        </div>
       </div>
       <Button
         type="submit"

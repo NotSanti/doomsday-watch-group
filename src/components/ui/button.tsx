@@ -1,6 +1,7 @@
 import { Slot } from '@radix-ui/react-slot'
 import { cva, type VariantProps } from 'class-variance-authority'
 import type { ButtonHTMLAttributes } from 'react'
+import { chipButtonClasses } from '@/lib/chip-styles'
 import { cn } from '@/lib/utils'
 
 const buttonVariants = cva(
@@ -8,12 +9,11 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        primary:
-          'bg-primary text-on-primary hover:bg-primary-hover doom-glow',
-        secondary:
-          'border border-border-strong bg-surface-card text-heading hover:border-primary-emphasis/60 hover:bg-surface-hover',
-        ghost: 'text-heading hover:bg-surface-hover',
-        danger: 'bg-danger text-heading hover:brightness-110',
+        primary: chipButtonClasses('green'),
+        secondary: chipButtonClasses('metal'),
+        ghost:
+          'border border-transparent bg-transparent text-chip-metal-fg hover:border-chip-metal-fg hover:bg-chip-metal-bg',
+        danger: chipButtonClasses('danger'),
       },
       size: {
         sm: 'h-9 px-3 text-sm',

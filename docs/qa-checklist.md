@@ -20,7 +20,7 @@ Manual and automated checks for the Doomsday Watch Group MVP before release. Run
 
 - [ ] Sign up with email/password and display name lands on `/app`.
 - [ ] Create group validates name length and enters the dashboard as owner.
-- [ ] Group settings: rename, description, timezone, and target date save correctly.
+- [ ] Group settings: rename and description save correctly.
 - [ ] Create invite copies a link; link works until revoked.
 - [ ] Owner can set/change current title; dashboard and watchlist reflect it.
 

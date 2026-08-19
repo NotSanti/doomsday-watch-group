@@ -423,6 +423,7 @@ export type Database = {
         }[]
       }
       revoke_invite: { Args: { p_invite_id: string }; Returns: undefined }
+      delete_invite: { Args: { p_invite_id: string }; Returns: undefined }
       transfer_ownership: {
         Args: { p_group_id: string; p_new_owner_id: string }
         Returns: undefined

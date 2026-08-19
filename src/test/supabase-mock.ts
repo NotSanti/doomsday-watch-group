@@ -44,6 +44,7 @@ let createInviteError: { code?: string; message: string } | null = null
 let previewError: { code?: string; message: string } | null = null
 let redeemError: { code?: string; message: string } | null = null
 let revokeError: { code?: string; message: string } | null = null
+let deleteInviteError: { code?: string; message: string } | null = null
 let titles: TitleRow[] = []
 let titlesError: { message: string } | null = null
 let progress: MockTitleProgress[] = []
@@ -262,6 +263,12 @@ export function setRevokeInviteError(
   error: { code?: string; message: string } | null,
 ): void {
   revokeError = error
+}
+
+export function setDeleteInviteError(
+  error: { code?: string; message: string } | null,
+): void {
+  deleteInviteError = error
 }
 
 export function setMockTitles(
@@ -592,6 +599,45 @@ async function revokeInviteImpl(args: { p_invite_id: string }) {
   return { data: null, error: null }
 }
 
+async function deleteInviteImpl(args: { p_invite_id: string }) {
+  if (deleteInviteError) {
+    return { data: null, error: deleteInviteError }
+  }
+
+  const index = invites.findIndex((item) => item.id === args.p_invite_id)
+  if (index === -1) {
+    return {
+      data: null,
+      error: { code: '22023', message: 'Invite not found' },
+    }
+  }
+
+  const invite = invites[index]
+  if (!invite) {
+    return {
+      data: null,
+      error: { code: '22023', message: 'Invite not found' },
+    }
+  }
+
+  if (!isOwnerOf(invite.group_id)) {
+    return {
+      data: null,
+      error: { code: '42501', message: 'Only owners can delete invites' },
+    }
+  }
+
+  if (!invite.revoked_at) {
+    return {
+      data: null,
+      error: { code: '22023', message: 'Only revoked invites can be deleted' },
+    }
+  }
+
+  invites.splice(index, 1)
+  return { data: null, error: null }
+}
+
 async function leaveGroupImpl(args: { p_group_id: string }) {
   if (leaveGroupError) {
     return { data: null, error: leaveGroupError }
@@ -825,6 +871,7 @@ export const supabaseRpcMock = {
   preview_invite: vi.fn(previewInviteImpl),
   redeem_invite: vi.fn(redeemInviteImpl),
   revoke_invite: vi.fn(revokeInviteImpl),
+  delete_invite: vi.fn(deleteInviteImpl),
   leave_group: vi.fn(leaveGroupImpl),
   transfer_ownership: vi.fn(transferOwnershipImpl),
 }
@@ -1370,6 +1417,10 @@ export function getSupabaseClient() {
         return supabaseRpcMock.revoke_invite(args as { p_invite_id: string })
       }
 
+      if (fn === 'delete_invite') {
+        return supabaseRpcMock.delete_invite(args as { p_invite_id: string })
+      }
+
       if (fn === 'leave_group') {
         return supabaseRpcMock.leave_group(args as { p_group_id: string })
       }
@@ -1400,6 +1451,7 @@ export function resetSupabaseClient(): void {
   previewError = null
   redeemError = null
   revokeError = null
+  deleteInviteError = null
   titles = []
   titlesError = null
   progress = []
@@ -1438,6 +1490,8 @@ export function resetSupabaseMock(): void {
   supabaseRpcMock.redeem_invite.mockImplementation(redeemInviteImpl)
   supabaseRpcMock.revoke_invite.mockReset()
   supabaseRpcMock.revoke_invite.mockImplementation(revokeInviteImpl)
+  supabaseRpcMock.delete_invite.mockReset()
+  supabaseRpcMock.delete_invite.mockImplementation(deleteInviteImpl)
   supabaseRpcMock.leave_group.mockReset()
   supabaseRpcMock.leave_group.mockImplementation(leaveGroupImpl)
   supabaseRpcMock.transfer_ownership.mockReset()

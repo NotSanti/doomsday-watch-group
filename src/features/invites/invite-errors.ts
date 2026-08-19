@@ -3,6 +3,7 @@ const LIST_FALLBACK = 'Invites could not be loaded. Please try again.'
 const PREVIEW_FALLBACK = 'This invite could not be checked. Please try again.'
 const REDEEM_FALLBACK = 'You could not join this group. Please try again.'
 const REVOKE_FALLBACK = 'The invite could not be revoked. Please try again.'
+const DELETE_FALLBACK = 'The invite could not be deleted. Please try again.'
 
 const INVALID_INVITE = 'This invite is not valid.'
 const REVOKED_INVITE = 'This invite was revoked.'
@@ -91,4 +92,16 @@ export function toFriendlyRevokeInviteError(error: unknown): string {
   }
 
   return REVOKE_FALLBACK
+}
+
+export function toFriendlyDeleteInviteError(error: unknown): string {
+  if (readError(error).code === '42501') {
+    return 'Only the group owner can delete invites.'
+  }
+
+  if (messageOf(error).includes('only revoked')) {
+    return 'Only revoked invites can be deleted.'
+  }
+
+  return DELETE_FALLBACK
 }

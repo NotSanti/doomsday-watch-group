@@ -299,7 +299,10 @@ describe('groups', () => {
       await screen.findByRole('heading', { name: 'Alpha Watch' }),
     ).toBeInTheDocument()
 
-    await user.selectOptions(screen.getByLabelText('Switch group'), GROUP_B)
+    await user.click(screen.getByRole('button', { name: 'Switch group' }))
+    await user.click(
+      await screen.findByRole('menuitem', { name: 'Beta Watch' }),
+    )
 
     expect(
       await screen.findByRole('heading', { name: 'Beta Watch' }),

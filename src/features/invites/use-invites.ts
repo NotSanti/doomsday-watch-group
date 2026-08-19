@@ -9,6 +9,7 @@ import {
   previewInvite,
   redeemInvite,
   revokeInvite,
+  deleteInvite,
 } from '@/features/invites/invite-api'
 import { inviteKeys } from '@/features/invites/invite-keys'
 import type { CreateInviteValues } from '@/features/invites/invite-schemas'
@@ -52,6 +53,19 @@ export function useRevokeInvite(groupId: string) {
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: inviteKeys.list(groupId) })
       toast.success('Invite revoked')
+    },
+  })
+}
+
+export function useDeleteInvite(groupId: string) {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (inviteId: string) =>
+      deleteInvite(getSupabaseClient(), inviteId),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: inviteKeys.list(groupId) })
+      toast.success('Invite deleted')
     },
   })
 }

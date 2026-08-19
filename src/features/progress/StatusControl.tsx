@@ -1,5 +1,9 @@
 import { Check } from 'lucide-react'
-import { isTitleWatched, type TitleStatus } from '@/features/watchlist/title-schemas'
+import {
+  isTitleWatched,
+  type TitleStatus,
+} from '@/features/watchlist/title-schemas'
+import { chipClasses } from '@/lib/chip-styles'
 import { cn } from '@/lib/utils'
 
 type StatusControlProps = {
@@ -28,10 +32,14 @@ export function StatusControl({
           onChange(watched ? 'not_started' : 'watched')
         }}
         className={cn(
-          'inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-medium transition-colors duration-200',
+          'gap-1.5 rounded-full px-3 py-1.5 text-sm transition-colors duration-200',
           watched
-            ? 'border-primary-emphasis/40 bg-primary-emphasis text-on-primary'
-            : 'border-metal/40 bg-surface-elevated text-metal hover:border-border-strong hover:text-heading',
+            ? chipClasses('green', 'pill')
+            : cn(
+                chipClasses('metal', 'pill'),
+                'hover:border-chip-metal-fg hover:text-chip-metal-fg',
+              ),
+          disabled && 'cursor-not-allowed opacity-60',
         )}
       >
         {watched ? <Check className="size-4" aria-hidden="true" /> : null}

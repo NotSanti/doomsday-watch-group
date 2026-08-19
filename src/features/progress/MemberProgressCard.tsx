@@ -12,6 +12,7 @@ import {
   isTitleWatched,
   type TitleRow,
 } from '@/features/watchlist/title-schemas'
+import { chipClasses } from '@/lib/chip-styles'
 import { cn } from '@/lib/utils'
 
 type MemberProgressCardProps = {
@@ -23,9 +24,7 @@ type MemberProgressCardProps = {
 
 function initials(name: string): string {
   const parts = name.trim().split(/\s+/).slice(0, 2)
-  const letters = parts
-    .map((part) => part[0]?.toUpperCase() ?? '')
-    .join('')
+  const letters = parts.map((part) => part[0]?.toUpperCase() ?? '').join('')
 
   return letters || '?'
 }
@@ -49,10 +48,8 @@ export function MemberProgressCard({
         <span
           aria-hidden="true"
           className={cn(
-            'inline-flex size-10 items-center justify-center rounded-full border text-sm font-medium',
-            member.role === 'owner'
-              ? 'border-accent/40 bg-accent/15 text-heading'
-              : 'border-border bg-surface-elevated text-heading',
+            chipClasses(member.role === 'owner' ? 'gold' : 'metal', 'pill'),
+            'size-10 justify-center rounded-full px-0 text-sm',
           )}
         >
           {initials(member.display_name)}
@@ -71,7 +68,9 @@ export function MemberProgressCard({
       {currentStatus ? (
         <p className="text-sm text-secondary">
           Current title:{' '}
-          <Badge tone={isTitleWatched(currentStatus) ? 'watched' : 'notStarted'}>
+          <Badge
+            tone={isTitleWatched(currentStatus) ? 'watched' : 'notStarted'}
+          >
             {TITLE_STATUS_LABEL[currentStatus]}
           </Badge>
         </p>

@@ -43,6 +43,12 @@ export const MEDIA_TYPE_LABEL: Record<MediaType, string> = {
   special: 'Special',
 }
 
+export const MEDIA_TYPE_CHIP_LABEL: Record<MediaType, string> = {
+  movie: 'FILM',
+  series: 'TV',
+  special: 'SPC',
+}
+
 export const IMPORTANCE_LABEL: Record<Importance, string> = {
   essential: 'Essential',
   recommended: 'Recommended',

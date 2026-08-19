@@ -7,10 +7,17 @@ import { Skeleton } from '@/components/Skeleton'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { useAuth } from '@/features/auth/use-auth'
-import { toFriendlyGroupDetailError, toFriendlyGroupMembersError } from '@/features/groups/group-errors'
+import {
+  toFriendlyGroupDetailError,
+  toFriendlyGroupMembersError,
+} from '@/features/groups/group-errors'
 import { groupRoleForUser } from '@/features/groups/group-schemas'
 import { MemberRoster } from '@/features/groups/MemberRoster'
-import { useGroup, useGroupMembers, useSetCurrentTitle } from '@/features/groups/use-groups'
+import {
+  useGroup,
+  useGroupMembers,
+  useSetCurrentTitle,
+} from '@/features/groups/use-groups'
 import { ChangeCurrentTitleDialog } from '@/features/progress/ChangeCurrentTitleDialog'
 import { CurrentTitleHero } from '@/features/progress/CurrentTitleHero'
 import { MemberProgressCard } from '@/features/progress/MemberProgressCard'
@@ -25,7 +32,10 @@ import {
   titlesCompletedAsAGroup,
   upcomingTitles,
 } from '@/features/progress/progress-metrics'
-import { useGroupProgress, useSetTitleStatus } from '@/features/progress/use-progress'
+import {
+  useGroupProgress,
+  useSetTitleStatus,
+} from '@/features/progress/use-progress'
 import { toFriendlyProgressListError } from '@/features/progress/progress-errors'
 import { TitleArtwork } from '@/features/watchlist/TitleArtwork'
 import {
@@ -36,7 +46,6 @@ import {
 } from '@/features/watchlist/title-schemas'
 import { useTitleList } from '@/features/watchlist/use-titles'
 import { toFriendlyTitleListError } from '@/features/watchlist/title-errors'
-import { formatDateInTimeZone } from '@/lib/timezone'
 
 export function GroupDashboardPage() {
   const { groupId = '' } = useParams()
@@ -142,13 +151,11 @@ export function GroupDashboardPage() {
           </Badge>
         </div>
         {group.description ? (
-          <p className="max-w-2xl text-muted">{group.description}</p>
+          <p className="max-w-2xl text-sm tracking-[0.08em] text-muted uppercase">
+            {group.description}
+          </p>
         ) : null}
-        <p className="text-sm text-secondary">
-          Doomsday target {formatDateInTimeZone(group.target_date, group.timezone)}{' '}
-          ({group.timezone})
-        </p>
-        <Countdown targetIso={group.target_date} className="justify-start" />
+        <Countdown className="justify-start" />
       </header>
 
       <section className="space-y-3">

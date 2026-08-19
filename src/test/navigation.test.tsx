@@ -12,7 +12,7 @@ describe('navigation', () => {
         name: /watch together on the road to doomsday/i,
       }),
     ).toBeInTheDocument()
-    expect(screen.getByText(/countdown/i)).toBeInTheDocument()
+    expect(screen.getByText(/doomsday is coming/i)).toBeInTheDocument()
   })
 
   it('opens the about page from the public header', async () => {

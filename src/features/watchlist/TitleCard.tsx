@@ -4,7 +4,7 @@ import { Card } from '@/components/ui/card'
 import type { GroupMember } from '@/features/groups/group-schemas'
 import { ReviewPreviewBubble } from '@/features/reviews/ReviewPreviewBubble'
 import type { ReviewRow } from '@/features/reviews/review-schemas'
-import { TitleArtwork } from '@/features/watchlist/TitleArtwork'
+import { TitleTypeChip } from '@/features/watchlist/TitleTypeChip'
 import {
   IMPORTANCE_LABEL,
   MEDIA_TYPE_LABEL,
@@ -59,28 +59,30 @@ export function TitleCard({
   return (
     <Card className="relative h-full p-0">
       <Link to={href} className="block h-full">
-        <TitleArtwork path={title.poster_path} alt="" className="rounded-t-xl" />
-        <div className="space-y-2 p-4">
-          <p className="text-xs tracking-[0.14em] text-secondary uppercase">
-            {String(sequence).padStart(2, '0')}
-          </p>
-          <h3 className="font-display text-lg tracking-[0.06em] text-heading uppercase">
-            {title.name}
-          </h3>
-          <p className="text-sm text-muted">
-            {[year, MEDIA_TYPE_LABEL[title.media_type], runtime]
-              .filter(Boolean)
-              .join(' · ')}
-          </p>
-          <div className="flex flex-wrap gap-2">
-            <Badge>{IMPORTANCE_LABEL[title.importance]}</Badge>
-            <Badge tone={statusTone(status)}>
-              {TITLE_STATUS_LABEL[status]}
-            </Badge>
-            <Badge tone="muted">{groupWatchedLabel}</Badge>
-            {showRating ? (
-              <Badge tone="rating">{averageRatingLabel}</Badge>
-            ) : null}
+        <div className="flex gap-3 p-4">
+          <TitleTypeChip mediaType={title.media_type} />
+          <div className="min-w-0 flex-1 space-y-2">
+            <p className="text-xs tracking-[0.14em] text-secondary uppercase">
+              {String(sequence).padStart(2, '0')}
+            </p>
+            <h3 className="font-display text-lg tracking-[0.06em] text-heading uppercase">
+              {title.name}
+            </h3>
+            <p className="text-sm text-muted">
+              {[year, MEDIA_TYPE_LABEL[title.media_type], runtime]
+                .filter(Boolean)
+                .join(' · ')}
+            </p>
+            <div className="flex flex-wrap gap-2">
+              <Badge>{IMPORTANCE_LABEL[title.importance]}</Badge>
+              <Badge tone={statusTone(status)}>
+                {TITLE_STATUS_LABEL[status]}
+              </Badge>
+              <Badge tone="muted">{groupWatchedLabel}</Badge>
+              {showRating ? (
+                <Badge tone="rating">{averageRatingLabel}</Badge>
+              ) : null}
+            </div>
           </div>
         </div>
       </Link>

@@ -123,3 +123,16 @@ export async function revokeInvite(
     throw error
   }
 }
+
+export async function deleteInvite(
+  client: BrowserSupabaseClient,
+  inviteId: string,
+): Promise<void> {
+  const { error } = await client.rpc('delete_invite', {
+    p_invite_id: inviteId,
+  })
+
+  if (error) {
+    throw error
+  }
+}

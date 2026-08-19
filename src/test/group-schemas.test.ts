@@ -44,21 +44,17 @@ describe('group schemas', () => {
     expect(isGroupId('demo')).toBe(false)
   })
 
-  it('requires a target date and timezone for group settings', () => {
+  it('updates name and description without a target date or timezone', () => {
     expect(
       updateGroupSettingsSchema.safeParse({
         name: 'Alpha Watch',
         description: '',
-        targetDate: '2026-12-18',
-        timezone: 'America/Toronto',
       }).success,
     ).toBe(true)
     expect(
       updateGroupSettingsSchema.safeParse({
-        name: 'Alpha Watch',
+        name: 'Ab',
         description: '',
-        targetDate: 'soon',
-        timezone: 'America/Toronto',
       }).success,
     ).toBe(false)
   })

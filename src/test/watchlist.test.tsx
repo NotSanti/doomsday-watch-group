@@ -104,6 +104,9 @@ describe('watchlist', () => {
     expect(screen.getAllByText('WandaVision').length).toBeGreaterThan(0)
     expect(screen.getAllByText('Werewolf by Night').length).toBeGreaterThan(0)
     expect(screen.getAllByText('Iron Man').length).toBeGreaterThan(0)
+    expect(screen.getAllByText('FILM').length).toBeGreaterThan(0)
+    expect(screen.getAllByText('TV').length).toBeGreaterThan(0)
+    expect(screen.getAllByText('SPC').length).toBeGreaterThan(0)
     expect(screen.getAllByText('1/1 watched').length).toBeGreaterThan(0)
     expect(
       screen.getByRole('heading', {
@@ -177,10 +180,9 @@ describe('watchlist', () => {
       screen.getByText('A sitcom reality begins to crack.'),
     ).toBeInTheDocument()
     expect(screen.getByText(/9 episodes/)).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Not watching' })).toHaveAttribute(
-      'aria-pressed',
-      'false',
-    )
+    expect(
+      screen.getByRole('button', { name: 'Not watching' }),
+    ).toHaveAttribute('aria-pressed', 'false')
     expect(screen.getByText(/0\/1 watched by the group/i)).toBeInTheDocument()
     expect(
       await screen.findByRole('heading', { name: 'Ratings and reviews' }),
@@ -229,7 +231,9 @@ describe('watchlist', () => {
     renderApp(`/groups/${GROUP_A}/watchlist`)
 
     expect(
-      await screen.findByText('The watchlist could not be loaded. Please try again.'),
+      await screen.findByText(
+        'The watchlist could not be loaded. Please try again.',
+      ),
     ).toBeInTheDocument()
     expect(
       screen.queryByText('column titles.secret does not exist'),
@@ -276,7 +280,9 @@ describe('watchlist', () => {
     renderApp(`/groups/${GROUP_A}/titles/${IRON_MAN_ID}`)
 
     expect(
-      await screen.findByText('This title could not be loaded. Please try again.'),
+      await screen.findByText(
+        'This title could not be loaded. Please try again.',
+      ),
     ).toBeInTheDocument()
   })
 
@@ -294,7 +300,9 @@ describe('watchlist', () => {
     ])
     renderApp(`/groups/${GROUP_A}/watchlist`)
 
-    expect(await screen.findByRole('heading', { name: 'Watchlist' })).toBeInTheDocument()
+    expect(
+      await screen.findByRole('heading', { name: 'Watchlist' }),
+    ).toBeInTheDocument()
     expect(screen.getByLabelText('Show rating')).toBeChecked()
     expect(screen.getByLabelText('Show reviews')).toBeChecked()
     expect(screen.getAllByText('Avg 8.5').length).toBeGreaterThan(0)
@@ -330,13 +338,17 @@ describe('about credits', () => {
   it('shows the unofficial disclaimer and TMDB credit', async () => {
     renderApp('/about')
 
-    expect(await screen.findByRole('heading', { name: 'About' })).toBeInTheDocument()
+    expect(
+      await screen.findByRole('heading', { name: 'About' }),
+    ).toBeInTheDocument()
     const main = screen.getByRole('main')
     expect(
       within(main).getByText(
         /unofficial fan project\. not affiliated with or endorsed by marvel or disney/i,
       ),
     ).toBeInTheDocument()
-    expect(within(main).getByText(TMDB_CREDIT, { exact: false })).toBeInTheDocument()
+    expect(
+      within(main).getByText(TMDB_CREDIT, { exact: false }),
+    ).toBeInTheDocument()
   })
 })

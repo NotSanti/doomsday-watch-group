@@ -11,7 +11,6 @@ import {
   type GroupRow,
   type UpdateGroupSettingsValues,
 } from '@/features/groups/group-schemas'
-import { zonedStartOfDayIso } from '@/lib/timezone'
 
 const GROUP_COLUMNS =
   'id, name, description, owner_id, current_title_id, target_date, timezone, created_at, updated_at'
@@ -161,8 +160,6 @@ export async function updateGroupSettings(
     .update({
       name: parsed.name,
       description: parsed.description.length > 0 ? parsed.description : null,
-      target_date: zonedStartOfDayIso(parsed.targetDate, parsed.timezone),
-      timezone: parsed.timezone,
     })
     .eq('id', groupId)
     .select(GROUP_COLUMNS)

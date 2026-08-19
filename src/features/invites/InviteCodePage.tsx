@@ -29,8 +29,7 @@ export function InviteCodePage() {
         >
           <CardTitle>Join a watch group</CardTitle>
           <p className="text-muted">
-            Paste the invite link or code you received. No private reviews are
-            shown here.
+            Paste the invite link or code you received.
           </p>
           <div>
             <label

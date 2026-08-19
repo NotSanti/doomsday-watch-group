@@ -3,7 +3,6 @@ import { Countdown } from '@/components/Countdown'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardTitle } from '@/components/ui/card'
-import { MOCK_DOOMSDAY_ISO } from '@/lib/countdown'
 
 export function LandingPage() {
   return (
@@ -32,14 +31,12 @@ export function LandingPage() {
               </Button>
             </div>
           </div>
-          <Card className="relative rating-glow">
-            <p className="gold-text text-sm uppercase">Countdown</p>
-            <Countdown className="mt-4" targetIso={MOCK_DOOMSDAY_ISO} />
-            <p className="mt-4 text-center text-xs text-muted">
-              Mock target date for development. The live date will be
-              configurable per group.
-            </p>
-          </Card>
+          <div className="w-max max-w-full justify-self-center text-center lg:justify-self-end">
+            <h2 className="gold-text font-display text-xl font-bold tracking-[0.18em] uppercase sm:text-2xl">
+              Doomsday is coming
+            </h2>
+            <Countdown className="mt-5" />
+          </div>
         </div>
       </section>
 

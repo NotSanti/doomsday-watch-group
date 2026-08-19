@@ -3,6 +3,7 @@ import { ErrorState } from '@/components/ErrorState'
 import { Skeleton } from '@/components/Skeleton'
 import { toFriendlyGroupMembersError } from '@/features/groups/group-errors'
 import type { GroupMember } from '@/features/groups/group-schemas'
+import { chipClasses } from '@/lib/chip-styles'
 import { cn } from '@/lib/utils'
 
 type MemberRosterProps = {
@@ -71,14 +72,12 @@ function MemberPill({ member }: { member: GroupMember }) {
   return (
     <span
       className={cn(
-        'inline-flex h-8 items-center gap-1.5 rounded-full border px-2.5 text-sm leading-none',
-        isOwner
-          ? 'border-accent/40 bg-accent/15 text-heading'
-          : 'border-border bg-surface-elevated text-heading',
+        chipClasses(isOwner ? 'gold' : 'metal', 'pill'),
+        'h-8 gap-1.5 px-2.5 text-sm leading-none',
       )}
     >
       {isOwner ? (
-        <Crown className="size-3.5 shrink-0 text-gold" aria-hidden="true" />
+        <Crown className="size-3.5 shrink-0" aria-hidden="true" />
       ) : null}
       <span>{member.display_name}</span>
       {isOwner ? <span className="sr-only"> (owner)</span> : null}

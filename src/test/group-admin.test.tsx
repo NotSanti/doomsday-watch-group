@@ -74,7 +74,7 @@ function seedMember(): void {
 }
 
 describe('group administration', () => {
-  it('lets an owner rename the group and change the target timezone', async () => {
+  it('lets an owner rename the group', async () => {
     const user = userEvent.setup()
     seedOwner()
     renderApp(`/groups/${GROUP_A}/settings`)
@@ -85,13 +85,13 @@ describe('group administration', () => {
     const nameField = screen.getByLabelText('Group name')
     await user.clear(nameField)
     await user.type(nameField, 'Latveria League')
-    await user.selectOptions(screen.getByLabelText('Timezone'), 'UTC')
     await user.click(screen.getByRole('button', { name: 'Save details' }))
 
     await waitFor(() => {
       expect(screen.getByLabelText('Group name')).toHaveValue('Latveria League')
     })
-    expect(screen.getByLabelText('Timezone')).toHaveValue('UTC')
+    expect(screen.queryByLabelText('Timezone')).not.toBeInTheDocument()
+    expect(screen.queryByLabelText('Target date')).not.toBeInTheDocument()
   })
 
   it('lets an owner remove a member after confirmation', async () => {
@@ -99,13 +99,19 @@ describe('group administration', () => {
     seedOwner()
     renderApp(`/groups/${GROUP_A}/settings`)
 
-    expect(await screen.findByRole('button', { name: 'Remove' })).toBeInTheDocument()
+    expect(
+      await screen.findByRole('button', { name: 'Remove' }),
+    ).toBeInTheDocument()
     await user.click(screen.getByRole('button', { name: 'Remove' }))
     const dialog = await screen.findByRole('dialog')
-    await user.click(within(dialog).getByRole('button', { name: 'Remove member' }))
+    await user.click(
+      within(dialog).getByRole('button', { name: 'Remove member' }),
+    )
 
     await waitFor(() => {
-      expect(screen.queryByRole('button', { name: 'Remove' })).not.toBeInTheDocument()
+      expect(
+        screen.queryByRole('button', { name: 'Remove' }),
+      ).not.toBeInTheDocument()
     })
   })
 
@@ -142,7 +148,9 @@ describe('group administration', () => {
       within(dialog).getByRole('button', { name: 'Delete group' }),
     ).toBeDisabled()
     await user.type(within(dialog).getByLabelText('Group name'), 'Alpha Watch')
-    await user.click(within(dialog).getByRole('button', { name: 'Delete group' }))
+    await user.click(
+      within(dialog).getByRole('button', { name: 'Delete group' }),
+    )
 
     expect(
       await screen.findByRole('heading', { name: 'Your groups' }),
@@ -168,7 +176,9 @@ describe('group administration', () => {
 
     await user.click(await screen.findByRole('button', { name: 'Leave group' }))
     const dialog = await screen.findByRole('dialog')
-    await user.click(within(dialog).getByRole('button', { name: 'Leave group' }))
+    await user.click(
+      within(dialog).getByRole('button', { name: 'Leave group' }),
+    )
 
     await waitFor(() => {
       expect(supabaseRpcMock.leave_group).toHaveBeenCalledWith({
@@ -191,7 +201,9 @@ describe('group administration', () => {
 
     await user.click(await screen.findByRole('button', { name: 'Leave group' }))
     const dialog = await screen.findByRole('dialog')
-    await user.click(within(dialog).getByRole('button', { name: 'Leave group' }))
+    await user.click(
+      within(dialog).getByRole('button', { name: 'Leave group' }),
+    )
 
     expect(
       await screen.findByText(

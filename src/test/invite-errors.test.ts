@@ -4,6 +4,7 @@ import {
   toFriendlyInvitePreviewReason,
   toFriendlyRedeemInviteError,
   toFriendlyRevokeInviteError,
+  toFriendlyDeleteInviteError,
 } from '@/features/invites/invite-errors'
 
 describe('invite errors', () => {
@@ -35,6 +36,18 @@ describe('invite errors', () => {
         message: 'Only owners can revoke invites',
       }),
     ).toBe('Only the group owner can revoke invites.')
+    expect(
+      toFriendlyDeleteInviteError({
+        code: '42501',
+        message: 'Only owners can delete invites',
+      }),
+    ).toBe('Only the group owner can delete invites.')
+    expect(
+      toFriendlyDeleteInviteError({
+        code: '22023',
+        message: 'Only revoked invites can be deleted',
+      }),
+    ).toBe('Only revoked invites can be deleted.')
     expect(
       toFriendlyRedeemInviteError({
         code: '22023',

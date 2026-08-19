@@ -14,21 +14,6 @@ export const groupRowSchema = z.object({
   updated_at: z.string(),
 })
 
-export const groupTimezoneSchema = z.enum([
-  'America/Toronto',
-  'America/New_York',
-  'America/Chicago',
-  'America/Denver',
-  'America/Los_Angeles',
-  'America/Vancouver',
-  'America/Sao_Paulo',
-  'Europe/London',
-  'Europe/Paris',
-  'UTC',
-  'Asia/Tokyo',
-  'Australia/Sydney',
-])
-
 export const createGroupSchema = z.object({
   name: z
     .string()
@@ -41,12 +26,7 @@ export const createGroupSchema = z.object({
     .pipe(z.string().max(280, 'Use 280 characters or fewer.')),
 })
 
-export const updateGroupSettingsSchema = createGroupSchema.extend({
-  targetDate: z
-    .string()
-    .regex(/^\d{4}-\d{2}-\d{2}$/, 'Choose a valid date.'),
-  timezone: groupTimezoneSchema,
-})
+export const updateGroupSettingsSchema = createGroupSchema
 
 export const groupMemberRoleSchema = z.enum(['owner', 'member'])
 
@@ -64,8 +44,9 @@ export const groupMemberQueryRowSchema = z.object({
 
 export type GroupRow = z.infer<typeof groupRowSchema>
 export type CreateGroupValues = z.infer<typeof createGroupSchema>
-export type UpdateGroupSettingsValues = z.infer<typeof updateGroupSettingsSchema>
-export type GroupTimezone = z.infer<typeof groupTimezoneSchema>
+export type UpdateGroupSettingsValues = z.infer<
+  typeof updateGroupSettingsSchema
+>
 export type GroupMemberRole = z.infer<typeof groupMemberRoleSchema>
 export type GroupMember = {
   group_id: string

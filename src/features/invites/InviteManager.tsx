@@ -11,9 +11,14 @@ import { CreateInviteDialog } from '@/features/invites/CreateInviteDialog'
 import {
   toFriendlyInviteListError,
   toFriendlyRevokeInviteError,
+  toFriendlyDeleteInviteError,
 } from '@/features/invites/invite-errors'
 import { inviteStatus, type InviteRow } from '@/features/invites/invite-schemas'
-import { useInviteList, useRevokeInvite } from '@/features/invites/use-invites'
+import {
+  useDeleteInvite,
+  useInviteList,
+  useRevokeInvite,
+} from '@/features/invites/use-invites'
 
 const STATUS_LABEL: Record<ReturnType<typeof inviteStatus>, string> = {
   active: 'Active',
@@ -75,8 +80,8 @@ export function InviteManager({ groupId }: { groupId: string }) {
             Invites
           </h2>
           <p className="mt-1 text-sm text-muted">
-            Copy a link as often as you need, then revoke it if it should stop
-            working.
+            Copy a link as often as you need, revoke it when it should stop
+            working, then delete revoked invites from the list.
           </p>
         </div>
         <CreateInviteDialog groupId={groupId} />
@@ -108,8 +113,11 @@ function InviteRowCard({
 }) {
   const status = inviteStatus(invite)
   const [confirmOpen, setConfirmOpen] = useState(false)
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false)
   const [revokeError, setRevokeError] = useState<string | null>(null)
+  const [deleteError, setDeleteError] = useState<string | null>(null)
   const revokeInvite = useRevokeInvite(groupId)
+  const deleteInvite = useDeleteInvite(groupId)
 
   return (
     <Card>
@@ -138,6 +146,15 @@ function InviteRowCard({
               onClick={() => setConfirmOpen(true)}
             >
               Revoke
+            </Button>
+          ) : null}
+          {status === 'revoked' ? (
+            <Button
+              variant="danger"
+              size="sm"
+              onClick={() => setDeleteConfirmOpen(true)}
+            >
+              Delete
             </Button>
           ) : null}
         </div>
@@ -173,6 +190,40 @@ function InviteRowCard({
               }}
             >
               {revokeInvite.isPending ? 'Revoking…' : 'Revoke invite'}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+      <Dialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen}>
+        <DialogContent title="Delete invite">
+          <p className="text-sm text-muted">
+            This removes the revoked invite from your list. It cannot be undone.
+          </p>
+          {deleteError ? (
+            <p className="mt-3 text-sm text-danger" role="alert">
+              {deleteError}
+            </p>
+          ) : null}
+          <div className="mt-4 flex flex-wrap justify-end gap-2">
+            <Button variant="ghost" onClick={() => setDeleteConfirmOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              variant="danger"
+              disabled={deleteInvite.isPending}
+              onClick={() => {
+                setDeleteError(null)
+                void deleteInvite.mutateAsync(invite.id).then(
+                  () => {
+                    setDeleteConfirmOpen(false)
+                  },
+                  (error: unknown) => {
+                    setDeleteError(toFriendlyDeleteInviteError(error))
+                  },
+                )
+              }}
+            >
+              {deleteInvite.isPending ? 'Deleting…' : 'Delete invite'}
             </Button>
           </div>
         </DialogContent>

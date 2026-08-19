@@ -12,8 +12,25 @@ type RatingInputProps = {
 
 const STARS = Array.from({ length: RATING_MAX }, (_, index) => index + 1)
 const RATING_STEP_HALF = 0.5
+const RATING_GOLD_GRADIENT_ID = 'rating-gold-gradient'
+
+function RatingGoldGradientDefs() {
+  return (
+    <svg width="0" height="0" className="absolute" aria-hidden="true">
+      <defs>
+        <linearGradient id={RATING_GOLD_GRADIENT_ID} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="var(--color-gold-gradient-start)" />
+          <stop offset="48%" stopColor="var(--color-gold-gradient-mid)" />
+          <stop offset="100%" stopColor="var(--color-gold-gradient-end)" />
+        </linearGradient>
+      </defs>
+    </svg>
+  )
+}
 
 function RatingStarIcon({ fill }: { fill: 0 | 0.5 | 1 }) {
+  const gradient = `url(#${RATING_GOLD_GRADIENT_ID})`
+
   return (
     <span className="pointer-events-none relative block size-8" aria-hidden="true">
       <Star className="size-8 text-muted" strokeWidth={1.5} />
@@ -22,8 +39,9 @@ function RatingStarIcon({ fill }: { fill: 0 | 0.5 | 1 }) {
         style={{ width: fill === 0 ? '0%' : fill === 0.5 ? '50%' : '100%' }}
       >
         <Star
-          className="size-8 fill-accent text-accent"
+          className="size-8"
           strokeWidth={1.5}
+          style={{ fill: gradient, stroke: gradient, color: gradient }}
         />
       </span>
     </span>
@@ -48,6 +66,7 @@ export function RatingInput({
 
   return (
     <div>
+      <RatingGoldGradientDefs />
       <p className="mb-2 text-sm text-secondary" id="rating-label">
         Your rating
       </p>
@@ -93,7 +112,13 @@ export function RatingInput({
             </span>
           )
         })}
-        <p className="ml-2 min-w-16 text-sm text-accent" aria-live="polite">
+        <p
+          className={cn(
+            'ml-2 min-w-16 text-sm',
+            shown === null ? 'text-secondary' : 'gold-text',
+          )}
+          aria-live="polite"
+        >
           {shown === null ? 'Select a rating' : `${formatRating(shown)} / 10`}
         </p>
       </div>

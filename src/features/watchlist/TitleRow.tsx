@@ -3,7 +3,7 @@ import { Badge } from '@/components/ui/badge'
 import type { GroupMember } from '@/features/groups/group-schemas'
 import { ReviewPreviewBubble } from '@/features/reviews/ReviewPreviewBubble'
 import type { ReviewRow } from '@/features/reviews/review-schemas'
-import { TitleArtwork } from '@/features/watchlist/TitleArtwork'
+import { TitleTypeChip } from '@/features/watchlist/TitleTypeChip'
 import type { WatchlistSort } from '@/features/watchlist/title-filters'
 import {
   IMPORTANCE_LABEL,
@@ -59,16 +59,12 @@ export function TitleRow({
     <div className="relative">
       <Link
         to={href}
-        className="grid grid-cols-[3rem_4.5rem_minmax(0,1fr)_auto] items-center gap-4 rounded-xl border border-border bg-surface-card px-3 py-2 hover:border-primary-emphasis/40 hover:bg-surface-hover"
+        className="grid grid-cols-[3rem_2.5rem_minmax(0,1fr)_auto] items-center gap-4 rounded-xl border border-border bg-surface-card px-3 py-2 hover:border-primary-emphasis/40 hover:bg-surface-hover"
       >
         <p className="text-xs tracking-[0.14em] text-secondary uppercase">
           {String(sequence).padStart(2, '0')}
         </p>
-        <TitleArtwork
-          path={title.poster_path}
-          alt=""
-          className="h-16 w-[4.5rem] rounded-md"
-        />
+        <TitleTypeChip mediaType={title.media_type} />
         <div className="min-w-0">
           <p className="truncate font-display text-lg tracking-[0.06em] text-heading uppercase">
             {title.name}

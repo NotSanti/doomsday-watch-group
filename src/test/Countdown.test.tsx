@@ -12,4 +12,22 @@ describe('Countdown', () => {
     expect(screen.getByText(/the date has arrived/i)).toBeInTheDocument()
     vi.useRealTimers()
   })
+
+  it('renders a zero-padded MM:DD:hh:mm:ss clock', () => {
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date(2026, 7, 18, 12, 0, 0))
+
+    render(
+      <Countdown targetIso={new Date(2026, 11, 18, 12, 0, 0).toISOString()} />,
+    )
+
+    expect(screen.getByRole('timer')).toHaveAttribute(
+      'aria-label',
+      '04:00:00:00:00',
+    )
+    expect(screen.getByText('Month')).toBeInTheDocument()
+    expect(screen.getByText('Day')).toBeInTheDocument()
+    expect(screen.getAllByText('04').length).toBeGreaterThan(0)
+    vi.useRealTimers()
+  })
 })

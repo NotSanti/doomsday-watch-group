@@ -260,6 +260,36 @@ describe('invites', () => {
     expect(
       screen.queryByRole('button', { name: 'Copy link' }),
     ).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Delete' })).toBeInTheDocument()
+  })
+
+  it('lets an owner delete a revoked invite', async () => {
+    const user = userEvent.setup()
+    signInAsOwner()
+    setMockInvites([
+      makeInvite({
+        id: '66666666-6666-4666-8666-666666666666',
+        token: null,
+        group_id: GROUP_A,
+        revoked_at: new Date().toISOString(),
+      }),
+    ])
+    renderApp(`/groups/${GROUP_A}/settings`)
+
+    expect(await screen.findByText('Revoked')).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'Delete' }))
+    const dialog = await screen.findByRole('dialog')
+    await user.click(
+      within(dialog).getByRole('button', { name: 'Delete invite' }),
+    )
+
+    await waitFor(() => {
+      expect(supabaseRpcMock.delete_invite).toHaveBeenCalledWith({
+        p_invite_id: '66666666-6666-4666-8666-666666666666',
+      })
+    })
+    expect(screen.queryByText('Revoked')).not.toBeInTheDocument()
+    expect(screen.getByText('No invites yet')).toBeInTheDocument()
   })
 
   it('lets an owner recopy an expired invite until it is revoked', async () => {
