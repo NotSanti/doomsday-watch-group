@@ -78,7 +78,7 @@ export function TitleCard({
           </div>
         </div>
       </Link>
-      <div className="absolute top-2 right-2 z-10">
+      <div className="absolute top-1.5 right-1.5 z-10">
         <ReviewPreviewBubble
           titleName={title.name}
           reviews={reviews}
