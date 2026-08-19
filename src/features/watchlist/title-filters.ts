@@ -29,6 +29,8 @@ export const watchlistFiltersSchema = z.object({
   importance: watchlistImportanceFilterSchema,
   status: watchlistStatusFilterSchema,
   sort: watchlistSortSchema,
+  showRating: z.boolean(),
+  showReviews: z.boolean(),
 })
 
 export type WatchlistSort = z.infer<typeof watchlistSortSchema>
@@ -41,6 +43,20 @@ export const DEFAULT_WATCHLIST_FILTERS: WatchlistFilters = {
   importance: 'all',
   status: 'all',
   sort: 'doomsday',
+  showRating: true,
+  showReviews: true,
+}
+
+function readBoolean(value: string | null, fallback: boolean): boolean {
+  if (value === '0' || value === 'false') {
+    return false
+  }
+
+  if (value === '1' || value === 'true') {
+    return true
+  }
+
+  return fallback
 }
 
 function readEnum<T extends z.ZodType>(
@@ -77,6 +93,14 @@ export function parseWatchlistFilters(
       params.get('sort'),
       DEFAULT_WATCHLIST_FILTERS.sort,
     ),
+    showRating: readBoolean(
+      params.get('showRating'),
+      DEFAULT_WATCHLIST_FILTERS.showRating,
+    ),
+    showReviews: readBoolean(
+      params.get('showReviews'),
+      DEFAULT_WATCHLIST_FILTERS.showReviews,
+    ),
   }
 }
 
@@ -103,6 +127,14 @@ export function serializeWatchlistFilters(
 
   if (filters.sort !== DEFAULT_WATCHLIST_FILTERS.sort) {
     params.set('sort', filters.sort)
+  }
+
+  if (filters.showRating !== DEFAULT_WATCHLIST_FILTERS.showRating) {
+    params.set('showRating', filters.showRating ? '1' : '0')
+  }
+
+  if (filters.showReviews !== DEFAULT_WATCHLIST_FILTERS.showReviews) {
+    params.set('showReviews', filters.showReviews ? '1' : '0')
   }
 
   return params

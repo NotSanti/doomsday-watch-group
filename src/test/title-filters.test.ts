@@ -97,6 +97,8 @@ describe('watchlist URL filters', () => {
       importance: 'essential',
       status: 'watched',
       sort: 'release',
+      showRating: true,
+      showReviews: true,
     })
     expect(
       parseWatchlistFilters(
@@ -116,10 +118,26 @@ describe('watchlist URL filters', () => {
         importance: 'recommended',
         status: 'unwatched',
         sort: 'release',
+        showRating: true,
+        showReviews: true,
       }).toString(),
     ).toBe(
       'q=Wanda&type=series&importance=recommended&status=unwatched&sort=release',
     )
+    expect(
+      serializeWatchlistFilters({
+        ...DEFAULT_WATCHLIST_FILTERS,
+        showRating: false,
+        showReviews: false,
+      }).toString(),
+    ).toBe('showRating=0&showReviews=0')
+    expect(
+      parseWatchlistFilters(new URLSearchParams('showRating=0&showReviews=0')),
+    ).toEqual({
+      ...DEFAULT_WATCHLIST_FILTERS,
+      showRating: false,
+      showReviews: false,
+    })
   })
 })
 
