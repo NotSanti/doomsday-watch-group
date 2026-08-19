@@ -10,6 +10,7 @@ import {
   statusForTitle,
   type WatchlistFilters,
 } from '@/features/watchlist/title-filters'
+import { groupTitlesByEra } from '@/features/watchlist/title-groups'
 import { TitleCard } from '@/features/watchlist/TitleCard'
 import { TitleRow } from '@/features/watchlist/TitleRow'
 import { TmdbCredit } from '@/features/watchlist/TmdbCredit'
@@ -39,6 +40,7 @@ export function WatchlistPage() {
   const titles = titlesQuery.data ?? []
   const progress = progressQuery.data ?? []
   const visible = filterTitles(titles, progress, filters)
+  const groups = groupTitlesByEra(visible)
 
   function updateFilters(next: WatchlistFilters) {
     setSearchParams(serializeWatchlistFilters(next), { replace: true })
@@ -90,30 +92,37 @@ export function WatchlistPage() {
         />
       ) : (
         <>
-          <ul className="grid gap-3 sm:grid-cols-2 md:hidden">
-            {visible.map((title) => (
-              <li key={title.id}>
-                <TitleCard
-                  title={title}
-                  status={statusForTitle(title.id, progress)}
-                  sort={filters.sort}
-                  href={`/groups/${groupId}/titles/${title.id}${querySuffix}`}
-                />
-              </li>
-            ))}
-          </ul>
-          <ul className="hidden space-y-2 md:block">
-            {visible.map((title) => (
-              <li key={title.id}>
-                <TitleRow
-                  title={title}
-                  status={statusForTitle(title.id, progress)}
-                  sort={filters.sort}
-                  href={`/groups/${groupId}/titles/${title.id}${querySuffix}`}
-                />
-              </li>
-            ))}
-          </ul>
+          {groups.map((group, index) => (
+            <section key={`${group.era}-${String(index)}`} className="space-y-3">
+              <h2 className="font-display text-sm tracking-[0.12em] text-accent">
+                {group.era}
+              </h2>
+              <ul className="grid gap-3 sm:grid-cols-2 md:hidden">
+                {group.titles.map((title) => (
+                  <li key={title.id}>
+                    <TitleCard
+                      title={title}
+                      status={statusForTitle(title.id, progress)}
+                      sort={filters.sort}
+                      href={`/groups/${groupId}/titles/${title.id}${querySuffix}`}
+                    />
+                  </li>
+                ))}
+              </ul>
+              <ul className="hidden space-y-2 md:block">
+                {group.titles.map((title) => (
+                  <li key={title.id}>
+                    <TitleRow
+                      title={title}
+                      status={statusForTitle(title.id, progress)}
+                      sort={filters.sort}
+                      href={`/groups/${groupId}/titles/${title.id}${querySuffix}`}
+                    />
+                  </li>
+                ))}
+              </ul>
+            </section>
+          ))}
         </>
       )}
       <TmdbCredit className="text-xs text-muted" />

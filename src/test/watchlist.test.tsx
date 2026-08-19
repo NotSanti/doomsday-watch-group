@@ -48,6 +48,7 @@ function seedCatalog(): void {
       poster_path: null,
       backdrop_path: null,
       synopsis: 'A sitcom reality begins to crack.',
+      era: 'Phase 4 — The Blip & New Beginnings (2023)',
       release_order: 23,
       doomsday_order: 1,
     }),
@@ -58,6 +59,7 @@ function seedCatalog(): void {
       importance: 'optional',
       runtime_minutes: 53,
       poster_path: null,
+      era: 'Phase 4 — Multiverse Opens (2024–2025)',
       release_order: 30,
       doomsday_order: 2,
     }),
@@ -100,6 +102,21 @@ describe('watchlist', () => {
     expect(screen.getAllByText('WandaVision').length).toBeGreaterThan(0)
     expect(screen.getAllByText('Werewolf by Night').length).toBeGreaterThan(0)
     expect(screen.getAllByText('Iron Man').length).toBeGreaterThan(0)
+    expect(
+      screen.getByRole('heading', {
+        name: 'Phase 4 — The Blip & New Beginnings (2023)',
+      }),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole('heading', {
+        name: 'Phase 4 — Multiverse Opens (2024–2025)',
+      }),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole('heading', {
+        name: 'Phase 1 — The Avengers Initiative (2008–2012)',
+      }),
+    ).toBeInTheDocument()
     expect(screen.getByText(TMDB_CREDIT, { exact: false })).toBeInTheDocument()
   })
 

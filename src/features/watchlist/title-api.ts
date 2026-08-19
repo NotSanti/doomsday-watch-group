@@ -8,7 +8,7 @@ import {
 } from '@/features/watchlist/title-schemas'
 
 const TITLE_COLUMNS =
-  'id, tmdb_id, media_type, name, release_date, runtime_minutes, episode_count, poster_path, backdrop_path, synopsis, phase, saga, importance, release_order, doomsday_order, is_active'
+  'id, tmdb_id, media_type, name, release_date, runtime_minutes, episode_count, poster_path, backdrop_path, synopsis, phase, saga, era, importance, release_order, doomsday_order, is_active'
 
 const PROGRESS_COLUMNS = 'title_id, status'
 
