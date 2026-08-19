@@ -22,10 +22,6 @@ type TitleRowProps = {
 }
 
 function statusTone(status: TitleStatus) {
-  if (status === 'watching') {
-    return 'watching' as const
-  }
-
   if (status === 'watched') {
     return 'watched' as const
   }

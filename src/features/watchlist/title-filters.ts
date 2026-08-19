@@ -13,7 +13,6 @@ export const watchlistSortSchema = z.enum(['doomsday', 'release'])
 export const watchlistStatusFilterSchema = z.enum([
   'all',
   'unwatched',
-  'watching',
   'watched',
 ])
 export const watchlistTypeFilterSchema = z.enum(['all', 'movie', 'series', 'special'])
@@ -151,11 +150,7 @@ export function filterTitles(
 
     const status = statusForTitle(title.id, progress)
 
-    if (filters.status === 'unwatched' && status !== 'not_started') {
-      return false
-    }
-
-    if (filters.status === 'watching' && status !== 'watching') {
+    if (filters.status === 'unwatched' && status === 'watched') {
       return false
     }
 

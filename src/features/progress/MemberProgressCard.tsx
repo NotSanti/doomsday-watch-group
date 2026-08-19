@@ -3,15 +3,14 @@ import { Badge } from '@/components/ui/badge'
 import type { GroupMember } from '@/features/groups/group-schemas'
 import {
   completionPercent,
-  memberWatchingTitle,
   progressStatusFor,
   watchedTitleCount,
 } from '@/features/progress/progress-metrics'
 import type { GroupProgressRow } from '@/features/progress/progress-schemas'
 import {
   TITLE_STATUS_LABEL,
+  isTitleWatched,
   type TitleRow,
-  type TitleStatus,
 } from '@/features/watchlist/title-schemas'
 import { cn } from '@/lib/utils'
 
@@ -31,18 +30,6 @@ function initials(name: string): string {
   return letters || '?'
 }
 
-function statusTone(status: TitleStatus) {
-  if (status === 'watching') {
-    return 'watching' as const
-  }
-
-  if (status === 'watched') {
-    return 'watched' as const
-  }
-
-  return 'notStarted' as const
-}
-
 export function MemberProgressCard({
   member,
   titles,
@@ -52,7 +39,6 @@ export function MemberProgressCard({
   const activeIds = new Set(titles.map((title) => title.id))
   const watched = watchedTitleCount(progress, member.user_id, activeIds)
   const percent = completionPercent(watched, titles.length)
-  const watching = memberWatchingTitle(progress, member.user_id, titles)
   const currentStatus = currentTitleId
     ? progressStatusFor(progress, member.user_id, currentTitleId)
     : null
@@ -85,14 +71,12 @@ export function MemberProgressCard({
       {currentStatus ? (
         <p className="text-sm text-secondary">
           Current title:{' '}
-          <Badge tone={statusTone(currentStatus)}>
+          <Badge tone={isTitleWatched(currentStatus) ? 'watched' : 'notStarted'}>
             {TITLE_STATUS_LABEL[currentStatus]}
           </Badge>
         </p>
-      ) : watching ? (
-        <p className="text-sm text-secondary">Watching {watching.name}</p>
       ) : (
-        <p className="text-sm text-secondary">Not started</p>
+        <p className="text-sm text-secondary">Not watching</p>
       )}
     </article>
   )

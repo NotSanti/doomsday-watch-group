@@ -50,9 +50,13 @@ export const IMPORTANCE_LABEL: Record<Importance, string> = {
 }
 
 export const TITLE_STATUS_LABEL: Record<TitleStatus, string> = {
-  not_started: 'Not started',
-  watching: 'Watching',
+  not_started: 'Not watching',
+  watching: 'Not watching',
   watched: 'Watched',
+}
+
+export function isTitleWatched(status: TitleStatus): boolean {
+  return status === 'watched'
 }
 
 export function isTitleId(value: string): boolean {

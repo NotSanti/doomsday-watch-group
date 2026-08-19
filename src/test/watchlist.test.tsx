@@ -173,7 +173,10 @@ describe('watchlist', () => {
       screen.getByText('A sitcom reality begins to crack.'),
     ).toBeInTheDocument()
     expect(screen.getByText(/9 episodes/)).toBeInTheDocument()
-    expect(screen.getByLabelText('My status')).toHaveValue('watching')
+    expect(screen.getByRole('button', { name: 'Not watching' })).toHaveAttribute(
+      'aria-pressed',
+      'false',
+    )
     expect(screen.getByText(/0\/1 watched by the group/i)).toBeInTheDocument()
     expect(
       screen.getByText(/ratings and reviews arrive in a later milestone/i),
@@ -242,7 +245,10 @@ describe('watchlist', () => {
     expect(
       screen.getByText('An industrialist builds a powered suit of armor.'),
     ).toBeInTheDocument()
-    expect(screen.getByLabelText('My status')).toHaveValue('watched')
+    expect(screen.getByRole('button', { name: 'Watched' })).toHaveAttribute(
+      'aria-pressed',
+      'true',
+    )
     expect(screen.getByText(/1\/1 watched by the group/i)).toBeInTheDocument()
   })
 

@@ -97,11 +97,11 @@ export function LandingPage() {
             <ul className="mt-4 space-y-2 text-sm">
               <li className="flex justify-between border-b border-border pb-2">
                 <span>01 · Iron Man</span>
-                <Badge tone="watching">Watching</Badge>
+                <Badge tone="watched">Watched</Badge>
               </li>
               <li className="flex justify-between border-b border-border pb-2">
                 <span>02 · The Incredible Hulk</span>
-                <Badge tone="notStarted">Not started</Badge>
+                <Badge tone="notStarted">Not watching</Badge>
               </li>
               <li className="flex justify-between">
                 <span>03 · Iron Man 2</span>

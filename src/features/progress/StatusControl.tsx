@@ -1,8 +1,5 @@
-import {
-  TITLE_STATUS_LABEL,
-  titleStatusSchema,
-  type TitleStatus,
-} from '@/features/watchlist/title-schemas'
+import { Check } from 'lucide-react'
+import { isTitleWatched, type TitleStatus } from '@/features/watchlist/title-schemas'
 import { cn } from '@/lib/utils'
 
 type StatusControlProps = {
@@ -18,27 +15,28 @@ export function StatusControl({
   onChange,
   className,
 }: StatusControlProps) {
+  const watched = isTitleWatched(value)
+
   return (
-    <label className={cn('block max-w-xs', className)}>
-      <span className="mb-1 block text-sm text-secondary">My status</span>
-      <select
-        aria-label="My status"
-        className="h-11 w-full rounded-md border border-border bg-surface-card px-3 text-sm text-heading"
+    <div className={cn('space-y-1', className)}>
+      <p className="text-sm text-secondary">My status</p>
+      <button
+        type="button"
         disabled={disabled}
-        value={value}
-        onChange={(event) => {
-          const parsed = titleStatusSchema.safeParse(event.target.value)
-          if (parsed.success) {
-            onChange(parsed.data)
-          }
+        aria-pressed={watched}
+        onClick={() => {
+          onChange(watched ? 'not_started' : 'watched')
         }}
+        className={cn(
+          'inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-medium transition-colors duration-200',
+          watched
+            ? 'border-primary-emphasis/40 bg-primary-emphasis text-on-primary'
+            : 'border-metal/40 bg-surface-elevated text-metal hover:border-border-strong hover:text-heading',
+        )}
       >
-        {titleStatusSchema.options.map((status) => (
-          <option key={status} value={status}>
-            {TITLE_STATUS_LABEL[status]}
-          </option>
-        ))}
-      </select>
-    </label>
+        {watched ? <Check className="size-4" aria-hidden="true" /> : null}
+        {watched ? 'Watched' : 'Not watching'}
+      </button>
+    </div>
   )
 }

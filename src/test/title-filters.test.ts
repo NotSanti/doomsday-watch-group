@@ -114,11 +114,11 @@ describe('watchlist URL filters', () => {
         q: 'Wanda',
         type: 'series',
         importance: 'recommended',
-        status: 'watching',
+        status: 'unwatched',
         sort: 'release',
       }).toString(),
     ).toBe(
-      'q=Wanda&type=series&importance=recommended&status=watching&sort=release',
+      'q=Wanda&type=series&importance=recommended&status=unwatched&sort=release',
     )
   })
 })
@@ -147,7 +147,7 @@ describe('filterTitles', () => {
       filterTitles(titles, progress, {
         ...DEFAULT_WATCHLIST_FILTERS,
         type: 'series',
-        status: 'watching',
+        status: 'unwatched',
       }).map((title) => title.name),
     ).toEqual(['WandaVision'])
     expect(
