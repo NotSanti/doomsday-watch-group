@@ -456,6 +456,7 @@ export type Database = {
       hash_invite_token: { Args: { raw_token: string }; Returns: string }
       is_group_member: { Args: { group_uuid: string }; Returns: boolean }
       is_group_owner: { Args: { group_uuid: string }; Returns: boolean }
+      leave_group: { Args: { p_group_id: string }; Returns: undefined }
       preview_invite: {
         Args: { p_token: string }
         Returns: {

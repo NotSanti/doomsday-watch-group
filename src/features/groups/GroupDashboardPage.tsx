@@ -7,6 +7,8 @@ import { Skeleton } from '@/components/Skeleton'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { useAuth } from '@/features/auth/use-auth'
+import { ActivityFeed } from '@/features/activity/ActivityFeed'
+import { useGroupActivity } from '@/features/activity/use-activity'
 import { toFriendlyGroupDetailError, toFriendlyGroupMembersError } from '@/features/groups/group-errors'
 import { groupRoleForUser } from '@/features/groups/group-schemas'
 import { MemberRoster } from '@/features/groups/MemberRoster'
@@ -36,19 +38,7 @@ import {
 } from '@/features/watchlist/title-schemas'
 import { useTitleList } from '@/features/watchlist/use-titles'
 import { toFriendlyTitleListError } from '@/features/watchlist/title-errors'
-
-function formatTargetDate(iso: string, timeZone: string): string {
-  try {
-    return new Intl.DateTimeFormat('en-CA', {
-      dateStyle: 'medium',
-      timeZone,
-    }).format(new Date(iso))
-  } catch {
-    return new Intl.DateTimeFormat('en-CA', { dateStyle: 'medium' }).format(
-      new Date(iso),
-    )
-  }
-}
+import { formatDateInTimeZone } from '@/lib/timezone'
 
 export function GroupDashboardPage() {
   const { groupId = '' } = useParams()
@@ -57,6 +47,7 @@ export function GroupDashboardPage() {
   const membersQuery = useGroupMembers(groupId)
   const titlesQuery = useTitleList()
   const progressQuery = useGroupProgress(groupId)
+  const activityQuery = useGroupActivity(groupId)
   const setStatus = useSetTitleStatus(groupId)
   const setCurrentTitle = useSetCurrentTitle(groupId)
   const [pickerOpen, setPickerOpen] = useState(false)
@@ -65,7 +56,8 @@ export function GroupDashboardPage() {
     groupQuery.isPending ||
     membersQuery.isPending ||
     titlesQuery.isPending ||
-    progressQuery.isPending
+    progressQuery.isPending ||
+    activityQuery.isPending
 
   if (pending) {
     return (
@@ -157,7 +149,7 @@ export function GroupDashboardPage() {
           <p className="max-w-2xl text-muted">{group.description}</p>
         ) : null}
         <p className="text-sm text-secondary">
-          Doomsday target {formatTargetDate(group.target_date, group.timezone)}{' '}
+          Doomsday target {formatDateInTimeZone(group.target_date, group.timezone)}{' '}
           ({group.timezone})
         </p>
         <Countdown targetIso={group.target_date} className="justify-start" />
@@ -318,6 +310,21 @@ export function GroupDashboardPage() {
           isError={membersQuery.isError}
           onRetry={() => {
             void membersQuery.refetch()
+          }}
+        />
+      </section>
+
+      <section className="space-y-3">
+        <h2 className="font-display text-2xl tracking-[0.08em] text-heading uppercase">
+          Activity
+        </h2>
+        <ActivityFeed
+          events={activityQuery.data ?? []}
+          timeZone={group.timezone}
+          isPending={false}
+          isError={activityQuery.isError}
+          onRetry={() => {
+            void activityQuery.refetch()
           }}
         />
       </section>
