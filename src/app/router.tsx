@@ -11,15 +11,13 @@ import { RequireGroupMembership } from '@/features/groups/RequireGroupMembership
 import { GroupSettingsPage } from '@/features/invites/GroupSettingsPage'
 import { InviteCodePage } from '@/features/invites/InviteCodePage'
 import { InvitePage } from '@/features/invites/InvitePage'
+import { TitleDetailPage } from '@/features/watchlist/TitleDetailPage'
+import { WatchlistPage } from '@/features/watchlist/WatchlistPage'
 import { AppShell } from '@/layouts/AppShell'
 import { PublicLayout } from '@/layouts/PublicLayout'
 import { LandingPage } from '@/pages/LandingPage'
-import {
-  AboutPage,
-  MembersPage,
-  TitleDetailPage,
-  WatchlistPage,
-} from '@/pages/PlaceholderPages'
+import { AboutPage } from '@/pages/AboutPage'
+import { MembersPage } from '@/pages/PlaceholderPages'
 
 export function AppRoutes() {
   return (
