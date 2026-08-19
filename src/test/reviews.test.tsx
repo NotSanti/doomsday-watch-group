@@ -239,4 +239,51 @@ describe('reviews', () => {
     expect(await screen.findByRole('heading', { name: 'Watchlist' })).toBeInTheDocument()
     expect(screen.getAllByText('Avg 8.5').length).toBeGreaterThan(0)
   })
+
+  it('shows a glowing review bubble on the watchlist and previews reviews on hover', async () => {
+    const user = userEvent.setup()
+    seedGroup()
+    setMockReviews([
+      makeReview({
+        id: '77777777-7777-4777-8777-777777777777',
+        group_id: GROUP_A,
+        user_id: OWNER_ID,
+        title_id: IRON_ID,
+        rating: 8.5,
+        body: 'A strong start.',
+        contains_spoilers: false,
+      }),
+      makeReview({
+        id: '88888888-8888-4888-8888-888888888888',
+        group_id: GROUP_A,
+        user_id: MEMBER_ID,
+        title_id: IRON_ID,
+        rating: 7.5,
+        body: 'Nick Fury is a skrull.',
+        contains_spoilers: true,
+      }),
+    ])
+    renderApp(`/groups/${GROUP_A}/watchlist`)
+
+    expect(await screen.findByRole('heading', { name: 'Watchlist' })).toBeInTheDocument()
+    const bubbles = screen.getAllByRole('button', {
+      name: '2 reviews for Iron Man',
+    })
+    expect(bubbles.length).toBeGreaterThan(0)
+    expect(
+      screen.queryByRole('button', { name: /reviews? for WandaVision/i }),
+    ).not.toBeInTheDocument()
+
+    const [bubble] = bubbles
+    if (!bubble) {
+      throw new Error('expected a review bubble')
+    }
+    await user.hover(bubble)
+
+    expect(await screen.findByText('Owner A (you)')).toBeInTheDocument()
+    expect(screen.getAllByText('A strong start.').length).toBeGreaterThan(0)
+    expect(screen.getAllByText('Member B').length).toBeGreaterThan(0)
+    expect(screen.getAllByText('This review contains spoilers.').length).toBeGreaterThan(0)
+    expect(screen.queryByText('Nick Fury is a skrull.')).not.toBeInTheDocument()
+  })
 })

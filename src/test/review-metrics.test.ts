@@ -4,6 +4,7 @@ import {
   formatAverageRatingLabel,
   formatRating,
   ratingsForTitle,
+  reviewHoverPreview,
   starFill,
 } from '@/features/reviews/review-metrics'
 import { isValidRating, ratingValueSchema } from '@/features/reviews/review-schemas'
@@ -46,5 +47,23 @@ describe('review metrics', () => {
         'aa000000-0000-4000-8000-000000000001',
       ),
     ).toEqual([8])
+  })
+
+  it('hides other members’ spoiler text in hover previews', () => {
+    expect(
+      reviewHoverPreview({ body: null, contains_spoilers: false }, false),
+    ).toBe('Rated without a written review.')
+    expect(
+      reviewHoverPreview(
+        { body: 'Nick Fury is a skrull.', contains_spoilers: true },
+        false,
+      ),
+    ).toBe('This review contains spoilers.')
+    expect(
+      reviewHoverPreview(
+        { body: 'Nick Fury is a skrull.', contains_spoilers: true },
+        true,
+      ),
+    ).toBe('Nick Fury is a skrull.')
   })
 })

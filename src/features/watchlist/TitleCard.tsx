@@ -1,6 +1,9 @@
 import { Link } from 'react-router'
 import { Badge } from '@/components/ui/badge'
 import { Card } from '@/components/ui/card'
+import type { GroupMember } from '@/features/groups/group-schemas'
+import { ReviewPreviewBubble } from '@/features/reviews/ReviewPreviewBubble'
+import type { ReviewRow } from '@/features/reviews/review-schemas'
 import { TitleArtwork } from '@/features/watchlist/TitleArtwork'
 import {
   IMPORTANCE_LABEL,
@@ -21,6 +24,9 @@ type TitleCardProps = {
   href: string
   groupWatchedLabel: string
   averageRatingLabel: string
+  reviews: readonly ReviewRow[]
+  members: readonly GroupMember[]
+  currentUserId: string
 }
 
 function statusTone(status: TitleStatus) {
@@ -38,13 +44,16 @@ export function TitleCard({
   href,
   groupWatchedLabel,
   averageRatingLabel,
+  reviews,
+  members,
+  currentUserId,
 }: TitleCardProps) {
   const year = titleYear(title.release_date)
   const runtime = titleRuntimeLabel(title)
   const sequence = sequenceForTitle(title, sort)
 
   return (
-    <Card className="h-full p-0">
+    <Card className="relative h-full p-0">
       <Link to={href} className="block h-full">
         <TitleArtwork path={title.poster_path} alt="" className="rounded-t-xl" />
         <div className="space-y-2 p-4">
@@ -69,6 +78,14 @@ export function TitleCard({
           </div>
         </div>
       </Link>
+      <div className="absolute top-2 right-2 z-10">
+        <ReviewPreviewBubble
+          titleName={title.name}
+          reviews={reviews}
+          members={members}
+          currentUserId={currentUserId}
+        />
+      </div>
     </Card>
   )
 }

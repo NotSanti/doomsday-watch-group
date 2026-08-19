@@ -1,5 +1,8 @@
 import { Link } from 'react-router'
 import { Badge } from '@/components/ui/badge'
+import type { GroupMember } from '@/features/groups/group-schemas'
+import { ReviewPreviewBubble } from '@/features/reviews/ReviewPreviewBubble'
+import type { ReviewRow } from '@/features/reviews/review-schemas'
 import { TitleArtwork } from '@/features/watchlist/TitleArtwork'
 import type { WatchlistSort } from '@/features/watchlist/title-filters'
 import {
@@ -20,6 +23,9 @@ type TitleRowProps = {
   href: string
   groupWatchedLabel: string
   averageRatingLabel: string
+  reviews: readonly ReviewRow[]
+  members: readonly GroupMember[]
+  currentUserId: string
 }
 
 function statusTone(status: TitleStatus) {
@@ -37,40 +43,53 @@ export function TitleRow({
   href,
   groupWatchedLabel,
   averageRatingLabel,
+  reviews,
+  members,
+  currentUserId,
 }: TitleRowProps) {
   const year = titleYear(title.release_date)
   const runtime = titleRuntimeLabel(title)
   const sequence = sequenceForTitle(title, sort)
 
   return (
-    <Link
-      to={href}
-      className="grid grid-cols-[3rem_4.5rem_minmax(0,1fr)_auto] items-center gap-4 rounded-xl border border-border bg-surface-card px-3 py-2 hover:border-primary-emphasis/40 hover:bg-surface-hover"
-    >
-      <p className="text-xs tracking-[0.14em] text-secondary uppercase">
-        {String(sequence).padStart(2, '0')}
-      </p>
-      <TitleArtwork
-        path={title.poster_path}
-        alt=""
-        className="h-16 w-[4.5rem] rounded-md"
-      />
-      <div className="min-w-0">
-        <p className="truncate font-display text-lg tracking-[0.06em] text-heading uppercase">
-          {title.name}
+    <div className="relative">
+      <Link
+        to={href}
+        className="grid grid-cols-[3rem_4.5rem_minmax(0,1fr)_auto] items-center gap-4 rounded-xl border border-border bg-surface-card px-3 py-2 hover:border-primary-emphasis/40 hover:bg-surface-hover"
+      >
+        <p className="text-xs tracking-[0.14em] text-secondary uppercase">
+          {String(sequence).padStart(2, '0')}
         </p>
-        <p className="truncate text-sm text-muted">
-          {[year, MEDIA_TYPE_LABEL[title.media_type], runtime]
-            .filter(Boolean)
-            .join(' · ')}
-        </p>
+        <TitleArtwork
+          path={title.poster_path}
+          alt=""
+          className="h-16 w-[4.5rem] rounded-md"
+        />
+        <div className="min-w-0">
+          <p className="truncate font-display text-lg tracking-[0.06em] text-heading uppercase">
+            {title.name}
+          </p>
+          <p className="truncate text-sm text-muted">
+            {[year, MEDIA_TYPE_LABEL[title.media_type], runtime]
+              .filter(Boolean)
+              .join(' · ')}
+          </p>
+        </div>
+        <div className="hidden flex-wrap justify-end gap-2 sm:flex">
+          <Badge>{IMPORTANCE_LABEL[title.importance]}</Badge>
+          <Badge tone={statusTone(status)}>{TITLE_STATUS_LABEL[status]}</Badge>
+          <Badge tone="muted">{groupWatchedLabel}</Badge>
+          <Badge tone="rating">{averageRatingLabel}</Badge>
+        </div>
+      </Link>
+      <div className="absolute top-2 right-2 z-10">
+        <ReviewPreviewBubble
+          titleName={title.name}
+          reviews={reviews}
+          members={members}
+          currentUserId={currentUserId}
+        />
       </div>
-      <div className="hidden flex-wrap justify-end gap-2 sm:flex">
-        <Badge>{IMPORTANCE_LABEL[title.importance]}</Badge>
-        <Badge tone={statusTone(status)}>{TITLE_STATUS_LABEL[status]}</Badge>
-        <Badge tone="muted">{groupWatchedLabel}</Badge>
-        <Badge tone="rating">{averageRatingLabel}</Badge>
-      </div>
-    </Link>
+    </div>
   )
 }
