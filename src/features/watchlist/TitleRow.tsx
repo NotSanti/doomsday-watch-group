@@ -19,6 +19,7 @@ type TitleRowProps = {
   sort: WatchlistSort
   href: string
   groupWatchedLabel: string
+  averageRatingLabel: string
 }
 
 function statusTone(status: TitleStatus) {
@@ -35,6 +36,7 @@ export function TitleRow({
   sort,
   href,
   groupWatchedLabel,
+  averageRatingLabel,
 }: TitleRowProps) {
   const year = titleYear(title.release_date)
   const runtime = titleRuntimeLabel(title)
@@ -67,6 +69,7 @@ export function TitleRow({
         <Badge>{IMPORTANCE_LABEL[title.importance]}</Badge>
         <Badge tone={statusTone(status)}>{TITLE_STATUS_LABEL[status]}</Badge>
         <Badge tone="muted">{groupWatchedLabel}</Badge>
+        <Badge tone="rating">{averageRatingLabel}</Badge>
       </div>
     </Link>
   )

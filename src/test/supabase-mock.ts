@@ -7,6 +7,7 @@ import {
   type InvitePreview,
   type InviteRow,
 } from '@/features/invites/invite-schemas'
+import type { ReviewRow } from '@/features/reviews/review-schemas'
 import type { TitleRow, TitleStatus } from '@/features/watchlist/title-schemas'
 
 type AuthListener = (event: AuthChangeEvent, session: Session | null) => void
@@ -48,6 +49,9 @@ let titlesError: { message: string } | null = null
 let progress: MockTitleProgress[] = []
 let progressError: { message: string } | null = null
 let progressWriteError: { code?: string; message: string } | null = null
+let reviews: ReviewRow[] = []
+let reviewsError: { message: string } | null = null
+let reviewWriteError: { code?: string; message: string } | null = null
 const listeners = new Set<AuthListener>()
 const realtimeHandlers: { table: string; callback: () => void }[] = []
 
@@ -276,6 +280,39 @@ export function setProgressWriteError(
 
 export function getMockProgress(): MockTitleProgress[] {
   return progress
+}
+
+export function makeReview(overrides: Partial<ReviewRow> = {}): ReviewRow {
+  return {
+    id: '77777777-7777-4777-8777-777777777777',
+    group_id: '22222222-2222-4222-8222-222222222222',
+    user_id: '11111111-1111-4111-8111-111111111111',
+    title_id: 'aa000000-0000-4000-8000-000000000001',
+    rating: 8.5,
+    body: 'A strong start.',
+    contains_spoilers: false,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    ...overrides,
+  }
+}
+
+export function setMockReviews(
+  next: ReviewRow[],
+  error: { message: string } | null = null,
+): void {
+  reviews = next
+  reviewsError = error
+}
+
+export function setReviewWriteError(
+  error: { code?: string; message: string } | null,
+): void {
+  reviewWriteError = error
+}
+
+export function getMockReviews(): ReviewRow[] {
+  return reviews
 }
 
 export function getMockInvites(): MockInvite[] {
@@ -890,6 +927,180 @@ export const supabaseFromMock = vi.fn((table: string) => {
     }
   }
 
+  if (table === 'reviews') {
+    const filters: Record<string, string> = {}
+    const selectApi = {
+      eq(column: string, value: string) {
+        filters[column] = value
+        return selectApi
+      },
+      order: async () => {
+        if (reviewsError) {
+          return { data: null, error: reviewsError }
+        }
+
+        return {
+          data: reviews.filter((row) =>
+            Object.entries(filters).every(
+              ([column, value]) =>
+                row[column as keyof ReviewRow] === value,
+            ),
+          ),
+          error: null,
+        }
+      },
+    }
+
+    const deleteFilters: Record<string, string> = {}
+    const deleteApi = {
+      eq(column: string, value: string) {
+        deleteFilters[column] = value
+        return deleteApi
+      },
+      then(
+        onFulfilled?: (value: {
+          data: null
+          error: { code?: string; message: string } | null
+        }) => unknown,
+        onRejected?: (reason: unknown) => unknown,
+      ) {
+        if (reviewWriteError) {
+          return Promise.resolve({
+            data: null,
+            error: reviewWriteError,
+          }).then(onFulfilled, onRejected)
+        }
+
+        reviews = reviews.filter((row) => {
+          const idMatch = !deleteFilters.id || row.id === deleteFilters.id
+          const userMatch =
+            !deleteFilters.user_id || row.user_id === deleteFilters.user_id
+          return !(idMatch && userMatch && Boolean(deleteFilters.id))
+        })
+        return Promise.resolve({ data: null, error: null }).then(
+          onFulfilled,
+          onRejected,
+        )
+      },
+    }
+
+    return {
+      select: () => selectApi,
+      insert: (values: {
+        group_id: string
+        user_id: string
+        title_id: string
+        rating: number
+        body: string | null
+        contains_spoilers: boolean
+      }) => ({
+        select: () => ({
+          maybeSingle: async () => {
+            if (reviewWriteError) {
+              return { data: null, error: reviewWriteError }
+            }
+
+            const ratingOk =
+              Number.isFinite(values.rating) &&
+              values.rating >= 1 &&
+              values.rating <= 10 &&
+              Math.abs(values.rating * 2 - Math.round(values.rating * 2)) < 1e-8
+            const bodyOk =
+              values.body === null || values.body.length <= 2000
+
+            if (!ratingOk || !bodyOk) {
+              return {
+                data: null,
+                error: { code: '23514', message: 'check violation' },
+              }
+            }
+
+            const duplicate = reviews.some(
+              (row) =>
+                row.group_id === values.group_id &&
+                row.user_id === values.user_id &&
+                row.title_id === values.title_id,
+            )
+
+            if (duplicate) {
+              return {
+                data: null,
+                error: { code: '23505', message: 'duplicate' },
+              }
+            }
+
+            const row = makeReview({
+              id: crypto.randomUUID(),
+              ...values,
+            })
+            reviews = [...reviews, row]
+            return { data: row, error: null }
+          },
+        }),
+      }),
+      update: (values: Partial<ReviewRow>) => {
+        const updateFilters: Record<string, string> = {}
+        const updateApi = {
+          eq(column: string, value: string) {
+            updateFilters[column] = value
+            return updateApi
+          },
+          select: () => ({
+            maybeSingle: async () => {
+              if (reviewWriteError) {
+                return { data: null, error: reviewWriteError }
+              }
+
+              const ratingOk =
+                values.rating === undefined ||
+                (Number.isFinite(values.rating) &&
+                  values.rating >= 1 &&
+                  values.rating <= 10 &&
+                  Math.abs(
+                    values.rating * 2 - Math.round(values.rating * 2),
+                  ) < 1e-8)
+              const bodyOk =
+                values.body === undefined ||
+                values.body === null ||
+                values.body.length <= 2000
+
+              if (!ratingOk || !bodyOk) {
+                return {
+                  data: null,
+                  error: { code: '23514', message: 'check violation' },
+                }
+              }
+
+              const current = reviews.find(
+                (row) =>
+                  (!updateFilters.id || row.id === updateFilters.id) &&
+                  (!updateFilters.user_id ||
+                    row.user_id === updateFilters.user_id),
+              )
+
+              if (!current) {
+                return { data: null, error: null }
+              }
+
+              const next = {
+                ...current,
+                ...values,
+                updated_at: new Date().toISOString(),
+              }
+              reviews = reviews.map((row) =>
+                row.id === current.id ? next : row,
+              )
+              return { data: next, error: null }
+            },
+          }),
+        }
+
+        return updateApi
+      },
+      delete: () => deleteApi,
+    }
+  }
+
   throw new Error(`Unexpected table ${table}`)
 })
 
@@ -953,6 +1164,9 @@ export function resetSupabaseClient(): void {
   progress = []
   progressError = null
   progressWriteError = null
+  reviews = []
+  reviewsError = null
+  reviewWriteError = null
   listeners.clear()
   realtimeHandlers.length = 0
 }

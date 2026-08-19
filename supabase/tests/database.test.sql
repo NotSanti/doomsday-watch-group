@@ -1,5 +1,5 @@
 begin;
-select plan(45);
+select plan(47);
 
 create temp table test_users (
   label text primary key,
@@ -421,6 +421,19 @@ select throws_ok(
 
 select throws_ok(
   format(
+    $$insert into public.reviews (group_id, user_id, title_id, rating, body)
+      values (%L, %L, 'aa000000-0000-4000-8000-000000000002', 7.0, %L)$$,
+    (select id from test_groups where label = 'alpha'),
+    (select id from test_users where label = 'member-a'),
+    repeat('x', 2001)
+  ),
+  '23514',
+  null,
+  'review bodies over 2000 characters are rejected'
+);
+
+select throws_ok(
+  format(
     $$insert into public.activity_events (group_id, actor_id, event_type)
       values (%L, %L, 'joined')$$,
     (select id from test_groups where label = 'alpha'),
@@ -471,6 +484,15 @@ select lives_ok(
   'owner can insert own progress'
 );
 
+insert into public.reviews (group_id, user_id, title_id, rating, body)
+values (
+  (select id from test_groups where label = 'alpha'),
+  (select id from test_users where label = 'owner-a'),
+  'aa000000-0000-4000-8000-000000000003',
+  7.5,
+  'Mine'
+);
+
 select set_config('request.jwt.claim.sub', (select id::text from test_users where label = 'member-a'), true);
 select set_config(
   'request.jwt.claims',
@@ -497,6 +519,24 @@ select is(
   ),
   'watching',
   'member cannot update another member’s progress'
+);
+
+update public.reviews
+set rating = 1.0, body = 'hijack'
+where group_id = (select id from test_groups where label = 'alpha')
+  and user_id = (select id from test_users where label = 'owner-a')
+  and title_id = 'aa000000-0000-4000-8000-000000000003';
+
+select is(
+  (
+    select body
+    from public.reviews
+    where group_id = (select id from test_groups where label = 'alpha')
+      and user_id = (select id from test_users where label = 'owner-a')
+      and title_id = 'aa000000-0000-4000-8000-000000000003'
+  ),
+  'Mine',
+  'member cannot update another member’s review'
 );
 
 select set_config('request.jwt.claim.sub', (select id::text from test_users where label = 'owner-b'), true);

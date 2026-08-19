@@ -179,8 +179,9 @@ describe('watchlist', () => {
     )
     expect(screen.getByText(/0\/1 watched by the group/i)).toBeInTheDocument()
     expect(
-      screen.getByText(/ratings and reviews arrive in a later milestone/i),
+      await screen.findByRole('heading', { name: 'Ratings and reviews' }),
     ).toBeInTheDocument()
+    expect(screen.getByText('No ratings yet.')).toBeInTheDocument()
 
     await user.click(screen.getByRole('link', { name: 'Back to watchlist' }))
 
@@ -250,6 +251,9 @@ describe('watchlist', () => {
       'true',
     )
     expect(screen.getByText(/1\/1 watched by the group/i)).toBeInTheDocument()
+    expect(
+      await screen.findByRole('heading', { name: 'Ratings and reviews' }),
+    ).toBeInTheDocument()
   })
 
   it('shows unavailable copy for unknown or inactive titles', async () => {
