@@ -3,8 +3,8 @@ import {
   averageRating,
   formatAverageRatingLabel,
   formatRating,
-  ratingDistribution,
   ratingsForTitle,
+  starFill,
 } from '@/features/reviews/review-metrics'
 import { isValidRating, ratingValueSchema } from '@/features/reviews/review-schemas'
 
@@ -20,16 +20,16 @@ describe('review metrics', () => {
     expect(ratingValueSchema.safeParse(8.5).success).toBe(true)
   })
 
-  it('averages ratings to one decimal and builds 19 buckets', () => {
+  it('averages ratings to one decimal and fills stars including halves', () => {
     expect(averageRating([])).toBeNull()
     expect(averageRating([8, 9, 10])).toBe(9)
     expect(averageRating([8.5, 9])).toBe(8.8)
 
-    const buckets = ratingDistribution([8, 8, 9])
-    expect(buckets).toHaveLength(19)
-    expect(buckets.find((bucket) => bucket.value === 8)?.count).toBe(2)
-    expect(buckets.find((bucket) => bucket.value === 9)?.count).toBe(1)
-    expect(buckets.find((bucket) => bucket.value === 7.5)?.count).toBe(0)
+    expect(starFill(9, 9.5)).toBe(1)
+    expect(starFill(10, 9.5)).toBe(0.5)
+    expect(starFill(10, 9)).toBe(0)
+    expect(starFill(1, null)).toBe(0)
+    expect(starFill(4, 4)).toBe(1)
   })
 
   it('formats labels and filters ratings for a title', () => {

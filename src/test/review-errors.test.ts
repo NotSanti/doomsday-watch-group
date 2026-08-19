@@ -7,6 +7,7 @@ import {
 import {
   REVIEW_BODY_MAX,
   emptyToNull,
+  isReviewFormUnchanged,
   reviewFormSchema,
 } from '@/features/reviews/review-schemas'
 
@@ -49,5 +50,37 @@ describe('review errors and form schema', () => {
         contains_spoilers: true,
       }).success,
     ).toBe(true)
+  })
+
+  it('treats a review as unchanged until rating, body, or spoiler flag differs', () => {
+    const existing = {
+      id: '77777777-7777-4777-8777-777777777777',
+      group_id: '22222222-2222-4222-8222-222222222222',
+      user_id: '11111111-1111-4111-8111-111111111111',
+      title_id: 'aa000000-0000-4000-8000-000000000001',
+      rating: 8.5,
+      body: 'A strong start.',
+      contains_spoilers: false,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    }
+
+    expect(
+      isReviewFormUnchanged(existing, {
+        rating: 8.5,
+        body: 'A strong start.',
+        contains_spoilers: false,
+      }),
+    ).toBe(true)
+    expect(
+      isReviewFormUnchanged(existing, {
+        rating: 9,
+        body: 'A strong start.',
+        contains_spoilers: false,
+      }),
+    ).toBe(false)
+    expect(isReviewFormUnchanged(null, { rating: 8, body: '', contains_spoilers: false })).toBe(
+      false,
+    )
   })
 })

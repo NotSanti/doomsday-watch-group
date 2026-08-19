@@ -93,10 +93,14 @@ describe('reviews', () => {
       ).toBeInTheDocument()
       expect(groupAverageLabel()).toMatch(/2 ratings/)
     })
-    expect(groupAverageLabel()).toMatch(/^9/)
+      expect(groupAverageLabel()).toMatch(/^9/)
+
+    const updateButton = screen.getByRole('button', { name: 'Update review' })
+    expect(updateButton).toBeDisabled()
 
     await user.click(screen.getByRole('radio', { name: /^6$/ }))
-    await user.click(screen.getByRole('button', { name: 'Update review' }))
+    expect(updateButton).toBeEnabled()
+    await user.click(updateButton)
 
     await waitFor(() => {
       expect(
@@ -130,6 +134,39 @@ describe('reviews', () => {
       await screen.findByText('Choose a rating from 1 to 10.'),
     ).toBeInTheDocument()
     expect(getMockReviews()).toHaveLength(0)
+  })
+
+  it('previews half-star hover and keeps update disabled until a change', async () => {
+    const user = userEvent.setup()
+    seedGroup()
+    setMockReviews([
+      makeReview({
+        group_id: GROUP_A,
+        user_id: OWNER_ID,
+        title_id: IRON_ID,
+        rating: 8,
+        body: 'Solid.',
+      }),
+    ])
+    renderApp(`/groups/${GROUP_A}/titles/${IRON_ID}`)
+
+    expect(
+      await screen.findByRole('heading', { name: 'Ratings and reviews' }),
+    ).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Update review' })).toBeDisabled()
+    expect(screen.getByTestId('rating-star-8')).toHaveAttribute('data-fill', '1')
+    expect(screen.getByTestId('rating-star-9')).toHaveAttribute('data-fill', '0')
+
+    await user.hover(screen.getByRole('radio', { name: /^9\.5$/ }))
+
+    expect(screen.getByTestId('rating-star-9')).toHaveAttribute('data-fill', '1')
+    expect(screen.getByTestId('rating-star-10')).toHaveAttribute('data-fill', '0.5')
+    expect(screen.getByText('9.5 / 10')).toBeInTheDocument()
+
+    await user.click(screen.getByRole('radio', { name: /^9\.5$/ }))
+
+    expect(screen.getByRole('radio', { name: /^9\.5$/ })).toBeChecked()
+    expect(screen.getByRole('button', { name: 'Update review' })).toBeEnabled()
   })
 
   it('hides spoiler text until it is revealed', async () => {
