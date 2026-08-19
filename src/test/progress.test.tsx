@@ -125,21 +125,23 @@ describe('personal progress and current title', () => {
     seedGroup()
     renderApp(`/groups/${GROUP_A}/titles/${WANDA_ID}`)
 
-    const status = await screen.findByLabelText('My status')
-    expect(status).toHaveValue('not_started')
-    await user.selectOptions(status, 'watching')
+    const status = await screen.findByRole('button', { name: 'Not watching' })
+    expect(status).toHaveAttribute('aria-pressed', 'false')
+    await user.click(status)
 
     await waitFor(() => {
-      expect(screen.getByLabelText('My status')).toHaveValue('watching')
+      expect(screen.getByRole('button', { name: 'Watched' })).toHaveAttribute(
+        'aria-pressed',
+        'true',
+      )
     })
     expect(
       getMockProgress().some(
         (row) =>
           row.user_id === OWNER_ID &&
           row.title_id === WANDA_ID &&
-          row.status === 'watching' &&
-          row.started_at !== null &&
-          row.watched_at === null,
+          row.status === 'watched' &&
+          row.watched_at !== null,
       ),
     ).toBe(true)
   })
@@ -150,12 +152,15 @@ describe('personal progress and current title', () => {
     setProgressWriteError({ code: '42501', message: 'not allowed' })
     renderApp(`/groups/${GROUP_A}/titles/${IRON_ID}`)
 
-    const status = await screen.findByLabelText('My status')
-    expect(status).toHaveValue('watched')
-    await user.selectOptions(status, 'watching')
+    const status = await screen.findByRole('button', { name: 'Watched' })
+    expect(status).toHaveAttribute('aria-pressed', 'true')
+    await user.click(status)
 
     await waitFor(() => {
-      expect(screen.getByLabelText('My status')).toHaveValue('watched')
+      expect(screen.getByRole('button', { name: 'Watched' })).toHaveAttribute(
+        'aria-pressed',
+        'true',
+      )
     })
     expect(
       getMockProgress().find(

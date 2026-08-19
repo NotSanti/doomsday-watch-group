@@ -99,8 +99,7 @@ export function WatchlistFiltersForm({
           }}
         >
           <option value="all">All statuses</option>
-          <option value="unwatched">Unwatched</option>
-          <option value="watching">Watching</option>
+          <option value="unwatched">Not watching</option>
           <option value="watched">Watched</option>
         </select>
       </div>

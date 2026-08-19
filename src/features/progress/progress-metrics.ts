@@ -131,22 +131,6 @@ export function upcomingTitles(
   return ordered.slice(currentIndex + 1, currentIndex + 1 + limit)
 }
 
-export function memberWatchingTitle(
-  rows: readonly ProgressStatusRow[],
-  userId: string,
-  titles: readonly TitleRow[],
-): TitleRow | null {
-  const watching = rows.find(
-    (row) => row.user_id === userId && row.status === 'watching',
-  )
-
-  if (!watching) {
-    return null
-  }
-
-  return titles.find((title) => title.id === watching.title_id) ?? null
-}
-
 export function formatPercent(value: number): string {
   return `${Math.round(value)}%`
 }
