@@ -24,6 +24,8 @@ type TitleCardProps = {
   href: string
   groupWatchedLabel: string
   averageRatingLabel: string
+  showRating: boolean
+  showReviews: boolean
   reviews: readonly ReviewRow[]
   members: readonly GroupMember[]
   currentUserId: string
@@ -44,6 +46,8 @@ export function TitleCard({
   href,
   groupWatchedLabel,
   averageRatingLabel,
+  showRating,
+  showReviews,
   reviews,
   members,
   currentUserId,
@@ -74,20 +78,24 @@ export function TitleCard({
               {TITLE_STATUS_LABEL[status]}
             </Badge>
             <Badge tone="muted">{groupWatchedLabel}</Badge>
-            <Badge tone="rating">{averageRatingLabel}</Badge>
+            {showRating ? (
+              <Badge tone="rating">{averageRatingLabel}</Badge>
+            ) : null}
           </div>
         </div>
       </Link>
-      <div className="pointer-events-none absolute inset-0 z-10">
-        <div className="pointer-events-auto absolute top-1.5 right-1.5">
-          <ReviewPreviewBubble
-            titleName={title.name}
-            reviews={reviews}
-            members={members}
-            currentUserId={currentUserId}
-          />
+      {showReviews ? (
+        <div className="pointer-events-none absolute inset-0 z-10">
+          <div className="pointer-events-auto absolute top-1.5 right-1.5">
+            <ReviewPreviewBubble
+              titleName={title.name}
+              reviews={reviews}
+              members={members}
+              currentUserId={currentUserId}
+            />
+          </div>
         </div>
-      </div>
+      ) : null}
     </Card>
   )
 }

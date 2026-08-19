@@ -6,12 +6,14 @@ import { renderApp } from '@/test/render-app'
 import {
   makeGroup,
   makeProfile,
+  makeReview,
   makeSession,
   makeTitle,
   makeTitleProgress,
   setMockGroups,
   setMockProfile,
   setMockProgress,
+  setMockReviews,
   setMockSession,
   setMockTitles,
 } from '@/test/supabase-mock'
@@ -135,6 +137,8 @@ describe('watchlist', () => {
     expect(screen.getByLabelText('Type')).toHaveValue('movie')
     expect(screen.getByLabelText('My status')).toHaveValue('watched')
     expect(screen.getByLabelText('Order')).toHaveValue('release')
+    expect(screen.getByLabelText('Show rating')).toBeChecked()
+    expect(screen.getByLabelText('Show reviews')).toBeChecked()
     expect(screen.getByText('Showing 1 of 3 titles')).toBeInTheDocument()
     expect(screen.getAllByText('Iron Man').length).toBeGreaterThan(0)
     expect(screen.queryByText('WandaVision')).not.toBeInTheDocument()
@@ -274,6 +278,51 @@ describe('watchlist', () => {
     expect(
       await screen.findByText('This title could not be loaded. Please try again.'),
     ).toBeInTheDocument()
+  })
+
+  it('toggles rating and review content on listings', async () => {
+    const user = userEvent.setup()
+    signInAsOwner()
+    seedCatalog()
+    setMockReviews([
+      makeReview({
+        group_id: GROUP_A,
+        title_id: IRON_MAN_ID,
+        rating: 8.5,
+        body: 'A strong start.',
+      }),
+    ])
+    renderApp(`/groups/${GROUP_A}/watchlist`)
+
+    expect(await screen.findByRole('heading', { name: 'Watchlist' })).toBeInTheDocument()
+    expect(screen.getByLabelText('Show rating')).toBeChecked()
+    expect(screen.getByLabelText('Show reviews')).toBeChecked()
+    expect(screen.getAllByText('Avg 8.5').length).toBeGreaterThan(0)
+    expect(
+      screen.getAllByRole('button', { name: '1 review for Iron Man' }).length,
+    ).toBeGreaterThan(0)
+
+    await user.click(screen.getByLabelText('Show rating'))
+    expect(screen.getByLabelText('Show rating')).not.toBeChecked()
+    expect(screen.queryByText('Avg 8.5')).not.toBeInTheDocument()
+    expect(
+      screen.getAllByRole('button', { name: '1 review for Iron Man' }).length,
+    ).toBeGreaterThan(0)
+
+    await user.click(screen.getByLabelText('Show reviews'))
+    expect(screen.getByLabelText('Show reviews')).not.toBeChecked()
+    expect(
+      screen.queryByRole('button', { name: '1 review for Iron Man' }),
+    ).not.toBeInTheDocument()
+
+    const [titleLink] = screen.getAllByRole('link', { name: /Iron Man/ })
+    if (!titleLink) {
+      throw new Error('expected Iron Man link')
+    }
+    expect(titleLink).toHaveAttribute(
+      'href',
+      `/groups/${GROUP_A}/titles/${IRON_MAN_ID}?showRating=0&showReviews=0`,
+    )
   })
 })
 

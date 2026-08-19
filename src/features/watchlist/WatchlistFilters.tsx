@@ -14,9 +14,48 @@ const selectClassName = cn(
   'hover:border-border-strong focus-visible:outline-none',
 )
 
+const checkButtonClassName = cn(
+  'inline-flex h-11 cursor-pointer items-center gap-2 rounded-md border px-3 text-sm',
+)
+
 type WatchlistFiltersProps = {
   filters: WatchlistFilters
   onChange: (filters: WatchlistFilters) => void
+}
+
+function FilterCheckButton({
+  id,
+  label,
+  checked,
+  onChange,
+}: {
+  id: string
+  label: string
+  checked: boolean
+  onChange: (checked: boolean) => void
+}) {
+  return (
+    <label
+      htmlFor={id}
+      className={cn(
+        checkButtonClassName,
+        checked
+          ? 'border-primary-emphasis/50 bg-primary-muted text-heading'
+          : 'border-border bg-surface text-secondary hover:border-border-strong hover:text-heading',
+      )}
+    >
+      <input
+        id={id}
+        type="checkbox"
+        className="size-4 accent-primary"
+        checked={checked}
+        onChange={(event) => {
+          onChange(event.target.checked)
+        }}
+      />
+      {label}
+    </label>
+  )
 }
 
 export function WatchlistFiltersForm({
@@ -121,11 +160,27 @@ export function WatchlistFiltersForm({
           <option value="release">Release order</option>
         </select>
       </div>
+      <div className="flex flex-wrap items-end gap-2 sm:col-span-2 lg:col-span-5">
+        <FilterCheckButton
+          id="watchlist-show-rating"
+          label="Show rating"
+          checked={filters.showRating}
+          onChange={(showRating) => onChange({ ...filters, showRating })}
+        />
+        <FilterCheckButton
+          id="watchlist-show-reviews"
+          label="Show reviews"
+          checked={filters.showReviews}
+          onChange={(showReviews) => onChange({ ...filters, showReviews })}
+        />
+      </div>
       {filters.q ||
       filters.type !== DEFAULT_WATCHLIST_FILTERS.type ||
       filters.importance !== DEFAULT_WATCHLIST_FILTERS.importance ||
       filters.status !== DEFAULT_WATCHLIST_FILTERS.status ||
-      filters.sort !== DEFAULT_WATCHLIST_FILTERS.sort ? (
+      filters.sort !== DEFAULT_WATCHLIST_FILTERS.sort ||
+      filters.showRating !== DEFAULT_WATCHLIST_FILTERS.showRating ||
+      filters.showReviews !== DEFAULT_WATCHLIST_FILTERS.showReviews ? (
         <div className="sm:col-span-2 lg:col-span-5">
           <button
             type="button"

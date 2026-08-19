@@ -146,6 +146,8 @@ export function WatchlistPage() {
                           averageRating(titleRatings),
                           titleRatings.length,
                         )}
+                        showRating={filters.showRating}
+                        showReviews={filters.showReviews}
                         reviews={titleReviews}
                         members={membersQuery.data ?? []}
                         currentUserId={user?.id ?? ''}
@@ -183,6 +185,8 @@ export function WatchlistPage() {
                           averageRating(titleRatings),
                           titleRatings.length,
                         )}
+                        showRating={filters.showRating}
+                        showReviews={filters.showReviews}
                         reviews={titleReviews}
                         members={membersQuery.data ?? []}
                         currentUserId={user?.id ?? ''}
