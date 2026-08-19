@@ -9,7 +9,6 @@ import {
 } from '@/features/invites/invite-schemas'
 import type { ReviewRow } from '@/features/reviews/review-schemas'
 import type { TitleRow, TitleStatus } from '@/features/watchlist/title-schemas'
-import type { ActivityEventType } from '@/features/activity/activity-schemas'
 
 type AuthListener = (event: AuthChangeEvent, session: Session | null) => void
 
@@ -29,18 +28,6 @@ export type MockTitleProgress = {
   status: TitleStatus
   started_at: string | null
   watched_at: string | null
-}
-
-export type MockActivity = {
-  id: number
-  group_id: string
-  actor_id: string
-  event_type: ActivityEventType
-  title_id: string | null
-  metadata: unknown
-  created_at: string
-  actor_name: string
-  title_name: string | null
 }
 
 let session: Session | null = null
@@ -65,12 +52,9 @@ let progressWriteError: { code?: string; message: string } | null = null
 let reviews: ReviewRow[] = []
 let reviewsError: { message: string } | null = null
 let reviewWriteError: { code?: string; message: string } | null = null
-let activity: MockActivity[] = []
-let activityError: { message: string } | null = null
 let groupWriteError: { code?: string; message: string } | null = null
 let leaveGroupError: { code?: string; message: string } | null = null
 let transferOwnershipError: { code?: string; message: string } | null = null
-let activityId = 1
 const listeners = new Set<AuthListener>()
 const realtimeHandlers: { table: string; callback: () => void }[] = []
 
@@ -334,31 +318,6 @@ export function getMockReviews(): ReviewRow[] {
   return reviews
 }
 
-export function makeActivity(
-  overrides: Partial<MockActivity> = {},
-): MockActivity {
-  return {
-    id: activityId++,
-    group_id: '22222222-2222-4222-8222-222222222222',
-    actor_id: '11111111-1111-4111-8111-111111111111',
-    event_type: 'joined',
-    title_id: null,
-    metadata: {},
-    created_at: new Date().toISOString(),
-    actor_name: 'Owner A',
-    title_name: null,
-    ...overrides,
-  }
-}
-
-export function setMockActivity(
-  next: MockActivity[],
-  error: { message: string } | null = null,
-): void {
-  activity = next
-  activityError = error
-}
-
 export function setGroupWriteError(
   error: { code?: string; message: string } | null,
 ): void {
@@ -401,32 +360,6 @@ type RpcError = { code?: string; message: string }
 function isOwnerOf(groupId: string): boolean {
   const group = groups.find((item) => item.id === groupId)
   return Boolean(session && group && group.owner_id === session.user.id)
-}
-
-function pushJoinedActivity(groupId: string, userId: string, name: string): void {
-  activity = [
-    makeActivity({
-      group_id: groupId,
-      actor_id: userId,
-      event_type: 'joined',
-      actor_name: name,
-    }),
-    ...activity,
-  ]
-}
-
-function activityToRow(event: MockActivity) {
-  return {
-    id: event.id,
-    group_id: event.group_id,
-    actor_id: event.actor_id,
-    event_type: event.event_type,
-    title_id: event.title_id,
-    metadata: event.metadata,
-    created_at: event.created_at,
-    profiles: { display_name: event.actor_name },
-    titles: event.title_name ? { name: event.title_name } : null,
-  }
 }
 
 function memberToRow(member: MockMember) {
@@ -500,7 +433,6 @@ async function createGroupImpl(args: {
       display_name: profile?.display_name ?? 'Owner A',
     }),
   ]
-  pushJoinedActivity(group.id, group.owner_id, profile?.display_name ?? 'Owner A')
   return { data: group, error: null }
 }
 
@@ -624,11 +556,6 @@ async function redeemInviteImpl(args: { p_token: string }) {
       display_name: profile?.display_name ?? 'Member B',
     }),
   ]
-  pushJoinedActivity(
-    group.id,
-    session?.user.id ?? '55555555-5555-4555-8555-555555555555',
-    profile?.display_name ?? 'Member B',
-  )
   return {
     data: [{ group_id: invite.group_id, already_member: false }],
     error: null,
@@ -1373,29 +1300,6 @@ export const supabaseFromMock = vi.fn((table: string) => {
     }
   }
 
-  if (table === 'activity_events') {
-    return {
-      select: () => ({
-        eq: (_column: string, groupId: string) => ({
-          order: () => ({
-            limit: async () => {
-              if (activityError) {
-                return { data: null, error: activityError }
-              }
-
-              return {
-                data: activity
-                  .filter((event) => event.group_id === groupId)
-                  .map(activityToRow),
-                error: null,
-              }
-            },
-          }),
-        }),
-      }),
-    }
-  }
-
   throw new Error(`Unexpected table ${table}`)
 })
 
@@ -1472,12 +1376,9 @@ export function resetSupabaseClient(): void {
   reviews = []
   reviewsError = null
   reviewWriteError = null
-  activity = []
-  activityError = null
   groupWriteError = null
   leaveGroupError = null
   transferOwnershipError = null
-  activityId = 1
   listeners.clear()
   realtimeHandlers.length = 0
 }

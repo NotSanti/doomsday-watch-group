@@ -34,58 +34,6 @@ export type Database = {
   }
   public: {
     Tables: {
-      activity_events: {
-        Row: {
-          actor_id: string
-          created_at: string
-          event_type: string
-          group_id: string
-          id: number
-          metadata: Json
-          title_id: string | null
-        }
-        Insert: {
-          actor_id: string
-          created_at?: string
-          event_type: string
-          group_id: string
-          id?: never
-          metadata?: Json
-          title_id?: string | null
-        }
-        Update: {
-          actor_id?: string
-          created_at?: string
-          event_type?: string
-          group_id?: string
-          id?: never
-          metadata?: Json
-          title_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "activity_events_actor_id_fkey"
-            columns: ["actor_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "activity_events_group_id_fkey"
-            columns: ["group_id"]
-            isOneToOne: false
-            referencedRelation: "groups"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "activity_events_title_id_fkey"
-            columns: ["title_id"]
-            isOneToOne: false
-            referencedRelation: "titles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       group_invites: {
         Row: {
           created_at: string

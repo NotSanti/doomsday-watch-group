@@ -7,8 +7,6 @@ import { Skeleton } from '@/components/Skeleton'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { useAuth } from '@/features/auth/use-auth'
-import { ActivityFeed } from '@/features/activity/ActivityFeed'
-import { useGroupActivity } from '@/features/activity/use-activity'
 import { toFriendlyGroupDetailError, toFriendlyGroupMembersError } from '@/features/groups/group-errors'
 import { groupRoleForUser } from '@/features/groups/group-schemas'
 import { MemberRoster } from '@/features/groups/MemberRoster'
@@ -47,7 +45,6 @@ export function GroupDashboardPage() {
   const membersQuery = useGroupMembers(groupId)
   const titlesQuery = useTitleList()
   const progressQuery = useGroupProgress(groupId)
-  const activityQuery = useGroupActivity(groupId)
   const setStatus = useSetTitleStatus(groupId)
   const setCurrentTitle = useSetCurrentTitle(groupId)
   const [pickerOpen, setPickerOpen] = useState(false)
@@ -56,8 +53,7 @@ export function GroupDashboardPage() {
     groupQuery.isPending ||
     membersQuery.isPending ||
     titlesQuery.isPending ||
-    progressQuery.isPending ||
-    activityQuery.isPending
+    progressQuery.isPending
 
   if (pending) {
     return (
@@ -310,21 +306,6 @@ export function GroupDashboardPage() {
           isError={membersQuery.isError}
           onRetry={() => {
             void membersQuery.refetch()
-          }}
-        />
-      </section>
-
-      <section className="space-y-3">
-        <h2 className="font-display text-2xl tracking-[0.08em] text-heading uppercase">
-          Activity
-        </h2>
-        <ActivityFeed
-          events={activityQuery.data ?? []}
-          timeZone={group.timezone}
-          isPending={false}
-          isError={activityQuery.isError}
-          onRetry={() => {
-            void activityQuery.refetch()
           }}
         />
       </section>
