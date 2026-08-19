@@ -1,3 +1,4 @@
--- Curated MCU catalog is applied by migration 20260819001500_mcu_catalog.sql.
+-- Curated MCU catalog is applied by migrations:
+--   20260819001500_mcu_catalog.sql
+--   20260819020000_doomsday_path_order.sql
 -- Keep this file as the review pointer so the seed glob stays explicit.
--- Do not scrape marvelwatchlist.com.

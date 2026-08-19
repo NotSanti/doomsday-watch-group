@@ -64,7 +64,18 @@ const inactive = {
   is_active: false,
 } satisfies TitleRow
 
-const titles = [ironMan, wandaVision, werewolf, inactive]
+const offPath = {
+  ...ironMan,
+  id: 'aa000000-0000-4000-8000-000000000040',
+  tmdb_id: 524434,
+  name: 'Eternals',
+  release_date: '2021-11-05',
+  importance: 'optional',
+  release_order: 31,
+  doomsday_order: null,
+} satisfies TitleRow
+
+const titles = [ironMan, wandaVision, werewolf, inactive, offPath]
 
 const progress: TitleProgress[] = [
   { title_id: ironMan.id, status: 'watched' },
@@ -159,6 +170,20 @@ describe('filterTitles', () => {
         ...DEFAULT_WATCHLIST_FILTERS,
         sort: 'release',
       }).map((title) => title.name),
-    ).toEqual(['Iron Man', 'WandaVision', 'Werewolf by Night'])
+    ).toEqual(['Iron Man', 'WandaVision', 'Werewolf by Night', 'Eternals'])
+  })
+
+  it('omits off-path titles from Doomsday order and keeps them in release order', () => {
+    expect(
+      filterTitles(titles, progress, DEFAULT_WATCHLIST_FILTERS).map(
+        (title) => title.name,
+      ),
+    ).toEqual(['WandaVision', 'Werewolf by Night', 'Iron Man'])
+    expect(
+      filterTitles(titles, progress, {
+        ...DEFAULT_WATCHLIST_FILTERS,
+        sort: 'release',
+      }).some((title) => title.name === 'Eternals'),
+    ).toBe(true)
   })
 })
