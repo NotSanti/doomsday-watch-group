@@ -1,5 +1,5 @@
 begin;
-select plan(33);
+select plan(45);
 
 create temp table test_users (
   label text primary key,
@@ -267,6 +267,104 @@ select throws_ok(
   'member cannot insert progress for another user'
 );
 
+select lives_ok(
+  format(
+    $$insert into public.member_title_progress (group_id, user_id, title_id, status)
+      values (%L, %L, 'aa000000-0000-4000-8000-000000000002', 'watching')$$,
+    (select id from test_groups where label = 'alpha'),
+    (select id from test_users where label = 'member-a')
+  ),
+  'member can insert watching without supplying timestamps'
+);
+
+select isnt(
+  (
+    select started_at
+    from public.member_title_progress
+    where group_id = (select id from test_groups where label = 'alpha')
+      and user_id = (select id from test_users where label = 'member-a')
+      and title_id = 'aa000000-0000-4000-8000-000000000002'
+  ),
+  null,
+  'watching sets started_at'
+);
+
+select is(
+  (
+    select watched_at
+    from public.member_title_progress
+    where group_id = (select id from test_groups where label = 'alpha')
+      and user_id = (select id from test_users where label = 'member-a')
+      and title_id = 'aa000000-0000-4000-8000-000000000002'
+  ),
+  null,
+  'watching leaves watched_at empty'
+);
+
+select lives_ok(
+  format(
+    $$update public.member_title_progress
+      set status = 'watched'
+      where group_id = %L
+        and user_id = %L
+        and title_id = 'aa000000-0000-4000-8000-000000000002'$$,
+    (select id from test_groups where label = 'alpha'),
+    (select id from test_users where label = 'member-a')
+  ),
+  'member can mark a title watched'
+);
+
+select isnt(
+  (
+    select watched_at
+    from public.member_title_progress
+    where group_id = (select id from test_groups where label = 'alpha')
+      and user_id = (select id from test_users where label = 'member-a')
+      and title_id = 'aa000000-0000-4000-8000-000000000002'
+  ),
+  null,
+  'watched sets watched_at'
+);
+
+select lives_ok(
+  format(
+    $$update public.member_title_progress
+      set status = 'watching'
+      where group_id = %L
+        and user_id = %L
+        and title_id = 'aa000000-0000-4000-8000-000000000002'$$,
+    (select id from test_groups where label = 'alpha'),
+    (select id from test_users where label = 'member-a')
+  ),
+  'member can return a title to watching'
+);
+
+select is(
+  (
+    select watched_at
+    from public.member_title_progress
+    where group_id = (select id from test_groups where label = 'alpha')
+      and user_id = (select id from test_users where label = 'member-a')
+      and title_id = 'aa000000-0000-4000-8000-000000000002'
+  ),
+  null,
+  'returning to watching clears watched_at'
+);
+
+update public.groups
+set current_title_id = 'aa000000-0000-4000-8000-000000000001'
+where id = (select id from test_groups where label = 'alpha');
+
+select is(
+  (
+    select current_title_id
+    from public.groups
+    where id = (select id from test_groups where label = 'alpha')
+  ),
+  null,
+  'non-owner cannot change the current title'
+);
+
 select throws_ok(
   format(
     $$select * from public.create_invite(%L, now() + interval '1 day', 1)$$,
@@ -331,6 +429,74 @@ select throws_ok(
   '42501',
   null,
   'clients cannot insert activity events'
+);
+
+select set_config('request.jwt.claim.sub', (select id::text from test_users where label = 'owner-a'), true);
+select set_config(
+  'request.jwt.claims',
+  json_build_object(
+    'sub', (select id::text from test_users where label = 'owner-a'),
+    'role', 'authenticated'
+  )::text,
+  true
+);
+
+select lives_ok(
+  format(
+    $$update public.groups
+      set current_title_id = 'aa000000-0000-4000-8000-000000000001'
+      where id = %L$$,
+    (select id from test_groups where label = 'alpha')
+  ),
+  'owner can change the current title'
+);
+
+select is(
+  (
+    select current_title_id
+    from public.groups
+    where id = (select id from test_groups where label = 'alpha')
+  ),
+  'aa000000-0000-4000-8000-000000000001'::uuid,
+  'owner current-title update persists'
+);
+
+select lives_ok(
+  format(
+    $$insert into public.member_title_progress (group_id, user_id, title_id, status)
+      values (%L, %L, 'aa000000-0000-4000-8000-000000000003', 'watching')$$,
+    (select id from test_groups where label = 'alpha'),
+    (select id from test_users where label = 'owner-a')
+  ),
+  'owner can insert own progress'
+);
+
+select set_config('request.jwt.claim.sub', (select id::text from test_users where label = 'member-a'), true);
+select set_config(
+  'request.jwt.claims',
+  json_build_object(
+    'sub', (select id::text from test_users where label = 'member-a'),
+    'role', 'authenticated'
+  )::text,
+  true
+);
+
+update public.member_title_progress
+set status = 'watched'
+where group_id = (select id from test_groups where label = 'alpha')
+  and user_id = (select id from test_users where label = 'owner-a')
+  and title_id = 'aa000000-0000-4000-8000-000000000003';
+
+select is(
+  (
+    select status
+    from public.member_title_progress
+    where group_id = (select id from test_groups where label = 'alpha')
+      and user_id = (select id from test_users where label = 'owner-a')
+      and title_id = 'aa000000-0000-4000-8000-000000000003'
+  ),
+  'watching',
+  'member cannot update another member’s progress'
 );
 
 select set_config('request.jwt.claim.sub', (select id::text from test_users where label = 'owner-b'), true);

@@ -123,3 +123,26 @@ export async function createGroup(
 
   return groupRowSchema.parse(data)
 }
+
+export async function updateGroupCurrentTitle(
+  client: BrowserSupabaseClient,
+  groupId: string,
+  titleId: string | null,
+): Promise<GroupRow> {
+  const { data, error } = await client
+    .from('groups')
+    .update({ current_title_id: titleId })
+    .eq('id', groupId)
+    .select(GROUP_COLUMNS)
+    .maybeSingle()
+
+  if (error) {
+    throw error
+  }
+
+  if (!data) {
+    throw new Error('CURRENT_TITLE_UPDATE_FAILED')
+  }
+
+  return groupRowSchema.parse(data)
+}

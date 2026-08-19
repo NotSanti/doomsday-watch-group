@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { toFriendlyGroupDetailError } from '@/features/groups/group-errors'
 import { isGroupId } from '@/features/groups/group-schemas'
 import { useGroup } from '@/features/groups/use-groups'
+import { useGroupRealtime } from '@/features/progress/use-progress'
 
 function MembershipSkeleton() {
   return (
@@ -35,6 +36,7 @@ export function RequireGroupMembership() {
   const { groupId = '' } = useParams()
   const groupQuery = useGroup(groupId)
   const canFetch = isGroupId(groupId)
+  useGroupRealtime(canFetch && groupQuery.data ? groupId : '')
 
   if (!canFetch) {
     return <GroupUnavailable />

@@ -19,6 +19,7 @@ type TitleCardProps = {
   status: TitleStatus
   sort: WatchlistSort
   href: string
+  groupWatchedLabel: string
 }
 
 function statusTone(status: TitleStatus) {
@@ -33,7 +34,13 @@ function statusTone(status: TitleStatus) {
   return 'notStarted' as const
 }
 
-export function TitleCard({ title, status, sort, href }: TitleCardProps) {
+export function TitleCard({
+  title,
+  status,
+  sort,
+  href,
+  groupWatchedLabel,
+}: TitleCardProps) {
   const year = titleYear(title.release_date)
   const runtime = titleRuntimeLabel(title)
   const sequence = sequenceForTitle(title, sort)
@@ -59,6 +66,7 @@ export function TitleCard({ title, status, sort, href }: TitleCardProps) {
             <Badge tone={statusTone(status)}>
               {TITLE_STATUS_LABEL[status]}
             </Badge>
+            <Badge tone="muted">{groupWatchedLabel}</Badge>
           </div>
         </div>
       </Link>
