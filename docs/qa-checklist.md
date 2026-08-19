@@ -74,8 +74,11 @@ Manual and automated checks for the Doomsday Watch Group MVP before release. Run
 
 ## Production smoke (after deploy)
 
-- [ ] Nested client route loads directly (e.g. `/groups/:id/watchlist`).
-- [ ] Auth callback works on production origin.
-- [ ] Create group → invite → join → watch → review on production-like backend.
+Full checklist: `docs/release-checklist.md`. Minimum:
+
+- [ ] Nested client route loads directly (e.g. `/about` or `/groups/:id/watchlist`).
+- [ ] Auth callback works on that origin.
+- [ ] Create group → invite → join → watch → review on the target backend.
+- [ ] Migrations were applied before promoting incompatible frontend code.
 
 Record date, environment (local/preview/prod), tester, and any defects in the release notes.

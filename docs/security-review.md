@@ -42,6 +42,7 @@ Re-run before each release; document any accepted risk with mitigation and revie
 
 - `E2E_SUPABASE_SERVICE_ROLE_KEY` is required only for Playwright global setup/helpers (seed expired invites). Keep it in local `.env` and CI secrets; never prefix with `VITE_`.
 - Playwright loads `.env` locally; production/preview Vercel projects must not define the service-role key.
+- GitHub Actions starts ephemeral local Supabase for database tests and Playwright; hosted keys are not stored in repository secrets for those jobs.
 
 ## Realtime
 
@@ -57,8 +58,8 @@ Re-run before each release; document any accepted risk with mitigation and revie
 
 ## Recommended follow-ups (post-MVP)
 
-- GitHub Actions job running lint, typecheck, unit tests, build, bundle scan, and Playwright against ephemeral Supabase (Milestone 12).
 - Periodic `npm audit` and dependency update cadence.
+- Dedicated preview/staging Supabase project (preview currently may share hosted production).
 - CSP headers and security.txt on production domain.
 
 ## Verification commands

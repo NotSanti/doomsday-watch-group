@@ -14,7 +14,7 @@ Unofficial fan project. Not affiliated with or endorsed by Marvel or Disney.
 - Backend: Supabase (Postgres, Auth, RLS, Realtime)
 - Tests: Vitest, React Testing Library, Playwright
 - Hosting: Vercel
-- CI: GitHub Actions (Milestone 12)
+- CI: GitHub Actions
 
 ## Links
 
@@ -51,10 +51,13 @@ npm run lint
 npm run typecheck
 npm run test
 npm run build
-npm run verify          # lint + format + typecheck + test + build + bundle scan + audit
+npm run ci              # lint + typecheck + unit tests + build + bundle scan + audit
+npm run verify          # ci plus Prettier check
 npm run test:e2e        # Playwright (requires local Supabase + .env)
 npx supabase test db
 ```
+
+GitHub Actions runs `npm run ci` plus local Supabase database tests and Playwright on every pull request and on `main`. See `docs/deployment.md`.
 
 Playwright needs `E2E_SUPABASE_SERVICE_ROLE_KEY` from `npx supabase status` in `.env` alongside the Vite Supabase vars. See `docs/qa-checklist.md`.
 
@@ -67,7 +70,10 @@ VITE_SUPABASE_PUBLISHABLE_KEY
 TMDB_API_READ_TOKEN
 ```
 
-`TMDB_API_READ_TOKEN` is server/script-only. Do not prefix it with `VITE_`.
+`TMDB_API_READ_TOKEN` is server/script-only. Do not prefix it with `VITE_` and do not add it to Vercel.
+
+Deployment, Auth redirect URLs, migration order, and rollback: `docs/deployment.md`.  
+Preview/production smoke: `docs/release-checklist.md`.
 
 ## Routes
 
@@ -106,6 +112,6 @@ Do not build in MVP: public groups, chat/comments/reactions/notifications, multi
 - [x] 9 — Activity, members, and group administration
 - [x] 10 — Realtime polish
 - [x] 11 — End-to-end quality and security
-- [ ] 12 — Production hardening and CI
+- [x] 12 — Production hardening and CI
 
-Work one numbered milestone at a time. See `AGENTS.md` and `docs/architecture.md`.
+Work one numbered milestone at a time. See `AGENTS.md`, `docs/architecture.md`, and `docs/deployment.md`.

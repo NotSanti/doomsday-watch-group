@@ -62,10 +62,10 @@ npx supabase test db
 
 Documented in `.env.example`:
 
-- `VITE_APP_URL` — public origin
+- `VITE_APP_URL` — public origin (canonical in production; derived from `VERCEL_URL` on preview)
 - `VITE_SUPABASE_URL` — project URL
 - `VITE_SUPABASE_PUBLISHABLE_KEY` — anon/publishable key
-- `TMDB_API_READ_TOKEN` — server/script only
+- `TMDB_API_READ_TOKEN` — server/script only (never Vercel)
 
 ## Hosting
 
@@ -73,5 +73,7 @@ Documented in `.env.example`:
 - Production: https://doomsday-watch-group.vercel.app
 - Vercel deploys `main` to production and pull requests to preview URLs.
 - `vercel.json` rewrites unknown paths to `index.html` so React Router nested URLs work.
-- Register local, preview, and production auth callback URLs in Supabase (Milestone 3 / 12).
+- GitHub Actions: `.github/workflows/ci.yml` (lint, typecheck, unit tests, build, bundle scan, audit, database tests, Playwright).
+- Register local, preview, and production auth callback URLs in Supabase. See `docs/deployment.md`.
   Local callback: `http://127.0.0.1:5173/auth/callback`
+  Production callback: `https://doomsday-watch-group.vercel.app/auth/callback`

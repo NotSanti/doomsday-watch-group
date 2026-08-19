@@ -3,6 +3,7 @@ import { fileURLToPath } from 'node:url'
 import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vitest/config'
+import { applyViteAppUrl } from './src/lib/resolve-app-url.ts'
 
 function withWindowsDriveCase(filePath: string): string {
   return filePath.replace(
@@ -21,6 +22,8 @@ if (process.platform === 'win32') {
 const rootDir = withWindowsDriveCase(
   path.dirname(fileURLToPath(import.meta.url)),
 )
+
+applyViteAppUrl(process.env)
 
 export default defineConfig({
   root: rootDir,
