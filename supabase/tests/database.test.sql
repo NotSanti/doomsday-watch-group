@@ -1,5 +1,5 @@
 begin;
-select plan(64);
+select plan(63);
 
 create temp table test_users (
   label text primary key,
@@ -430,18 +430,6 @@ select throws_ok(
   '23514',
   null,
   'review bodies over 2000 characters are rejected'
-);
-
-select throws_ok(
-  format(
-    $$insert into public.activity_events (group_id, actor_id, event_type)
-      values (%L, %L, 'joined')$$,
-    (select id from test_groups where label = 'alpha'),
-    (select id from test_users where label = 'member-a')
-  ),
-  '42501',
-  null,
-  'clients cannot insert activity events'
 );
 
 select set_config('request.jwt.claim.sub', (select id::text from test_users where label = 'owner-a'), true);

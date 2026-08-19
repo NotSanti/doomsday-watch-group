@@ -3,14 +3,12 @@ import userEvent from '@testing-library/user-event'
 import { describe, expect, it } from 'vitest'
 import { renderApp } from '@/test/render-app'
 import {
-  makeActivity,
   makeGroup,
   makeMember,
   makeProfile,
   makeSession,
   makeTitle,
   makeTitleProgress,
-  setMockActivity,
   setMockGroups,
   setMockMembers,
   setMockProfile,
@@ -74,30 +72,7 @@ function seedGroup(): void {
   ])
 }
 
-describe('members and activity', () => {
-  it('shows recent activity on the dashboard', async () => {
-    seedGroup()
-    setMockActivity([
-      makeActivity({
-        event_type: 'completed',
-        actor_name: 'Member B',
-        actor_id: MEMBER_ID,
-        title_id: IRON_ID,
-        title_name: 'Iron Man',
-      }),
-      makeActivity({
-        event_type: 'joined',
-        actor_name: 'Member B',
-        actor_id: MEMBER_ID,
-      }),
-    ])
-    renderApp(`/groups/${GROUP_A}`)
-
-    expect(await screen.findByRole('heading', { name: 'Activity' })).toBeInTheDocument()
-    expect(screen.getByText('Member B watched Iron Man')).toBeInTheDocument()
-    expect(screen.getByText('Member B joined the group')).toBeInTheDocument()
-  })
-
+describe('members', () => {
   it('lists members with owner badges, sort, and a comparison grid', async () => {
     const user = userEvent.setup()
     seedGroup()

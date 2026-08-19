@@ -163,8 +163,6 @@ describe('groups', () => {
     )
     expect(dashboardRoster).not.toBeNull()
     expect(await within(dashboardRoster!).findByText('Owner A')).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: 'Activity' })).toBeInTheDocument()
-    expect(screen.getByText('No activity yet')).toBeInTheDocument()
   })
 
   it('lists each group’s members and marks the owner with a crown', async () => {
