@@ -1,5 +1,5 @@
 begin;
-select plan(30);
+select plan(32);
 
 create temp table test_users (
   label text primary key,
@@ -445,6 +445,18 @@ select ok(
     having count(*) > 1
   ),
   'doomsday_order values are unique when present'
+);
+
+select is(
+  (select doomsday_order from public.titles where id = 'aa000000-0000-4000-8000-000000000005'),
+  1,
+  'doomsday order starts with Captain America: The First Avenger'
+);
+
+select is(
+  (select count(*)::integer from public.titles where doomsday_order is not null),
+  62,
+  'doomsday path has 62 full titles'
 );
 
 select set_config('request.jwt.claim.sub', (select id::text from test_users where label = 'owner-a'), true);

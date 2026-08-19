@@ -130,6 +130,10 @@ export function filterTitles(
       return false
     }
 
+    if (filters.sort === 'doomsday' && title.doomsday_order == null) {
+      return false
+    }
+
     if (query && !title.name.toLowerCase().includes(query)) {
       return false
     }
