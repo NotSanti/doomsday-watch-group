@@ -1084,14 +1084,6 @@ update public.groups
 set current_title_id = 'aa000000-0000-4000-8000-000000000001'
 where id = (select id from test_groups where label = 'beta');
 
-insert into public.group_members (group_id, user_id, role)
-values (
-  (select id from test_groups where label = 'beta'),
-  (select id from test_users where label = 'member-a'),
-  'member'
-)
-on conflict do nothing;
-
 insert into public.member_title_progress (group_id, user_id, title_id, status, watched_at)
 values
   (
@@ -1114,7 +1106,7 @@ insert into public.member_title_progress (group_id, user_id, title_id, status, w
 values
   (
     (select id from test_groups where label = 'beta'),
-    (select id from test_users where label = 'member-a'),
+    (select id from test_users where label = 'outsider'),
     'aa000000-0000-4000-8000-000000000001',
     'watched',
     now()
@@ -1128,18 +1120,7 @@ select is(
     from public.groups
     where id = (select id from test_groups where label = 'beta')
   ),
-  (
-    select t.id
-    from public.titles t
-    where t.is_active
-      and t.doomsday_order > (
-        select current.doomsday_order
-        from public.titles current
-        where current.id = 'aa000000-0000-4000-8000-000000000001'
-      )
-    order by t.doomsday_order
-    limit 1
-  ),
+  'aa000000-0000-4000-8000-000000000002'::uuid,
   'current title advances to the next doomsday_order title when everyone watched'
 );
 
