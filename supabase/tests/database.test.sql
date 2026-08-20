@@ -268,6 +268,8 @@ select is(
   'repeat redemption is idempotent'
 );
 
+reset role;
+
 select ok(
   exists (
     select 1
@@ -278,6 +280,7 @@ select ok(
   'joining a group enqueues a member_joined notification for the owner'
 );
 
+set local role authenticated;
 select set_config('request.jwt.claim.sub', (select id::text from test_users where label = 'owner-a'), true);
 select set_config(
   'request.jwt.claims',
@@ -1075,6 +1078,8 @@ select lives_ok(
   'owner can delete the group'
 );
 
+reset role;
+
 update public.groups
 set current_title_id = 'aa000000-0000-4000-8000-000000000001'
 where id = (select id from test_groups where label = 'beta');
@@ -1118,8 +1123,23 @@ on conflict (group_id, user_id, title_id) do update
 set status = excluded.status, watched_at = excluded.watched_at;
 
 select is(
-  public.advance_current_title_if_ready((select id from test_groups where label = 'beta')),
-  'aa000000-0000-4000-8000-000000000002'::uuid,
+  (
+    select current_title_id
+    from public.groups
+    where id = (select id from test_groups where label = 'beta')
+  ),
+  (
+    select t.id
+    from public.titles t
+    where t.is_active
+      and t.doomsday_order > (
+        select current.doomsday_order
+        from public.titles current
+        where current.id = 'aa000000-0000-4000-8000-000000000001'
+      )
+    order by t.doomsday_order
+    limit 1
+  ),
   'current title advances to the next doomsday_order title when everyone watched'
 );
 
