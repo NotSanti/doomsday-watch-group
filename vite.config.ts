@@ -3,6 +3,7 @@ import { fileURLToPath } from 'node:url'
 import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vite'
+import { VitePWA } from 'vite-plugin-pwa'
 import { applyViteAppUrl } from './src/lib/resolve-app-url.ts'
 
 function withWindowsDriveCase(filePath: string): string {
@@ -27,7 +28,47 @@ applyViteAppUrl(process.env)
 
 export default defineConfig({
   root: rootDir,
-  plugins: [react(), tailwindcss()],
+  plugins: [
+    react(),
+    tailwindcss(),
+    VitePWA({
+      registerType: 'autoUpdate',
+      includeAssets: ['doom.svg', 'apple-touch-icon.png', 'doom.ico'],
+      manifest: {
+        name: 'Doomsday Watch Group',
+        short_name: 'Doomsday',
+        description:
+          'Private MCU watch group on the road to Avengers: Doomsday.',
+        theme_color: '#0d1210',
+        background_color: '#0d1210',
+        display: 'standalone',
+        start_url: '/',
+        icons: [
+          {
+            src: '/apple-touch-icon.png',
+            sizes: '180x180',
+            type: 'image/png',
+          },
+          {
+            src: '/doom.svg',
+            sizes: 'any',
+            type: 'image/svg+xml',
+            purpose: 'any',
+          },
+        ],
+      },
+      strategies: 'injectManifest',
+      srcDir: 'src',
+      filename: 'sw.ts',
+      injectManifest: {
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
+      },
+      devOptions: {
+        enabled: true,
+        type: 'module',
+      },
+    }),
+  ],
   resolve: {
     alias: {
       '@': path.resolve(rootDir, './src'),

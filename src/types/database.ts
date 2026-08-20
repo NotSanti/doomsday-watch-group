@@ -220,6 +220,91 @@ export type Database = {
           },
         ]
       }
+      notification_outbox: {
+        Row: {
+          created_at: string
+          error: string | null
+          id: number
+          notification_type: string
+          payload: Json
+          recipient_id: string
+          sent_at: string | null
+          status: Database['public']['Enums']['notification_outbox_status']
+        }
+        Insert: {
+          created_at?: string
+          error?: string | null
+          id?: never
+          notification_type: string
+          payload?: Json
+          recipient_id: string
+          sent_at?: string | null
+          status?: Database['public']['Enums']['notification_outbox_status']
+        }
+        Update: {
+          created_at?: string
+          error?: string | null
+          id?: never
+          notification_type?: string
+          payload?: Json
+          recipient_id?: string
+          sent_at?: string | null
+          status?: Database['public']['Enums']['notification_outbox_status']
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notification_outbox_recipient_id_fkey"
+            columns: ["recipient_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notification_preferences: {
+        Row: {
+          daily_countdown: boolean
+          group_ready_for_next_title: boolean
+          last_daily_countdown_sent_on: string | null
+          member_joined: boolean
+          member_rated: boolean
+          member_reviewed: boolean
+          member_watched: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          daily_countdown?: boolean
+          group_ready_for_next_title?: boolean
+          last_daily_countdown_sent_on?: string | null
+          member_joined?: boolean
+          member_rated?: boolean
+          member_reviewed?: boolean
+          member_watched?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          daily_countdown?: boolean
+          group_ready_for_next_title?: boolean
+          last_daily_countdown_sent_on?: string | null
+          member_joined?: boolean
+          member_rated?: boolean
+          member_reviewed?: boolean
+          member_watched?: boolean
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notification_preferences_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -242,7 +327,48 @@ export type Database = {
           id?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [        ]
+      }
+      push_subscriptions: {
+        Row: {
+          auth: string
+          created_at: string
+          endpoint: string
+          id: string
+          last_seen_at: string
+          p256dh: string
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          auth: string
+          created_at?: string
+          endpoint: string
+          id?: string
+          last_seen_at?: string
+          p256dh: string
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          auth?: string
+          created_at?: string
+          endpoint?: string
+          id?: string
+          last_seen_at?: string
+          p256dh?: string
+          user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "push_subscriptions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       reviews: {
         Row: {
@@ -422,6 +548,10 @@ export type Database = {
           group_id: string
         }[]
       }
+      advance_current_title_if_ready: {
+        Args: { p_group_id: string }
+        Returns: string
+      }
       revoke_invite: { Args: { p_invite_id: string }; Returns: undefined }
       delete_invite: { Args: { p_invite_id: string }; Returns: undefined }
       transfer_ownership: {
@@ -430,7 +560,7 @@ export type Database = {
       }
     }
     Enums: {
-      [_ in never]: never
+      notification_outbox_status: 'pending' | 'sent' | 'failed'
     }
     CompositeTypes: {
       [_ in never]: never

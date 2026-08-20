@@ -56,6 +56,18 @@ let reviewWriteError: { code?: string; message: string } | null = null
 let groupWriteError: { code?: string; message: string } | null = null
 let leaveGroupError: { code?: string; message: string } | null = null
 let transferOwnershipError: { code?: string; message: string } | null = null
+let notificationPreferences: Record<string, {
+  user_id: string
+  member_joined: boolean
+  member_watched: boolean
+  member_rated: boolean
+  member_reviewed: boolean
+  group_ready_for_next_title: boolean
+  daily_countdown: boolean
+  last_daily_countdown_sent_on: string | null
+  updated_at: string
+}> = {}
+let pushSubscriptionCount = 0
 const listeners = new Set<AuthListener>()
 const realtimeHandlers: {
   table: string
@@ -881,6 +893,80 @@ export const supabaseRpcMock = {
 }
 
 export const supabaseFromMock = vi.fn((table: string) => {
+  if (table === 'notification_preferences') {
+    const emptyPrefs = (userId: string) => ({
+      user_id: userId,
+      member_joined: true,
+      member_watched: true,
+      member_rated: true,
+      member_reviewed: true,
+      group_ready_for_next_title: true,
+      daily_countdown: false,
+      last_daily_countdown_sent_on: null,
+      updated_at: new Date().toISOString(),
+    })
+
+    return {
+      select: () => ({
+        eq: (_column: string, userId: string) => ({
+          maybeSingle: async () => ({
+            data: notificationPreferences[userId] ?? emptyPrefs(userId),
+            error: null,
+          }),
+        }),
+      }),
+      insert: (values: { user_id: string }) => {
+        const created = emptyPrefs(values.user_id)
+        notificationPreferences[values.user_id] = created
+        return {
+          select: () => ({
+            single: async () => ({ data: created, error: null }),
+          }),
+        }
+      },
+      upsert: (values: {
+        user_id: string
+        daily_countdown?: boolean
+        member_joined?: boolean
+        member_watched?: boolean
+        member_rated?: boolean
+        member_reviewed?: boolean
+        group_ready_for_next_title?: boolean
+      }) => {
+        const next = {
+          ...(notificationPreferences[values.user_id] ?? emptyPrefs(values.user_id)),
+          ...values,
+          updated_at: new Date().toISOString(),
+        }
+        notificationPreferences[values.user_id] = next
+        return {
+          select: () => ({
+            single: async () => ({ data: next, error: null }),
+          }),
+        }
+      },
+    }
+  }
+
+  if (table === 'push_subscriptions') {
+    return {
+      select: () => ({
+        eq: () =>
+          Promise.resolve({
+            data: [],
+            count: pushSubscriptionCount,
+            error: null,
+          }),
+      }),
+      upsert: async () => ({ data: null, error: null }),
+      delete: () => ({
+        eq: () => ({
+          eq: async () => ({ data: null, error: null }),
+        }),
+      }),
+    }
+  }
+
   if (table === 'profiles') {
     return {
       select: () => ({
@@ -1478,6 +1564,8 @@ export function resetSupabaseClient(): void {
   groupWriteError = null
   leaveGroupError = null
   transferOwnershipError = null
+  notificationPreferences = {}
+  pushSubscriptionCount = 0
   listeners.clear()
   realtimeHandlers.length = 0
   activeRealtimeChannelNames.clear()

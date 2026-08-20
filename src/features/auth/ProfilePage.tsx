@@ -19,6 +19,7 @@ import { parseAvatarIconId, type ProfileIconId } from '@/features/auth/profile-i
 import { useAuth } from '@/features/auth/use-auth'
 import { getSupabaseClient } from '@/lib/supabase'
 import { safeReturnTo } from '@/lib/return-to'
+import { PushNotificationsCard } from '@/features/notifications/PushNotificationsCard'
 
 export function ProfilePage() {
   const { user, profile, needsOnboarding, refreshProfile, signOut } = useAuth()
@@ -150,6 +151,11 @@ export function ProfilePage() {
                 : 'Save profile'}
           </Button>
         </form>
+        {onboarding ? null : (
+          <div className="mt-6 border-t border-border pt-4">
+            <PushNotificationsCard userId={user.id} />
+          </div>
+        )}
         <div className="mt-6 border-t border-border pt-4">
           <Button
             variant="secondary"

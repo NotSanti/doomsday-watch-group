@@ -130,4 +130,28 @@ describe('auth forms', () => {
       'true',
     )
   })
+
+  it('lets a member opt in to the daily Doomsday countdown', async () => {
+    const user = userEvent.setup()
+    setMockProfile(makeProfile({ avatar_url: 'icon:spider-man' }))
+    emitAuthEvent('SIGNED_IN', makeSession())
+    renderApp('/profile')
+
+    const toggle = await screen.findByRole('checkbox', {
+      name: /Daily Doomsday countdown/,
+    })
+    expect(toggle).not.toBeChecked()
+    expect(
+      screen.getByText(/Off by default/i),
+    ).toBeInTheDocument()
+
+    await user.click(toggle)
+
+    await waitFor(() => {
+      expect(toggle).toBeChecked()
+    })
+    expect(
+      screen.getByText(/You will get a reminder around 10:00 AM Eastern/i),
+    ).toBeInTheDocument()
+  })
 })

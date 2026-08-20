@@ -305,6 +305,12 @@ max_frequency = "5s"
 [functions.send-auth-email]
 verify_jwt = false
 
+[functions.send-push-notification]
+verify_jwt = false
+
+[functions.send-daily-countdown]
+verify_jwt = false
+
 # Configure one of the supported SMS providers: `twilio`, `twilio_verify`, `messagebird`, `textlocal`, `vonage`.
 [auth.sms.twilio]
 enabled = false

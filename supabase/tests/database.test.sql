@@ -1,5 +1,5 @@
 begin;
-select plan(73);
+select plan(79);
 
 create temp table test_users (
   label text primary key,
@@ -179,6 +179,35 @@ select is(
   'users cannot update another profile icon'
 );
 
+select ok(
+  exists (
+    select 1
+    from public.notification_preferences np
+    where np.user_id = (select id from test_users where label = 'owner-a')
+  ),
+  'notification preferences are created for profiles'
+);
+
+select lives_ok(
+  format(
+    $$insert into public.push_subscriptions (user_id, endpoint, p256dh, auth)
+      values (%L, 'https://push.example.test/device-owner', 'p256dh-key', 'auth-key')$$,
+    (select id from test_users where label = 'owner-a')
+  ),
+  'users can save their own push subscription'
+);
+
+select throws_ok(
+  format(
+    $$insert into public.push_subscriptions (user_id, endpoint, p256dh, auth)
+      values (%L, 'https://push.example.test/device-other', 'p256dh-key', 'auth-key')$$,
+    (select id from test_users where label = 'owner-b')
+  ),
+  '42501',
+  null,
+  'users cannot save push subscriptions for another account'
+);
+
 create temp table alpha_invite as
 select * from public.create_invite(
   (select id from test_groups where label = 'alpha'),
@@ -237,6 +266,16 @@ select is(
   ),
   true,
   'repeat redemption is idempotent'
+);
+
+select ok(
+  exists (
+    select 1
+    from public.notification_outbox no
+    where no.notification_type = 'member_joined'
+      and no.recipient_id = (select id from test_users where label = 'owner-a')
+  ),
+  'joining a group enqueues a member_joined notification for the owner'
 );
 
 select set_config('request.jwt.claim.sub', (select id::text from test_users where label = 'owner-a'), true);
@@ -1034,6 +1073,54 @@ select set_config(
 select lives_ok(
   format($$delete from public.groups where id = %L$$, (select id from test_groups where label = 'alpha')),
   'owner can delete the group'
+);
+
+update public.groups
+set current_title_id = 'aa000000-0000-4000-8000-000000000001'
+where id = (select id from test_groups where label = 'beta');
+
+insert into public.group_members (group_id, user_id, role)
+values (
+  (select id from test_groups where label = 'beta'),
+  (select id from test_users where label = 'member-a'),
+  'member'
+)
+on conflict do nothing;
+
+insert into public.member_title_progress (group_id, user_id, title_id, status, watched_at)
+values
+  (
+    (select id from test_groups where label = 'beta'),
+    (select id from test_users where label = 'owner-b'),
+    'aa000000-0000-4000-8000-000000000001',
+    'watched',
+    now()
+  )
+on conflict (group_id, user_id, title_id) do update
+set status = excluded.status, watched_at = excluded.watched_at;
+
+select is(
+  public.advance_current_title_if_ready((select id from test_groups where label = 'beta')),
+  null,
+  'current title does not advance until every member has watched it'
+);
+
+insert into public.member_title_progress (group_id, user_id, title_id, status, watched_at)
+values
+  (
+    (select id from test_groups where label = 'beta'),
+    (select id from test_users where label = 'member-a'),
+    'aa000000-0000-4000-8000-000000000001',
+    'watched',
+    now()
+  )
+on conflict (group_id, user_id, title_id) do update
+set status = excluded.status, watched_at = excluded.watched_at;
+
+select is(
+  public.advance_current_title_if_ready((select id from test_groups where label = 'beta')),
+  'aa000000-0000-4000-8000-000000000002'::uuid,
+  'current title advances to the next doomsday_order title when everyone watched'
 );
 
 select * from finish();

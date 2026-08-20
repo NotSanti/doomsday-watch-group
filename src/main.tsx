@@ -1,6 +1,7 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { QueryClientProvider } from '@tanstack/react-query'
+import { registerSW } from 'virtual:pwa-register'
 import { AppRouter } from '@/app/router'
 import { createQueryClient } from '@/app/query-client'
 import { ErrorState } from '@/components/ErrorState'
@@ -15,6 +16,10 @@ if (!rootElement) {
 }
 
 const queryClient = createQueryClient()
+
+if (import.meta.env.PROD || import.meta.env.DEV) {
+  registerSW({ immediate: true })
+}
 
 let envError: string | null = null
 
