@@ -8,27 +8,27 @@ describe('resolveViteAppUrl', () => {
   it('prefers an explicit public origin and strips a trailing slash', () => {
     expect(
       resolveViteAppUrl({
-        VITE_APP_URL: 'https://doomsday-watch-group.vercel.app/',
-        VERCEL_URL: 'doomsday-watch-group-git-preview-notsanti.vercel.app',
+        VITE_APP_URL: 'https://doomwatchparty.vercel.app/',
+        VERCEL_URL: 'doomwatchparty-git-preview-notsanti.vercel.app',
         VERCEL_ENV: 'preview',
       }),
-    ).toBe('https://doomsday-watch-group.vercel.app')
+    ).toBe('https://doomwatchparty.vercel.app')
   })
 
   it('derives HTTPS preview origins from VERCEL_URL', () => {
     expect(
       resolveViteAppUrl({
-        VERCEL_URL: 'doomsday-watch-group-abc123-notsanti.vercel.app',
+        VERCEL_URL: 'doomwatchparty-abc123-notsanti.vercel.app',
         VERCEL_ENV: 'preview',
       }),
-    ).toBe('https://doomsday-watch-group-abc123-notsanti.vercel.app')
+    ).toBe('https://doomwatchparty-abc123-notsanti.vercel.app')
   })
 
   it('refuses production builds without a canonical origin', () => {
     expect(() =>
       resolveViteAppUrl({
         VERCEL_ENV: 'production',
-        VERCEL_URL: 'doomsday-watch-group-xyz.vercel.app',
+        VERCEL_URL: 'doomwatchparty-xyz.vercel.app',
       }),
     ).toThrow(PRODUCTION_APP_URL_ERROR)
   })

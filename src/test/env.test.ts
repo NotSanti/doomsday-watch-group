@@ -6,9 +6,11 @@ describe('parseClientEnv', () => {
       VITE_APP_URL: 'http://127.0.0.1:5173',
       VITE_SUPABASE_URL: 'http://127.0.0.1:54321',
       VITE_SUPABASE_PUBLISHABLE_KEY: 'test-publishable-key',
+      RESEND_API_KEY: 're_should-not-be-read',
     })
 
     expect(env.VITE_APP_URL).toBe('http://127.0.0.1:5173')
+    expect(env).not.toHaveProperty('RESEND_API_KEY')
   })
 
   it('hides missing values behind a configuration message', () => {

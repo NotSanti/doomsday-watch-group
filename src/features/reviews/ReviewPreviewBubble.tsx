@@ -1,4 +1,5 @@
 import { PLACEHOLDER_DISPLAY_NAME } from '@/features/auth/auth-schemas'
+import { MemberAvatar } from '@/features/groups/MemberAvatar'
 import type { GroupMember } from '@/features/groups/group-schemas'
 import {
   formatRating,
@@ -21,10 +22,16 @@ type ReviewPreviewBubbleProps = {
   className?: string
 }
 
-function nameFor(members: readonly GroupMember[], userId: string): string {
+function memberFor(
+  members: readonly GroupMember[],
+  userId: string,
+): Pick<GroupMember, 'display_name' | 'avatar_url' | 'role'> {
   return (
-    members.find((member) => member.user_id === userId)?.display_name ??
-    PLACEHOLDER_DISPLAY_NAME
+    members.find((member) => member.user_id === userId) ?? {
+      display_name: PLACEHOLDER_DISPLAY_NAME,
+      avatar_url: null,
+      role: 'member',
+    }
   )
 }
 
@@ -61,28 +68,36 @@ export function ReviewPreviewBubble({
           {reviews.length}
         </button>
       </PopoverTrigger>
-      <PopoverContent side="top" align="end" onOpenAutoFocus={(event) => {
-        event.preventDefault()
-      }}>
+      <PopoverContent
+        side="top"
+        align="end"
+        onOpenAutoFocus={(event) => {
+          event.preventDefault()
+        }}
+      >
         <PopoverLabel>{countLabel}</PopoverLabel>
         <ul className="max-h-64 space-y-3 overflow-y-auto">
           {reviews.map((review) => {
             const isOwn = review.user_id === currentUserId
+            const member = memberFor(members, review.user_id)
 
             return (
-              <li key={review.id} className="space-y-1">
-                <p className="flex items-baseline justify-between gap-3">
-                  <span className="text-heading">
-                    {nameFor(members, review.user_id)}
-                    {isOwn ? ' (you)' : ''}
-                  </span>
-                  <span className="gold-text text-xs">
-                    {formatRating(review.rating)} / 10
-                  </span>
-                </p>
-                <p className="text-muted">
-                  {reviewHoverPreview(review, isOwn)}
-                </p>
+              <li key={review.id} className="flex items-start gap-2.5">
+                <MemberAvatar member={member} />
+                <div className="min-w-0 flex-1 space-y-1">
+                  <p className="flex items-baseline justify-between gap-3">
+                    <span className="truncate text-heading">
+                      {member.display_name}
+                      {isOwn ? ' (you)' : ''}
+                    </span>
+                    <span className="gold-text shrink-0 text-xs">
+                      {formatRating(review.rating)} / 10
+                    </span>
+                  </p>
+                  <p className="text-muted">
+                    {reviewHoverPreview(review, isOwn)}
+                  </p>
+                </div>
               </li>
             )
           })}

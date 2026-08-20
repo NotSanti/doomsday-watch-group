@@ -6,6 +6,10 @@ import {
   type SignInValues,
   type SignUpValues,
 } from '@/features/auth/auth-schemas'
+import {
+  toAvatarUrl,
+  type ProfileIconId,
+} from '@/features/auth/profile-icons'
 
 export const profileQueryKey = (userId: string) => ['profile', userId] as const
 
@@ -36,6 +40,25 @@ export async function updateDisplayName(
   const { data, error } = await client
     .from('profiles')
     .update({ display_name: displayName })
+    .eq('id', userId)
+    .select(PROFILE_COLUMNS)
+    .maybeSingle()
+
+  if (error || !data) {
+    throw error ?? new Error('PROFILE_UPDATE_FAILED')
+  }
+
+  return profileRowSchema.parse(data)
+}
+
+export async function updateAvatarIcon(
+  client: BrowserSupabaseClient,
+  userId: string,
+  iconId: ProfileIconId,
+): Promise<ProfileRow> {
+  const { data, error } = await client
+    .from('profiles')
+    .update({ avatar_url: toAvatarUrl(iconId) })
     .eq('id', userId)
     .select(PROFILE_COLUMNS)
     .maybeSingle()

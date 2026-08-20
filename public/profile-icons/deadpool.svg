@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256" role="img" aria-labelledby="title-deadpool">
+<title id="title-deadpool">Deadpool fan avatar</title>
+<circle cx="128" cy="128" r="118" fill="#2A0D12"/>
+<circle cx="128" cy="128" r="112" fill="none" stroke="#D82332" stroke-width="5"/>
+<circle cx="128" cy="128" r="72" fill="#D82332" stroke="#121217" stroke-width="9"/><path d="M128 57v142M72 88q30 7 43 37-4 44-35 57-22-42-8-94Zm112 0q-30 7-43 37 4 44 35 57 22-42 8-94Z" fill="#121217"/><path d="m82 116 27 14-21 15m86-29-27 14 21 15" fill="none" stroke="#F4EFE8" stroke-width="9" stroke-linecap="round"/>
+</svg>

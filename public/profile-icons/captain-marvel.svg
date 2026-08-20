@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256" role="img" aria-labelledby="title-captain-marvel">
+<title id="title-captain-marvel">Captain Marvel fan avatar</title>
+<circle cx="128" cy="128" r="118" fill="#153D70"/>
+<circle cx="128" cy="128" r="112" fill="none" stroke="#D62839" stroke-width="5"/>
+<path d="m128 47 18 50 53-15-35 42 36 40-54-12-18 55-18-55-54 12 36-40-35-42 53 15z" fill="#F5C542" stroke="#D62839" stroke-width="8" stroke-linejoin="round"/><path d="m128 82 10 29 31-7-21 23 20 23-30-8-10 32-10-32-30 8 20-23-21-23 31 7z" fill="#F7F2E8"/>
+</svg>

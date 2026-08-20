@@ -1,5 +1,5 @@
 begin;
-select plan(70);
+select plan(73);
 
 create temp table test_users (
   label text primary key,
@@ -125,6 +125,58 @@ select set_config(
     'role', 'authenticated'
   )::text,
   true
+);
+
+select lives_ok(
+  format(
+    $$update public.profiles set avatar_url = 'icon:iron-man' where id = %L$$,
+    (select id from test_users where label = 'owner-a')
+  ),
+  'users can save their own profile icon'
+);
+
+select is(
+  (
+    select avatar_url
+    from public.profiles
+    where id = (select id from test_users where label = 'owner-a')
+  ),
+  'icon:iron-man',
+  'saved profile icon persists'
+);
+
+select set_config('request.jwt.claim.sub', (select id::text from test_users where label = 'owner-b'), true);
+select set_config(
+  'request.jwt.claims',
+  json_build_object(
+    'sub', (select id::text from test_users where label = 'owner-b'),
+    'role', 'authenticated'
+  )::text,
+  true
+);
+
+update public.profiles
+set avatar_url = 'icon:spider-man'
+where id = (select id from test_users where label = 'owner-a');
+
+select set_config('request.jwt.claim.sub', (select id::text from test_users where label = 'owner-a'), true);
+select set_config(
+  'request.jwt.claims',
+  json_build_object(
+    'sub', (select id::text from test_users where label = 'owner-a'),
+    'role', 'authenticated'
+  )::text,
+  true
+);
+
+select is(
+  (
+    select avatar_url
+    from public.profiles
+    where id = (select id from test_users where label = 'owner-a')
+  ),
+  'icon:iron-man',
+  'users cannot update another profile icon'
 );
 
 create temp table alpha_invite as

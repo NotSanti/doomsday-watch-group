@@ -156,8 +156,9 @@ describe('groups', () => {
     ).toBeInTheDocument()
     expect(screen.getByText('First room')).toBeInTheDocument()
     expect(screen.getByText('Owner')).toBeInTheDocument()
-    expect(await screen.findByText('Owner A')).toBeInTheDocument()
-    expect(screen.getByText('(owner)')).toBeInTheDocument()
+    expect(
+      await screen.findByRole('button', { name: 'Owner A (owner)' }),
+    ).toBeInTheDocument()
 
     await user.click(screen.getByRole('link', { name: 'Open group' }))
 
@@ -176,7 +177,7 @@ describe('groups', () => {
     ).toBeInTheDocument()
   })
 
-  it('lists each group’s members and marks the owner with a crown', async () => {
+  it('lists each group’s members as icons and highlights the owner', async () => {
     const user = userEvent.setup()
     signInAsOwner()
     setMockGroups([
@@ -191,12 +192,14 @@ describe('groups', () => {
         user_id: USER_ID,
         role: 'owner',
         display_name: 'Owner A',
+        avatar_url: 'icon:iron-man',
       }),
       makeMember({
         group_id: GROUP_A,
         user_id: MEMBER_ID,
         role: 'member',
         display_name: 'Member B',
+        avatar_url: 'icon:spider-man',
         joined_at: '2026-08-19T00:00:00.000Z',
       }),
     ])
@@ -207,12 +210,24 @@ describe('groups', () => {
     })
     const tile = tileHeading.closest('li')
     expect(tile).not.toBeNull()
-    expect(await within(tile!).findByText('Owner A')).toBeInTheDocument()
-    expect(within(tile!).getByText('(owner)')).toBeInTheDocument()
-    expect(within(tile!).getByText('Member B')).toBeInTheDocument()
-    expect(within(tile!).getByText('Owner A').parentElement).toHaveClass(
-      'rounded-full',
+    const ownerButton = await within(tile!).findByRole('button', {
+      name: 'Owner A (owner)',
+    })
+    const memberButton = within(tile!).getByRole('button', { name: 'Member B' })
+    expect(ownerButton).toHaveClass('ring-gold')
+    expect(ownerButton.querySelector('img')).toHaveAttribute(
+      'src',
+      '/profile-icons/iron-man.svg',
     )
+    expect(memberButton.querySelector('img')).toHaveAttribute(
+      'src',
+      '/profile-icons/spider-man.svg',
+    )
+
+    await user.hover(memberButton)
+    expect(
+      await screen.findByRole('tooltip', { name: 'Member B' }),
+    ).toBeInTheDocument()
 
     await user.click(within(tile!).getByRole('link', { name: 'Open group' }))
 

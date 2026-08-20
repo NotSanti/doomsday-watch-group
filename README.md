@@ -19,7 +19,7 @@ Unofficial fan project. Not affiliated with or endorsed by Marvel or Disney.
 ## Links
 
 - GitHub: https://github.com/NotSanti/doomsday-watch-group
-- Vercel production: https://doomsday-watch-group.vercel.app
+- Vercel production: https://doomwatchparty.vercel.app
 
 ## Local setup
 
@@ -33,7 +33,7 @@ npm run dev
 
 Copy `API_URL` into `VITE_SUPABASE_URL` and the anon/publishable key into `VITE_SUPABASE_PUBLISHABLE_KEY`. Set `VITE_APP_URL` to `http://127.0.0.1:5173`. Restart local Supabase after `config.toml` auth URL changes so callback links work.
 
-Auth emails are not sent on the public internet. Open Mailpit at `http://127.0.0.1:54324` for confirmation and password-reset messages.
+Auth emails are not sent on the public internet locally. Open Mailpit at `http://127.0.0.1:54324` for confirmation and password-reset messages. Hosted Auth uses Resend templates via the `send-auth-email` Edge Function — see `docs/auth-email.md`.
 
 Database commands:
 
@@ -68,11 +68,16 @@ VITE_APP_URL
 VITE_SUPABASE_URL
 VITE_SUPABASE_PUBLISHABLE_KEY
 TMDB_API_READ_TOKEN
+RESEND_API_KEY
+RESEND_FROM_EMAIL
 ```
 
 `TMDB_API_READ_TOKEN` is server/script-only. Do not prefix it with `VITE_` and do not add it to Vercel.
 
+`RESEND_*` and `SEND_EMAIL_HOOK_SECRET` are Supabase Edge Function secrets only. Never prefix them with `VITE_` and never add them to Vercel.
+
 Deployment, Auth redirect URLs, migration order, and rollback: `docs/deployment.md`.  
+Hosted Auth email (Resend): `docs/auth-email.md`.
 Preview/production smoke: `docs/release-checklist.md`.
 
 ## Routes

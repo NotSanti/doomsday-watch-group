@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256" role="img" aria-labelledby="title-doctor-doom">
+<title id="title-doctor-doom">Doctor Doom fan avatar</title>
+<circle cx="128" cy="128" r="118" fill="#18251E"/>
+<circle cx="128" cy="128" r="112" fill="none" stroke="#759171" stroke-width="5"/>
+<path d="m83 62 45-18 45 18 17 61-18 66-44 23-44-23-18-66z" fill="#759171" stroke="#18251E" stroke-width="9"/><path d="M90 92h76l10 35-18 64-30 16-30-16-18-64z" fill="#AEB8B0"/><path d="m91 119 29 8-21 16m66-24-29 8 21 16" fill="none" stroke="#18251E" stroke-width="9" stroke-linecap="round"/><path d="M128 105v67m-20 12h40" stroke="#18251E" stroke-width="7"/><circle cx="128" cy="72" r="9" fill="#D4B34C"/>
+</svg>

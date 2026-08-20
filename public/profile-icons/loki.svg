@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256" role="img" aria-labelledby="title-loki">
+<title id="title-loki">Loki fan avatar</title>
+<circle cx="128" cy="128" r="118" fill="#173C2B"/>
+<circle cx="128" cy="128" r="112" fill="none" stroke="#D6B34C" stroke-width="5"/>
+<path d="M92 187q-25-53-9-91 10-23 35-33-14 27-8 58l18 23 18-23q6-31-8-58 25 10 35 33 16 38-9 91l-36 24z" fill="#173C2B" stroke="#D6B34C" stroke-width="8"/><path d="M97 76Q66 60 59 33q35 7 52 34m48 9q31-16 38-43-35 7-52 34" fill="none" stroke="#D6B34C" stroke-width="11" stroke-linecap="round"/><path d="m97 135 21 9-16 15m57-24-21 9 16 15" fill="none" stroke="#DCEFE4" stroke-width="8" stroke-linecap="round"/>
+</svg>

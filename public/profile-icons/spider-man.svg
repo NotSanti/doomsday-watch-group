@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256" role="img" aria-labelledby="title-spider-man">
+<title id="title-spider-man">Spider-Man fan avatar</title>
+<circle cx="128" cy="128" r="118" fill="#7A1018"/>
+<circle cx="128" cy="128" r="112" fill="none" stroke="#E5232E" stroke-width="5"/>
+<path d="M128 47c42 0 69 34 63 81-5 42-31 78-63 78s-58-36-63-78c-6-47 21-81 63-81Z" fill="#E5232E" stroke="#121826" stroke-width="8"/><path d="M128 51v151M72 93l112 68M184 93 72 161M83 70q45 44 90 0M66 121q62 39 124 0M75 174q53 28 106 0" fill="none" stroke="#121826" stroke-width="4"/><path d="M80 112q22-20 42 2-9 35-35 38-10-18-7-40Zm96 0q-22-20-42 2 9 35 35 38 10-18 7-40Z" fill="#F7F2E8" stroke="#121826" stroke-width="7"/>
+</svg>

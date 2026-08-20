@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256" role="img" aria-labelledby="title-vision">
+<title id="title-vision">Vision fan avatar</title>
+<circle cx="128" cy="128" r="118" fill="#25464A"/>
+<circle cx="128" cy="128" r="112" fill="none" stroke="#D74B50" stroke-width="5"/>
+<path d="M128 46c42 0 68 35 63 82-5 43-31 78-63 78s-58-35-63-78c-5-47 21-82 63-82Z" fill="#D74B50" stroke="#F0C64A" stroke-width="8"/><path d="m128 62 15 20-15 19-15-19z" fill="#7FE0D0"/><path d="m79 111 38 15-27 18m87-33-38 15 27 18" fill="none" stroke="#F0C64A" stroke-width="8" stroke-linecap="round"/><path d="m103 172 25 14 25-14" fill="none" stroke="#25464A" stroke-width="8" stroke-linecap="round"/>
+</svg>

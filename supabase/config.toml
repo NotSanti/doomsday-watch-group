@@ -238,15 +238,18 @@ otp_length = 6
 # Number of seconds before the email OTP expires (defaults to 1 hour).
 otp_expiry = 3600
 
-# Use a production-ready SMTP server
+# Use a production-ready SMTP server (legacy). Prefer the send_email hook + Resend
+# templates instead. Local GoTrue keeps Mailpit unless hook or SMTP is enabled.
+# Resend SMTP (legacy): host smtp.resend.com, user resend, pass env(RESEND_API_KEY)
+# pass env(RESEND_API_KEY), from a verified domain address.
 # [auth.email.smtp]
 # enabled = true
-# host = "smtp.sendgrid.net"
-# port = 587
-# user = "apikey"
-# pass = "env(SENDGRID_API_KEY)"
-# admin_email = "admin@email.com"
-# sender_name = "Admin"
+# host = "smtp.resend.com"
+# port = 465
+# user = "resend"
+# pass = "env(RESEND_API_KEY)"
+# admin_email = "env(RESEND_FROM_EMAIL)"
+# sender_name = "Doomsday Watch Group"
 
 # Uncomment to customize email template
 # [auth.email.template.invite]
@@ -289,6 +292,16 @@ max_frequency = "5s"
 # [auth.hook.custom_access_token]
 # enabled = true
 # uri = "pg-functions://<database>/<schema>/<hook_name>"
+
+# Send auth emails through the send-auth-email Edge Function + Resend templates.
+# Leave disabled locally so Mailpit captures messages. Enable for end-to-end Resend testing.
+# [auth.hook.send_email]
+# enabled = true
+# uri = "http://host.docker.internal:54321/functions/v1/send-auth-email"
+# secrets = "env(SEND_EMAIL_HOOK_SECRET)"
+
+[functions.send-auth-email]
+verify_jwt = false
 
 # Configure one of the supported SMS providers: `twilio`, `twilio_verify`, `messagebird`, `textlocal`, `vonage`.
 [auth.sms.twilio]

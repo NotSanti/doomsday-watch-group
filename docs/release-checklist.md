@@ -6,11 +6,11 @@ Use this after CI is green on the release commit. Record date, environment (prev
 
 - [ ] GitHub Actions `verify` and `integration` jobs passed on the commit.
 - [ ] New SQL is already applied to the **target** database (`npx supabase db push`), or this release has no schema change.
-- [ ] Hosted Auth Site URL is `https://doomsday-watch-group.vercel.app`.
+- [ ] Hosted Auth Site URL is `https://doomwatchparty.vercel.app`.
 - [ ] Redirect allow-list includes local, production, and Vercel preview patterns in `docs/deployment.md`.
 - [ ] Vercel Production env has `VITE_APP_URL`, `VITE_SUPABASE_URL`, and `VITE_SUPABASE_PUBLISHABLE_KEY`.
 - [ ] Vercel Preview leaves `VITE_APP_URL` unset and does not define service-role or TMDB tokens.
-- [ ] `npm run check:bundle` passed (CI) — no service-role/TMDB secret in the client.
+- [ ] Hosted Auth email uses Resend templates + `send-auth-email` hook (`docs/auth-email.md`); `RESEND_API_KEY` is not in Vercel.
 
 ## Preview smoke (Vercel preview URL)
 
@@ -22,9 +22,9 @@ Use this after CI is green on the release commit. Record date, environment (prev
 
 ## Production smoke
 
-Production origin: https://doomsday-watch-group.vercel.app
+Production origin: https://doomwatchparty.vercel.app
 
-- [ ] Nested route: open `https://doomsday-watch-group.vercel.app/about` in a fresh tab.
+- [ ] Nested route: open `https://doomwatchparty.vercel.app/about` in a fresh tab.
 - [ ] Auth callback: complete a sign-in or recovery link; land on `/auth/callback` then `/app` (or update-password).
 - [ ] Create group → invite → join → watch → review on production (use throwaway accounts).
 - [ ] Owner changes current title; dashboard reflects it.

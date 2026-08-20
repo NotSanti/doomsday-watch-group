@@ -97,7 +97,7 @@ export function makeProfile(overrides: Partial<ProfileRow> = {}): ProfileRow {
   return {
     id: '11111111-1111-4111-8111-111111111111',
     display_name: 'Owner A',
-    avatar_url: null,
+    avatar_url: 'icon:iron-man',
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
     ...overrides,
@@ -126,6 +126,7 @@ export function makeMember(overrides: Partial<MockMember> = {}): MockMember {
     role: 'owner',
     joined_at: new Date().toISOString(),
     display_name: 'Owner A',
+    avatar_url: 'icon:iron-man',
     ...overrides,
   }
 }
@@ -380,7 +381,10 @@ function memberToRow(member: MockMember) {
     user_id: member.user_id,
     role: member.role,
     joined_at: member.joined_at,
-    profiles: { display_name: member.display_name },
+    profiles: {
+      display_name: member.display_name,
+      avatar_url: member.avatar_url,
+    },
   }
 }
 
@@ -887,12 +891,23 @@ export const supabaseFromMock = vi.fn((table: string) => {
               : { data: profile, error: null },
         }),
       }),
-      update: (values: { display_name?: string }) => ({
+      update: (values: {
+        display_name?: string
+        avatar_url?: string | null
+      }) => ({
         eq: () => ({
           select: () => ({
             maybeSingle: async () => {
-              if (profile && values.display_name) {
-                profile = { ...profile, display_name: values.display_name }
+              if (profile) {
+                profile = {
+                  ...profile,
+                  ...(values.display_name
+                    ? { display_name: values.display_name }
+                    : {}),
+                  ...(values.avatar_url !== undefined
+                    ? { avatar_url: values.avatar_url }
+                    : {}),
+                }
               }
 
               return { data: profile, error: null }

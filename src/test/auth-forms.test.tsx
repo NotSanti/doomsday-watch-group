@@ -87,4 +87,47 @@ describe('auth forms', () => {
       ).toBeInTheDocument()
     })
   })
+
+  it('asks for a profile icon after email confirmation', async () => {
+    const user = userEvent.setup()
+    setMockProfile(makeProfile({ avatar_url: null }))
+    emitAuthEvent('SIGNED_IN', makeSession())
+    renderApp('/app')
+
+    expect(
+      await screen.findByRole('heading', { name: 'Last step' }),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole('button', { name: 'Save icon' }),
+    ).toBeDisabled()
+
+    await user.click(screen.getByRole('radio', { name: 'Iron Man' }))
+    await user.click(screen.getByRole('button', { name: 'Save icon' }))
+
+    await waitFor(() => {
+      expect(
+        screen.queryByRole('heading', { name: 'Last step' }),
+      ).not.toBeInTheDocument()
+    })
+    expect(
+      screen.getByRole('heading', { name: 'Your groups' }),
+    ).toBeInTheDocument()
+  })
+
+  it('shows the saved profile icon on the profile page', async () => {
+    setMockProfile(makeProfile({ avatar_url: 'icon:spider-man' }))
+    emitAuthEvent('SIGNED_IN', makeSession())
+    renderApp('/profile')
+
+    expect(
+      await screen.findByRole('heading', { name: 'Profile' }),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole('img', { name: 'Your profile icon' }),
+    ).toBeInTheDocument()
+    expect(screen.getByRole('radio', { name: 'Spider Man' })).toHaveAttribute(
+      'aria-checked',
+      'true',
+    )
+  })
 })

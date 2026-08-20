@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256" role="img" aria-labelledby="title-hulk">
+<title id="title-hulk">Hulk fan avatar</title>
+<circle cx="128" cy="128" r="118" fill="#173B2B"/>
+<circle cx="128" cy="128" r="112" fill="none" stroke="#46B86B" stroke-width="5"/>
+<path d="M68 160 77 92l25-18 13 27 13-43 13 43 13-27 25 18 9 68-30 39H98z" fill="#46B86B" stroke="#10261B" stroke-width="8" stroke-linejoin="round"/><path d="m89 112 26 11-22 12m74-23-26 11 22 12" fill="none" stroke="#10261B" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/><path d="M108 168h40" stroke="#D9F5DF" stroke-width="9" stroke-linecap="round"/>
+</svg>

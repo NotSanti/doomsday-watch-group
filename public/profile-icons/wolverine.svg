@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256" role="img" aria-labelledby="title-wolverine">
+<title id="title-wolverine">Wolverine fan avatar</title>
+<circle cx="128" cy="128" r="118" fill="#14233B"/>
+<circle cx="128" cy="128" r="112" fill="none" stroke="#F5C542" stroke-width="5"/>
+<path d="M66 62q28 5 62 43 34-38 62-43l-13 58 12 71-38 21-23-35-23 35-38-21 12-71z" fill="#F5C542" stroke="#14233B" stroke-width="9" stroke-linejoin="round"/><path d="M78 78q28 13 50 43 22-30 50-43l-13 53-22 18-15-17-15 17-22-18z" fill="#2F6AA3"/><path d="m89 137 27 5-20 18m71-23-27 5 20 18" fill="none" stroke="#F7F2E8" stroke-width="8" stroke-linecap="round"/><path d="m111 181 17 11 17-11" fill="none" stroke="#14233B" stroke-width="8" stroke-linecap="round"/>
+</svg>

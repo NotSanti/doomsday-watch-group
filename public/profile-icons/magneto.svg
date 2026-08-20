@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256" role="img" aria-labelledby="title-magneto">
+<title id="title-magneto">Magneto fan avatar</title>
+<circle cx="128" cy="128" r="118" fill="#35194F"/>
+<circle cx="128" cy="128" r="112" fill="none" stroke="#8C59B5" stroke-width="5"/>
+<path d="M74 65q54-35 108 0l10 66-22 62-42 22-42-22-22-62z" fill="#8C59B5" stroke="#E33E48" stroke-width="9"/><path d="M92 77v44l36 29 36-29V77q-36-17-72 0Z" fill="#35194F"/><path d="m88 126 29 8-20 18m71-26-29 8 20 18" fill="none" stroke="#F3EAF8" stroke-width="8" stroke-linecap="round"/><path d="m128 151-18 27 18 14 18-14z" fill="#E33E48"/>
+</svg>

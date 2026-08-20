@@ -16,6 +16,7 @@ const members: GroupMember[] = [
     role: 'owner',
     joined_at: '2026-01-01T00:00:00.000Z',
     display_name: 'Owner A',
+    avatar_url: null,
   },
   {
     group_id: GROUP,
@@ -23,6 +24,7 @@ const members: GroupMember[] = [
     role: 'member',
     joined_at: '2026-02-01T00:00:00.000Z',
     display_name: 'Member B',
+    avatar_url: null,
   },
 ]
 

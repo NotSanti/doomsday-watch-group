@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256" role="img" aria-labelledby="title-black-widow">
+<title id="title-black-widow">Black Widow fan avatar</title>
+<circle cx="128" cy="128" r="118" fill="#1A1218"/>
+<circle cx="128" cy="128" r="112" fill="none" stroke="#E32636" stroke-width="5"/>
+<circle cx="128" cy="128" r="66" fill="none" stroke="#E32636" stroke-width="10"/><path d="m128 128-45-48h90zm0 0-45 48h90z" fill="#E32636"/><circle cx="128" cy="128" r="18" fill="#F7E3E6"/><path d="M91 65 65 39m100 26 26-26M91 191l-26 26m100-26 26 26" stroke="#E32636" stroke-width="8" stroke-linecap="round"/>
+</svg>

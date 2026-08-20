@@ -1,6 +1,7 @@
 import { Navigate, Outlet, useLocation } from 'react-router'
 import { ErrorState } from '@/components/ErrorState'
 import { Skeleton } from '@/components/Skeleton'
+import { ChooseAvatarOverlay } from '@/features/auth/ChooseAvatarOverlay'
 import { useAuth } from '@/features/auth/use-auth'
 
 function GuardSkeleton() {
@@ -21,6 +22,7 @@ export function RequireAuth() {
   const {
     status,
     needsOnboarding,
+    needsAvatarOnboarding,
     profileStatus,
     profileError,
     refreshProfile,
@@ -69,5 +71,10 @@ export function RequireAuth() {
     )
   }
 
-  return <Outlet />
+  return (
+    <>
+      {needsAvatarOnboarding ? <ChooseAvatarOverlay /> : null}
+      <Outlet />
+    </>
+  )
 }

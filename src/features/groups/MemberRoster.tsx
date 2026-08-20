@@ -1,6 +1,13 @@
 import { Crown } from 'lucide-react'
 import { ErrorState } from '@/components/ErrorState'
 import { Skeleton } from '@/components/Skeleton'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
+import { MemberAvatar } from '@/features/groups/MemberAvatar'
 import { toFriendlyGroupMembersError } from '@/features/groups/group-errors'
 import type { GroupMember } from '@/features/groups/group-schemas'
 import { chipClasses } from '@/lib/chip-styles'
@@ -55,6 +62,20 @@ export function MemberRoster({
     return <p className="text-sm text-muted">No members yet.</p>
   }
 
+  if (compact) {
+    return (
+      <TooltipProvider>
+        <ul className="flex flex-wrap items-center justify-start gap-2">
+          {members.map((member) => (
+            <li key={`${member.group_id}:${member.user_id}`}>
+              <MemberIcon member={member} />
+            </li>
+          ))}
+        </ul>
+      </TooltipProvider>
+    )
+  }
+
   return (
     <ul className="flex flex-wrap items-center justify-start gap-2">
       {members.map((member) => (
@@ -63,6 +84,35 @@ export function MemberRoster({
         </li>
       ))}
     </ul>
+  )
+}
+
+function MemberIcon({ member }: { member: GroupMember }) {
+  const isOwner = member.role === 'owner'
+  const label = isOwner
+    ? `${member.display_name} (owner)`
+    : member.display_name
+
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <button
+          type="button"
+          aria-label={label}
+          className={cn(
+            'rounded-full focus-visible:ring-2 focus-visible:ring-focus focus-visible:outline-none',
+            isOwner
+              ? 'ring-2 ring-gold ring-offset-2 ring-offset-surface-card'
+              : 'ring-1 ring-border',
+          )}
+        >
+          <MemberAvatar member={member} />
+        </button>
+      </TooltipTrigger>
+      <TooltipContent className="px-2.5 py-1.5" side="top">
+        {member.display_name}
+      </TooltipContent>
+    </Tooltip>
   )
 }
 

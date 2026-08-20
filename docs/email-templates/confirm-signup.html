@@ -1,0 +1,315 @@
+<!--
+  Doomsday Watch Group — confirm signup email (Resend template)
+
+  WHERE TO PASTE
+  Resend Dashboard → Templates → Create template → paste HTML
+
+  SUBJECT (Resend template field)
+  Confirm your Doomsday Watch Group account
+
+  PREVIEW TEXT (Resend template field — not in HTML body)
+  One last step — confirm your email to join your watch group.
+
+  VARIABLES (create in Resend Inspector — set fallback for each)
+  ACTION_URL  — string — fallback: https://doomwatchparty.online/auth/callback
+  USER_NAME   — string — fallback: there
+
+  Remove CONFIRMATION_URL if Resend auto-added it from an old paste.
+
+  Reserved by Resend (do not use): EMAIL, FIRST_NAME, LAST_NAME, UNSUBSCRIBE_URL
+
+  Example send (API):
+  template: {
+    id: 'confirm-signup',
+    variables: {
+      ACTION_URL: 'https://doomwatchparty.online/auth/callback?...',
+      USER_NAME: 'Tony',
+    },
+  }
+-->
+
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="x-apple-disable-message-reformatting" />
+    <title>Confirm your email</title>
+  </head>
+  <body
+    style="
+      margin: 0;
+      padding: 0;
+      width: 100% !important;
+      height: 100% !important;
+      background-color: #0d1210;
+      -webkit-text-size-adjust: 100%;
+      -ms-text-size-adjust: 100%;
+    "
+  >
+    <div
+      style="
+        display: none;
+        font-size: 1px;
+        line-height: 1px;
+        max-height: 0;
+        max-width: 0;
+        opacity: 0;
+        overflow: hidden;
+        mso-hide: all;
+      "
+    >
+      One last step — confirm your email to join your watch group.
+    </div>
+
+    <table
+      role="presentation"
+      cellpadding="0"
+      cellspacing="0"
+      border="0"
+      width="100%"
+      style="background-color: #0d1210; border-collapse: collapse"
+    >
+      <tr>
+        <td align="center" style="padding: 32px 16px">
+          <table
+            role="presentation"
+            cellpadding="0"
+            cellspacing="0"
+            border="0"
+            width="100%"
+            style="
+              max-width: 560px;
+              border-collapse: collapse;
+              background-color: #171e1a;
+              border: 1px solid #35423a;
+              border-radius: 12px;
+            "
+          >
+            <tr>
+              <td
+                style="
+                  height: 4px;
+                  background: linear-gradient(
+                    90deg,
+                    #855a2c 0%,
+                    #c49a50 50%,
+                    #855a2c 100%
+                  );
+                  background-color: #c49a50;
+                  border-radius: 12px 12px 0 0;
+                  font-size: 0;
+                  line-height: 0;
+                "
+              >
+                &nbsp;
+              </td>
+            </tr>
+
+            <tr>
+              <td style="padding: 36px 32px 8px 32px">
+                <p
+                  style="
+                    margin: 0 0 8px 0;
+                    font-family: 'Segoe UI', Arial, sans-serif;
+                    font-size: 11px;
+                    font-weight: 600;
+                    letter-spacing: 0.18em;
+                    text-transform: uppercase;
+                    color: #c49a50;
+                  "
+                >
+                  Doomsday Watch Group
+                </p>
+                <h1
+                  style="
+                    margin: 0;
+                    font-family: 'Segoe UI', Arial, sans-serif;
+                    font-size: 28px;
+                    font-weight: 700;
+                    line-height: 1.15;
+                    letter-spacing: 0.06em;
+                    text-transform: uppercase;
+                    color: #e6ebe5;
+                  "
+                >
+                  Confirm your email
+                </h1>
+              </td>
+            </tr>
+
+            <tr>
+              <td style="padding: 16px 32px 0 32px">
+                <p
+                  style="
+                    margin: 0;
+                    font-family: 'Segoe UI', Arial, sans-serif;
+                    font-size: 16px;
+                    line-height: 1.6;
+                    color: #a5afa8;
+                  "
+                >
+                  Hi {{{USER_NAME}}}, thanks for signing up. Confirm your
+                  address to finish creating your account and start tracking the
+                  MCU watch order with your group.
+                </p>
+              </td>
+            </tr>
+
+            <tr>
+              <td align="center" style="padding: 28px 32px 8px 32px">
+                <table
+                  role="presentation"
+                  cellpadding="0"
+                  cellspacing="0"
+                  border="0"
+                  style="border-collapse: collapse"
+                >
+                  <tr>
+                    <td
+                      align="center"
+                      bgcolor="#4d7a4d"
+                      style="
+                        border-radius: 8px;
+                        background-color: #4d7a4d;
+                        border: 1px solid #74b85a;
+                      "
+                    >
+                      <a
+                        href="{{{ACTION_URL}}}"
+                        target="_blank"
+                        style="
+                          display: inline-block;
+                          padding: 14px 28px;
+                          font-family: 'Segoe UI', Arial, sans-serif;
+                          font-size: 15px;
+                          font-weight: 600;
+                          line-height: 1.2;
+                          color: #081009;
+                          text-decoration: none;
+                          border-radius: 8px;
+                        "
+                      >
+                        Confirm email address
+                      </a>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+
+            <tr>
+              <td style="padding: 8px 32px 24px 32px">
+                <p
+                  style="
+                    margin: 0 0 8px 0;
+                    font-family: 'Segoe UI', Arial, sans-serif;
+                    font-size: 13px;
+                    line-height: 1.5;
+                    color: #737d76;
+                  "
+                >
+                  If the button does not work, copy and paste this link into
+                  your browser:
+                </p>
+                <p
+                  style="
+                    margin: 0;
+                    font-family: 'Segoe UI', Arial, sans-serif;
+                    font-size: 12px;
+                    line-height: 1.5;
+                    word-break: break-all;
+                  "
+                >
+                  <a
+                    href="{{{ACTION_URL}}}"
+                    style="color: #74b85a; text-decoration: underline"
+                    >{{{ACTION_URL}}}</a
+                  >
+                </p>
+              </td>
+            </tr>
+
+            <tr>
+              <td style="padding: 0 32px">
+                <table
+                  role="presentation"
+                  cellpadding="0"
+                  cellspacing="0"
+                  border="0"
+                  width="100%"
+                  style="border-collapse: collapse"
+                >
+                  <tr>
+                    <td
+                      style="
+                        border-top: 1px solid #35423a;
+                        font-size: 0;
+                        line-height: 0;
+                      "
+                    >
+                      &nbsp;
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+
+            <tr>
+              <td style="padding: 20px 32px 28px 32px">
+                <p
+                  style="
+                    margin: 0 0 12px 0;
+                    font-family: 'Segoe UI', Arial, sans-serif;
+                    font-size: 13px;
+                    line-height: 1.5;
+                    color: #737d76;
+                  "
+                >
+                  If you did not create an account, you can ignore this email.
+                  The link expires after a short time for security.
+                </p>
+                <p
+                  style="
+                    margin: 0;
+                    font-family: 'Segoe UI', Arial, sans-serif;
+                    font-size: 11px;
+                    line-height: 1.5;
+                    color: #59645e;
+                  "
+                >
+                  Unofficial fan project. Not affiliated with or endorsed by
+                  Marvel or Disney.
+                </p>
+              </td>
+            </tr>
+          </table>
+
+          <table
+            role="presentation"
+            cellpadding="0"
+            cellspacing="0"
+            border="0"
+            width="100%"
+            style="max-width: 560px; border-collapse: collapse"
+          >
+            <tr>
+              <td
+                align="center"
+                style="
+                  padding: 20px 16px 0 16px;
+                  font-family: 'Segoe UI', Arial, sans-serif;
+                  font-size: 11px;
+                  line-height: 1.5;
+                  color: #59645e;
+                "
+              >
+                Sent by Doomsday Watch Group
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>

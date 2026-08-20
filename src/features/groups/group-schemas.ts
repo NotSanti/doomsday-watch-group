@@ -38,6 +38,7 @@ export const groupMemberQueryRowSchema = z.object({
   profiles: z
     .object({
       display_name: z.string().min(1),
+      avatar_url: z.string().nullable().optional(),
     })
     .nullable(),
 })
@@ -54,6 +55,7 @@ export type GroupMember = {
   role: GroupMemberRole
   joined_at: string
   display_name: string
+  avatar_url: string | null
 }
 
 export function isGroupId(value: string): boolean {

@@ -15,6 +15,7 @@ import {
 import { AuthContext, type ProfileStatus } from '@/features/auth/auth-context'
 import { toFriendlyProfileError } from '@/features/auth/auth-errors'
 import { needsDisplayNameOnboarding } from '@/features/auth/auth-schemas'
+import { isMissingProfileIcon } from '@/features/auth/profile-icons'
 import { removeAllRealtimeChannels } from '@/lib/realtime'
 import { getSupabaseClient } from '@/lib/supabase'
 
@@ -116,6 +117,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
       profileError: profileQuery.isError ? toFriendlyProfileError() : null,
       needsOnboarding: Boolean(
         profile && needsDisplayNameOnboarding(profile.display_name),
+      ),
+      needsAvatarOnboarding: Boolean(
+        profile &&
+          !needsDisplayNameOnboarding(profile.display_name) &&
+          isMissingProfileIcon(profile.avatar_url),
       ),
       isPasswordRecovery,
       refreshProfile,

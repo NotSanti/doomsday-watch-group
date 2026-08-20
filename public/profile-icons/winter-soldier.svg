@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256" role="img" aria-labelledby="title-winter-soldier">
+<title id="title-winter-soldier">Winter Soldier fan avatar</title>
+<circle cx="128" cy="128" r="118" fill="#26313D"/>
+<circle cx="128" cy="128" r="112" fill="none" stroke="#A8B1BA" stroke-width="5"/>
+<circle cx="128" cy="128" r="68" fill="#A8B1BA" stroke="#26313D" stroke-width="9"/><path d="M128 60v136M83 82l90 92M173 82l-90 92" stroke="#26313D" stroke-width="8"/><path d="m128 90 12 24 27 4-20 19 5 27-24-13-24 13 5-27-20-19 27-4z" fill="#D23A42"/><path d="M69 128h28m62 0h28" stroke="#F7F2E8" stroke-width="7"/>
+</svg>

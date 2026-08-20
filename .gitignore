@@ -18,6 +18,7 @@ test-results
 # Secrets — names only belong in .env.example
 .env
 .env.*
+.env_local
 !.env.example
 credentials.txt
 

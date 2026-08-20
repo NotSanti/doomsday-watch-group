@@ -6,13 +6,16 @@ import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
-import { updateDisplayName } from '@/features/auth/auth-api'
+import { updateAvatarIcon, updateDisplayName } from '@/features/auth/auth-api'
 import { toFriendlyAuthError } from '@/features/auth/auth-errors'
 import {
   needsDisplayNameOnboarding,
   profileSchema,
   type ProfileFormValues,
 } from '@/features/auth/auth-schemas'
+import { ProfileIcon } from '@/features/auth/ProfileIcon'
+import { ProfileIconPicker } from '@/features/auth/ProfileIconPicker'
+import { parseAvatarIconId, type ProfileIconId } from '@/features/auth/profile-icons'
 import { useAuth } from '@/features/auth/use-auth'
 import { getSupabaseClient } from '@/lib/supabase'
 import { safeReturnTo } from '@/lib/return-to'
@@ -24,6 +27,9 @@ export function ProfilePage() {
   const [formError, setFormError] = useState<string | null>(null)
   const onboarding = searchParams.get('onboarding') === '1' || needsOnboarding
   const returnTo = safeReturnTo(searchParams.get('returnTo'))
+  const [draftIcon, setDraftIcon] = useState<ProfileIconId | null>(null)
+  const savedIcon = parseAvatarIconId(profile?.avatar_url)
+  const selectedIcon = draftIcon ?? savedIcon
 
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileSchema),
@@ -59,8 +65,15 @@ export function ProfilePage() {
                 user.id,
                 values.displayName,
               )
+              if (selectedIcon) {
+                await updateAvatarIcon(
+                  getSupabaseClient(),
+                  user.id,
+                  selectedIcon,
+                )
+              }
               await refreshProfile()
-              toast.success('Display name saved')
+              toast.success('Profile saved')
               if (onboarding) {
                 navigate(returnTo, { replace: true })
               }
@@ -91,6 +104,12 @@ export function ProfilePage() {
             <p className="text-sm text-secondary">Email</p>
             <p className="mt-1 text-heading">{user.email ?? 'Signed in'}</p>
           </div>
+          {savedIcon ? (
+            <div className="flex items-center gap-3">
+              <ProfileIcon id={savedIcon} size="lg" label="Your profile icon" />
+              <p className="text-sm text-secondary">Current icon</p>
+            </div>
+          ) : null}
           <div>
             <label
               className="mb-1 block text-sm text-secondary"
@@ -109,12 +128,26 @@ export function ProfilePage() {
               </p>
             ) : null}
           </div>
+          {onboarding ? null : (
+            <div>
+              <p className="mb-2 text-sm text-secondary">Profile icon</p>
+              <ProfileIconPicker
+                value={selectedIcon}
+                onChange={setDraftIcon}
+                disabled={form.formState.isSubmitting}
+              />
+            </div>
+          )}
           <Button
             className="w-full"
             type="submit"
             disabled={form.formState.isSubmitting}
           >
-            {form.formState.isSubmitting ? 'Saving…' : 'Save display name'}
+            {form.formState.isSubmitting
+              ? 'Saving…'
+              : onboarding
+                ? 'Save display name'
+                : 'Save profile'}
           </Button>
         </form>
         <div className="mt-6 border-t border-border pt-4">

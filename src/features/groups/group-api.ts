@@ -16,7 +16,7 @@ const GROUP_COLUMNS =
   'id, name, description, owner_id, current_title_id, target_date, timezone, created_at, updated_at'
 
 const MEMBER_COLUMNS =
-  'group_id, user_id, role, joined_at, profiles(display_name)'
+  'group_id, user_id, role, joined_at, profiles(display_name, avatar_url)'
 
 export async function listGroups(
   client: BrowserSupabaseClient,
@@ -92,6 +92,7 @@ function toGroupMember(
       displayName && displayName.length > 0
         ? displayName
         : PLACEHOLDER_DISPLAY_NAME,
+    avatar_url: row.profiles?.avatar_url ?? null,
   }
 }
 

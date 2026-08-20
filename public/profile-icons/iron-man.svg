@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256" role="img" aria-labelledby="title-iron-man">
+<title id="title-iron-man">Iron Man fan avatar</title>
+<circle cx="128" cy="128" r="118" fill="#7A1018"/>
+<circle cx="128" cy="128" r="112" fill="none" stroke="#F4B942" stroke-width="5"/>
+<path d="M83 62 108 48h40l25 14 13 48-13 75-28 22h-34l-28-22-13-75z" fill="#F4B942" stroke="#2A0B0E" stroke-width="8"/><path d="m83 62 25 25h40l25-25-9 44-18 18h-36l-18-18z" fill="#A61B25"/><path d="m91 132 29 7-8 14-26-5zm74 0-29 7 8 14 26-5z" fill="#FFF0C2"/><path d="m113 181 15 8 15-8" fill="none" stroke="#7A1018" stroke-width="7" stroke-linecap="round"/>
+</svg>

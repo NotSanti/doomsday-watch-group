@@ -13,6 +13,7 @@ export type AuthContextValue = {
   profileStatus: ProfileStatus
   profileError: string | null
   needsOnboarding: boolean
+  needsAvatarOnboarding: boolean
   isPasswordRecovery: boolean
   refreshProfile: () => Promise<void>
   signOut: () => Promise<void>

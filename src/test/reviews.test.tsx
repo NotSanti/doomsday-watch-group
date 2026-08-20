@@ -36,12 +36,14 @@ function seedGroup(): void {
       user_id: OWNER_ID,
       role: 'owner',
       display_name: 'Owner A',
+      avatar_url: 'icon:iron-man',
     }),
     makeMember({
       group_id: GROUP_A,
       user_id: MEMBER_ID,
       role: 'member',
       display_name: 'Member B',
+      avatar_url: 'icon:spider-man',
     }),
   ])
   setMockTitles([
@@ -282,6 +284,17 @@ describe('reviews', () => {
     expect(await screen.findByText('Owner A (you)')).toBeInTheDocument()
     expect(screen.getAllByText('A strong start.').length).toBeGreaterThan(0)
     expect(screen.getAllByText('Member B').length).toBeGreaterThan(0)
+    const preview = screen.getByText('Owner A (you)').closest('li')
+    expect(preview).not.toBeNull()
+    expect(preview!.querySelector('img')).toHaveAttribute(
+      'src',
+      '/profile-icons/iron-man.svg',
+    )
+    const memberPreview = screen.getAllByText('Member B')[0]?.closest('li')
+    expect(memberPreview?.querySelector('img')).toHaveAttribute(
+      'src',
+      '/profile-icons/spider-man.svg',
+    )
     expect(screen.getAllByText('This review contains spoilers.').length).toBeGreaterThan(0)
     expect(screen.queryByText('Nick Fury is a skrull.')).not.toBeInTheDocument()
   })

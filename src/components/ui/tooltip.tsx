@@ -31,7 +31,23 @@ export function TooltipContent({
         {...props}
       >
         {children}
-        <TooltipPrimitive.Arrow className="fill-surface-elevated" />
+        <TooltipPrimitive.Arrow width={14} height={8} asChild>
+          <svg
+            width={14}
+            height={8}
+            viewBox="0 0 14 8"
+            preserveAspectRatio="none"
+            className="-my-px"
+          >
+            <path d="M0 0 L7 8 L14 0 Z" className="fill-surface-elevated" />
+            <path
+              d="M0 0 L7 8 L14 0"
+              fill="none"
+              className="stroke-accent/30"
+              strokeWidth="1"
+            />
+          </svg>
+        </TooltipPrimitive.Arrow>
       </TooltipPrimitive.Content>
     </TooltipPrimitive.Portal>
   )

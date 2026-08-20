@@ -14,8 +14,8 @@ const forbiddenPatterns = [
     pattern: /TMDB_API_READ_TOKEN\s*[:=]\s*['"][^'"]+['"]/,
   },
   {
-    label: 'Supabase secret key assignment',
-    pattern: /sb_secret_[A-Za-z0-9_-]{20,}/,
+    label: 'Resend API key',
+    pattern: /\bre_[A-Za-z0-9]{20,}\b/,
   },
 ]
 

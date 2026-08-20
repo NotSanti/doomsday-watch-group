@@ -13,9 +13,10 @@ The browser bundle uses only the Supabase publishable (anon) key. Privileged wri
 
 | Check                           | Result    | Notes                                                                                                                                    |
 | ------------------------------- | --------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| Service-role key in Vite bundle | Pass      | `npm run check:bundle` scans `dist/assets/*.js` for service-role markers, `sb_secret_`, and `TMDB_API_READ_TOKEN`.                       |
+| Service-role key in Vite bundle | Pass      | `npm run check:bundle` scans `dist/assets/*.js` for service-role markers, `sb_secret_`, Resend `re_` keys, and `TMDB_API_READ_TOKEN`. |
 | TMDB token in client            | Pass      | `TMDB_API_READ_TOKEN` is documented server/script-only; not referenced from `src/`.                                                      |
-| `VITE_*` secret leakage         | Pass      | `.env.example` lists publishable vars only; `.gitignore` excludes `.env` and `.env.*`.                                                   |
+| Resend API key in client        | Pass      | `RESEND_API_KEY` is an Edge Function secret only; not a `VITE_` var and not read by `parseClientEnv`.                                   |
+| `VITE_*` secret leakage         | Pass      | `.env.example` lists names only; `.gitignore` excludes `.env` and `.env.*`.                                                              |
 | Invite tokens in URLs           | By design | Invite links include the raw token in the path for redemption; owners can recopy until revoke. Do not log full invite URLs in analytics. |
 
 ## Authorization model

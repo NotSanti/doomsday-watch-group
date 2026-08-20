@@ -8,7 +8,7 @@ Doomsday Watch Group is a Vite SPA. GitHub is the source of truth; Vercel hosts 
 | ----------- | ----------------------------------------- | ----------------------------------------------- | ------------------ |
 | Local       | `http://127.0.0.1:5173`                   | `npx supabase start`                            | `npm run dev`      |
 | Preview     | unique `https://$VERCEL_URL`              | hosted project (or a dedicated staging project) | every pull request |
-| Production  | `https://doomsday-watch-group.vercel.app` | hosted project `mtnptgydaxcjycrrxyuz`           | merges to `main`   |
+| Production  | `https://doomwatchparty.vercel.app` | hosted project `mtnptgydaxcjycrrxyuz`           | merges to `main`   |
 
 Prefer a separate Supabase project for preview when practical. Until that exists, preview and production may share the hosted project — never put a service-role or TMDB token in Vercel for either environment.
 
@@ -20,7 +20,7 @@ Prefer a separate Supabase project for preview when practical. Until that exists
 - `vercel.json` rewrites unknown paths to `/index.html` so opening `/groups/:id/watchlist` directly works.
 - Browser isolation headers (`X-Frame-Options`, `nosniff`, referrer policy) are set in `vercel.json`. No secrets.
 
-Preview deployments use Vercel Deployment Protection, so the preview URL may require a Vercel login. After that, nested client routes still rewrite to the SPA. Production (`https://doomsday-watch-group.vercel.app`) is public.
+Preview deployments use Vercel Deployment Protection, so the preview URL may require a Vercel login. After that, nested client routes still rewrite to the SPA. Production (`https://doomwatchparty.vercel.app`) is public.
 
 Vercel system variables (`VERCEL_URL`, `VERCEL_ENV`) are provided by the platform. Do not copy them into git.
 
@@ -30,7 +30,7 @@ Set these in the Vercel dashboard by environment. Names only in git (see `.env.e
 
 | Name                            | Production                                                 | Preview                                                         | Local                             |
 | ------------------------------- | ---------------------------------------------------------- | --------------------------------------------------------------- | --------------------------------- |
-| `VITE_APP_URL`                  | Canonical origin `https://doomsday-watch-group.vercel.app` | **Leave unset** so the Vite build derives `https://$VERCEL_URL` | `http://127.0.0.1:5173`           |
+| `VITE_APP_URL`                  | Canonical origin `https://doomwatchparty.vercel.app` | **Leave unset** so the Vite build derives `https://$VERCEL_URL` | `http://127.0.0.1:5173`           |
 | `VITE_SUPABASE_URL`             | Hosted project URL                                         | Staging URL if available, otherwise hosted URL                  | `npx supabase status` → `API_URL` |
 | `VITE_SUPABASE_PUBLISHABLE_KEY` | Hosted publishable (anon) key                              | Matching preview project key                                    | `npx supabase status`             |
 
@@ -41,6 +41,7 @@ Never set on Vercel:
 - `E2E_SUPABASE_SERVICE_ROLE_KEY`
 - Supabase service-role / `sb_secret_` keys
 - `TMDB_API_READ_TOKEN`
+- `RESEND_API_KEY`
 
 `TMDB_API_READ_TOKEN` stays in local/admin script environments only.
 
@@ -51,7 +52,7 @@ Hosted dashboard: [URL Configuration](https://supabase.com/dashboard/project/mtn
 **Site URL** (default redirect, production):
 
 ```text
-https://doomsday-watch-group.vercel.app
+https://doomwatchparty.vercel.app
 ```
 
 **Additional redirect URLs:**
@@ -59,14 +60,16 @@ https://doomsday-watch-group.vercel.app
 ```text
 http://127.0.0.1:5173/**
 http://localhost:5173/**
-https://doomsday-watch-group.vercel.app/**
-https://doomsday-watch-group-*.vercel.app/**
+https://doomwatchparty.vercel.app/**
+https://doomwatchparty-*.vercel.app/**
 https://*-notsantis-projects.vercel.app/**
 ```
 
 Do not allow `https://*.vercel.app/**` — that would accept auth redirects onto any Vercel app.
 
 The client sends `emailRedirectTo` / `redirectTo` as `{VITE_APP_URL}/auth/callback`. Preview builds must therefore use that preview origin (leave `VITE_APP_URL` unset on Preview). If confirmation emails still land on the Site URL, switch the Auth email templates to `{{ .RedirectTo }}` instead of `{{ .SiteURL }}`.
+
+Hosted confirmation and reset mail go through the **send-auth-email** Edge Function and **Resend templates**, not the Vite app. Setup: `docs/auth-email.md`. Never put `RESEND_API_KEY` in Vercel.
 
 Local GoTrue reads `supabase/config.toml` (`site_url` and `additional_redirect_urls`). Restart `npx supabase start` after changing those values.
 

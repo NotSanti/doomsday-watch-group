@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256" role="img" aria-labelledby="title-falcon">
+<title id="title-falcon">Falcon fan avatar</title>
+<circle cx="128" cy="128" r="118" fill="#29323D"/>
+<circle cx="128" cy="128" r="112" fill="none" stroke="#D43A3A" stroke-width="5"/>
+<path d="M128 105Q87 67 43 69q20 52 73 83l12 57 12-57q53-31 73-83-44-2-85 36Z" fill="#D43A3A" stroke="#E8EDF2" stroke-width="8" stroke-linejoin="round"/><path d="M54 82q35 9 62 49M202 82q-35 9-62 49" fill="none" stroke="#29323D" stroke-width="9"/><path d="m128 78 15 28-15 25-15-25z" fill="#E8EDF2"/>
+</svg>

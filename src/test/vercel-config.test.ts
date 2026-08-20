@@ -24,7 +24,7 @@ describe('Vercel SPA configuration', () => {
   })
 
   it('does not store secrets in vercel.json', () => {
-    expect(raw).not.toMatch(/service.role|sb_secret_|TMDB_API_READ_TOKEN/i)
+    expect(raw).not.toMatch(/service.role|sb_secret_|TMDB_API_READ_TOKEN|RESEND_API_KEY/i)
     expect(raw).not.toMatch(/VITE_SUPABASE_PUBLISHABLE_KEY/)
   })
 

@@ -50,6 +50,17 @@ describe('auth route guards', () => {
     ).toBeInTheDocument()
   })
 
+  it('shows a last-step overlay until a profile icon is saved', async () => {
+    setMockSession(makeSession())
+    setMockProfile(makeProfile({ avatar_url: null }))
+    renderApp('/app')
+
+    expect(
+      await screen.findByRole('heading', { name: 'Last step' }),
+    ).toBeInTheDocument()
+    expect(screen.getByRole('dialog', { name: 'Last step' })).toBeInTheDocument()
+  })
+
   it('clears the query cache on sign out', async () => {
     const user = userEvent.setup()
     setMockSession(makeSession())

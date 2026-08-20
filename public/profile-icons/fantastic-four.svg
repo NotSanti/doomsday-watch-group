@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256" role="img" aria-labelledby="title-fantastic-four">
+<title id="title-fantastic-four">Fantastic Four fan avatar</title>
+<circle cx="128" cy="128" r="118" fill="#103D73"/>
+<circle cx="128" cy="128" r="112" fill="none" stroke="#F7F2E8" stroke-width="5"/>
+<circle cx="128" cy="128" r="70" fill="#F7F2E8" stroke="#50A7E8" stroke-width="10"/><path d="M145 74 87 145h47v37h25v-37h19v-23h-19V74Zm-11 48h-16l16-20Z" fill="#103D73" fill-rule="evenodd"/>
+</svg>

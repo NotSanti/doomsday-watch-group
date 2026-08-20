@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256" role="img" aria-labelledby="title-ant-man">
+<title id="title-ant-man">Ant-Man fan avatar</title>
+<circle cx="128" cy="128" r="118" fill="#20252B"/>
+<circle cx="128" cy="128" r="112" fill="none" stroke="#C52B38" stroke-width="5"/>
+<path d="M86 76h84l18 42-13 71-47 24-47-24-13-71z" fill="#303740" stroke="#E7EDF2" stroke-width="8"/><path d="M92 78 72 47m92 31 20-31" stroke="#E7EDF2" stroke-width="7" stroke-linecap="round"/><path d="M86 100h84v46l-30 24h-24l-30-24z" fill="#C52B38"/><path d="m94 112 27 13-20 19m61-32-27 13 20 19" fill="none" stroke="#E7EDF2" stroke-width="9" stroke-linecap="round"/><path d="M128 91v78" stroke="#20252B" stroke-width="7"/>
+</svg>
