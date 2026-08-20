@@ -1,5 +1,6 @@
 import { buildAuthActionUrl } from '../../supabase/functions/_shared/auth-action-url.ts'
 import {
+  normalizeHookSecret,
   resolveAuthEmailTemplateId,
   resolveUserDisplayName,
 } from '../../supabase/functions/_shared/auth-email-templates.ts'
@@ -33,6 +34,13 @@ describe('resolveAuthEmailTemplateId', () => {
 
   it('falls back to the generic auth action template', () => {
     expect(resolveAuthEmailTemplateId('magiclink', env)).toBe('tmpl_action')
+  })
+})
+
+describe('normalizeHookSecret', () => {
+  it('strips quotes and the GoTrue secret prefix', () => {
+    expect(normalizeHookSecret('  "v1,whsec_abc123="  ')).toBe('abc123=')
+    expect(normalizeHookSecret('abc123=')).toBe('abc123=')
   })
 })
 

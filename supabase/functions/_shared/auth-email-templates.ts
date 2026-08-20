@@ -1,5 +1,10 @@
 import type { AuthEmailActionType } from './auth-action-url.ts'
 
+/** Strip quotes and the GoTrue `v1,whsec_` prefix so standardwebhooks can decode the secret. */
+export function normalizeHookSecret(raw: string): string {
+  return raw.trim().replaceAll(/^["']|["']$/g, '').replace(/^v1,whsec_/, '')
+}
+
 const SUPPORTED_ACTIONS = new Set<AuthEmailActionType>([
   'signup',
   'recovery',
