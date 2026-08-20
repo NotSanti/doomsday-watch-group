@@ -33,7 +33,11 @@ export default defineConfig({
     tailwindcss(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['doomWatchPartyLogo.svg'],
+      includeAssets: [
+        'doomWatchPartyLogo.svg',
+        'apple-touch-icon.png',
+        'pwa-icon-512.png',
+      ],
       manifest: {
         name: 'Doom Watch Party',
         short_name: 'Doom Watch Party',
@@ -44,6 +48,18 @@ export default defineConfig({
         display: 'standalone',
         start_url: '/',
         icons: [
+          {
+            src: '/apple-touch-icon.png',
+            sizes: '180x180',
+            type: 'image/png',
+            purpose: 'any',
+          },
+          {
+            src: '/pwa-icon-512.png',
+            sizes: '512x512',
+            type: 'image/png',
+            purpose: 'any',
+          },
           {
             src: '/doomWatchPartyLogo.svg',
             sizes: 'any',

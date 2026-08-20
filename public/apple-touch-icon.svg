@@ -1,15 +1,28 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title">
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-labelledby="title">
   <title id="title">Doom Watch Party</title>
+  <rect width="512" height="512" fill="#0d1210"/>
   <defs>
-    <linearGradient id="doomGreen" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#0ac80a"/>
-      <stop offset="1" stop-color="#079207"/>
+    <linearGradient id="neutral" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#c9d0c9"/>
+    </linearGradient>
+    <linearGradient id="green" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#a8bc96"/>
+      <stop offset="1" stop-color="#647b69"/>
     </linearGradient>
   </defs>
-  <rect width="512" height="512" fill="#0d1210"/>
-  <circle cx="256" cy="256" r="244" fill="#001800" stroke="url(#doomGreen)" stroke-width="16"/>
-  <path fill="url(#doomGreen)" d="M61 220 171 71 140 190 242 267 179 442 150 318Z"/>
-  <path fill="url(#doomGreen)" d="M451 220 341 71 372 190 270 267 333 442 362 318Z"/>
-  <path fill="url(#doomGreen)" d="m256 276 23 62h-46Z"/>
+  <path
+    fill="url(#neutral)"
+    fill-rule="evenodd"
+    d="M78 130h98c59 0 96 31 96 82s-37 82-96 82h-64c-10 0-18-4-23-12l-28-42c-4-6-5-13-3-20Zm56 47-16 50 17 20h39c28 0 43-12 43-35s-15-35-43-35Z"
+  />
+  <path
+    fill="url(#neutral)"
+    fill-rule="evenodd"
+    d="M240 130h96c60 0 97 31 97 82s-37 82-97 82h-43v30h-53Zm53 47v70h41c29 0 44-12 44-35s-15-35-44-35Z"
+  />
+  <path
+    fill="url(#green)"
+    d="M135 270h59l28 100 19-65c3-10 9-15 18-15s15 5 18 15l19 65 28-100h59l-49 148c-4 12-12 18-24 18h-25l-26-77-26 77h-25c-12 0-20-6-24-18Z"
+  />
 </svg>

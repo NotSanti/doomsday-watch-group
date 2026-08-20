@@ -31,8 +31,8 @@ self.addEventListener('push', (event) => {
   const title = payload.title ?? 'Doom Watch Party'
   const options: NotificationOptions = {
     body: payload.body ?? 'You have a new update from your watch group.',
-    icon: '/doomWatchPartyLogo.svg',
-    badge: '/doomWatchPartyLogo.svg',
+    icon: '/apple-touch-icon.png',
+    badge: '/apple-touch-icon.png',
     data: { url: payload.url ?? '/' },
   }
 
