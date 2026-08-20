@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link, Navigate, useSearchParams } from 'react-router'
 import { ErrorState } from '@/components/ErrorState'
 import { Skeleton } from '@/components/Skeleton'
@@ -11,52 +11,53 @@ import { useAuth } from '@/features/auth/use-auth'
 import { safeReturnTo } from '@/lib/return-to'
 import { getSupabaseClient } from '@/lib/supabase'
 
+type OtpPhase = 'idle' | 'verifying' | 'success' | 'error'
+
 export function AuthCallbackPage() {
   const { status, isPasswordRecovery } = useAuth()
   const [searchParams] = useSearchParams()
   const tokenHash = searchParams.get('token_hash')
   const otpType = parseEmailOtpType(searchParams.get('type'))
   const needsOtpExchange = Boolean(tokenHash && otpType)
-  const [otpStatus, setOtpStatus] = useState<
-    'idle' | 'verifying' | 'error'
-  >(needsOtpExchange ? 'verifying' : 'idle')
+  const verifyStarted = useRef(false)
+  const [otpPhase, setOtpPhase] = useState<OtpPhase>(
+    needsOtpExchange ? 'verifying' : 'idle',
+  )
   const [otpError, setOtpError] = useState<string | null>(null)
 
   useEffect(() => {
-    if (!tokenHash || !otpType) {
+    if (!tokenHash || !otpType || verifyStarted.current) {
       return
     }
 
-    let cancelled = false
+    // OTP links are single-use; guard against React Strict Mode double-invoke.
+    verifyStarted.current = true
+    setOtpPhase('verifying')
 
     void verifyEmailOtp(getSupabaseClient(), {
       tokenHash,
       type: otpType,
-    }).then(({ error }) => {
-      if (cancelled) {
-        return
-      }
-
-      if (error) {
+    }).then(({ data, error }) => {
+      if (error || !data.session) {
         setOtpError(
           'This sign-in link is invalid or has expired. Request a new one from the sign-in page.',
         )
-        setOtpStatus('error')
+        setOtpPhase('error')
         return
       }
 
-      setOtpStatus('idle')
+      setOtpPhase('success')
     })
-
-    return () => {
-      cancelled = true
-    }
   }, [otpType, tokenHash])
 
   const fallback = isPasswordRecovery ? '/auth?mode=update-password' : '/app'
   const next = safeReturnTo(searchParams.get('next'), fallback)
 
-  if (otpStatus === 'verifying' || status === 'loading') {
+  if (
+    otpPhase === 'verifying' ||
+    status === 'loading' ||
+    (otpPhase === 'success' && status !== 'authenticated')
+  ) {
     return (
       <main
         className="mx-auto max-w-md px-4 py-16"
@@ -70,7 +71,7 @@ export function AuthCallbackPage() {
     )
   }
 
-  if (otpStatus === 'error' || status === 'anonymous') {
+  if (otpPhase === 'error' || (otpPhase === 'idle' && status === 'anonymous')) {
     return (
       <main className="mx-auto max-w-lg px-4 py-16">
         <ErrorState

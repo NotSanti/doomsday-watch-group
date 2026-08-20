@@ -879,6 +879,14 @@ export const supabaseAuthMock = {
     data: { user: session?.user ?? null },
     error: null,
   })),
+  verifyOtp: vi.fn(async () => {
+    const next = makeSession()
+    emitAuthEvent('SIGNED_IN', next)
+    return {
+      data: { session: next, user: next.user },
+      error: null,
+    }
+  }),
 }
 
 export const supabaseRpcMock = {
@@ -1580,6 +1588,7 @@ export function resetSupabaseMock(): void {
   supabaseAuthMock.signOut.mockClear()
   supabaseAuthMock.resetPasswordForEmail.mockClear()
   supabaseAuthMock.updateUser.mockClear()
+  supabaseAuthMock.verifyOtp.mockClear()
   supabaseFromMock.mockClear()
   supabaseChannelMock.channel.mockClear()
   supabaseChannelMock.removeChannel.mockClear()

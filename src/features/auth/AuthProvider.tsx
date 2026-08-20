@@ -40,8 +40,16 @@ export function AuthProvider({ children }: AuthProviderProps) {
         return
       }
 
-      setSession(data.session)
-      setStatus(data.session ? 'authenticated' : 'anonymous')
+      // Do not clobber a session established by verifyOtp / onAuthStateChange
+      // while this initial getSession() was in flight.
+      setSession((current) => current ?? data.session)
+      setStatus((current) => {
+        if (current !== 'loading') {
+          return current
+        }
+
+        return data.session ? 'authenticated' : 'anonymous'
+      })
     })
 
     const { data } = client.auth.onAuthStateChange((event, nextSession) => {

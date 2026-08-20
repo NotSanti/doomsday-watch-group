@@ -86,7 +86,7 @@ Wait for the current hour window to reset if you already hit the 2-email cap, or
 
 ## Redirect URLs
 
-The client sends `emailRedirectTo` / `redirectTo` as `{VITE_APP_URL}/auth/callback`. The Send Email hook builds `ACTION_URL` as that callback plus `token_hash` and `type`. The SPA calls `supabase.auth.verifyOtp` on `/auth/callback` — do **not** link to `/auth/v1/verify` (the API gateway requires an `apikey` that email clients cannot send). If links ignore the client redirect and always use the Site URL, fix **Site URL** and redirect allow-list in Supabase Auth settings. See `docs/deployment.md`.
+The client sends `emailRedirectTo` / `redirectTo` as `{VITE_APP_URL}/auth/callback`. The Send Email hook builds `ACTION_URL` as `{origin}/auth/callback?token_hash=…&type=…` (always the callback path, even when GoTrue’s `redirect_to` is only the Site URL `/`). The SPA calls `supabase.auth.verifyOtp` on `/auth/callback`. Do **not** link to `/auth/v1/verify` (the API gateway requires an `apikey` that email clients cannot send). If older emails still open `/` with `token_hash`, the public layout forwards them to `/auth/callback`.
 
 ## Legacy SMTP note
 

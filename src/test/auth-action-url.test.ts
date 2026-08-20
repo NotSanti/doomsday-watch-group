@@ -22,6 +22,18 @@ describe('buildAuthActionUrl', () => {
     )
   })
 
+  it('forces /auth/callback when GoTrue only provides the Site URL', () => {
+    const url = buildAuthActionUrl({
+      tokenHash: 'hash123',
+      emailActionType: 'signup',
+      redirectTo: 'https://doomwatchparty.vercel.app/',
+    })
+
+    expect(url).toBe(
+      'https://doomwatchparty.vercel.app/auth/callback?token_hash=hash123&type=signup',
+    )
+  })
+
   it('preserves existing redirect query params such as next', () => {
     const url = buildAuthActionUrl({
       tokenHash: 'hash456',

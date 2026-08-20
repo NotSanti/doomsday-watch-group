@@ -1,12 +1,14 @@
 import { Outlet, useLocation } from 'react-router'
 import { shouldShowPwaWelcomeGate } from '@/features/auth/pwa-welcome'
 import { useAuth } from '@/features/auth/use-auth'
+import { useAuthEmailTokenRedirect } from '@/features/auth/use-auth-email-token-redirect'
 import { isStandalonePwa } from '@/features/notifications/push-utils'
 import { PublicFooter, PublicHeader } from '@/layouts/PublicChrome'
 
 export function PublicLayout() {
   const { status } = useAuth()
   const location = useLocation()
+  useAuthEmailTokenRedirect()
   const hideChrome =
     location.pathname === '/' &&
     shouldShowPwaWelcomeGate({

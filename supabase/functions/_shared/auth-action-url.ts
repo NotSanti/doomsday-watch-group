@@ -15,13 +15,28 @@ export type BuildAuthActionUrlInput = {
   redirectTo: string
 }
 
+const AUTH_CALLBACK_PATH = '/auth/callback'
+
 /**
- * Build an app callback URL with token_hash for client-side verifyOtp.
- * Avoids linking to /auth/v1/verify (Kong requires an apikey on that route).
+ * Build an SPA `/auth/callback` URL with token_hash for client-side verifyOtp.
+ *
+ * Always uses the callback path (not Site URL `/`) so GoTrue's redirect_to
+ * cannot drop users on the marketing home without exchanging the OTP.
  */
 export function buildAuthActionUrl(input: BuildAuthActionUrlInput): string {
-  const url = new URL(input.redirectTo)
-  url.searchParams.set('token_hash', input.tokenHash)
-  url.searchParams.set('type', input.emailActionType)
-  return url.toString()
+  const redirect = new URL(input.redirectTo)
+  const callback = new URL(AUTH_CALLBACK_PATH, redirect.origin)
+
+  // Preserve safe query params already on redirect_to (e.g. next=).
+  redirect.searchParams.forEach((value, key) => {
+    if (key === 'token_hash' || key === 'type') {
+      return
+    }
+
+    callback.searchParams.set(key, value)
+  })
+
+  callback.searchParams.set('token_hash', input.tokenHash)
+  callback.searchParams.set('type', input.emailActionType)
+  return callback.toString()
 }
