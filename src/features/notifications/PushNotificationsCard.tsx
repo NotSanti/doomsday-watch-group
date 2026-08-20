@@ -1,13 +1,10 @@
-import { useEffect, useRef } from 'react'
+import { useEffect } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/Skeleton'
 import type { NotificationPreferences } from '@/features/notifications/notification-schemas'
 import { syncExistingPushSubscription } from '@/features/notifications/register-push'
-import {
-  DAILY_COUNTDOWN_SCHEDULE_LABEL,
-  isStandalonePwa,
-} from '@/features/notifications/push-utils'
+import { DAILY_COUNTDOWN_SCHEDULE_LABEL } from '@/features/notifications/push-utils'
 import {
   useNotificationPreferences,
   usePushNotificationSupport,
@@ -66,7 +63,6 @@ export function PushNotificationsCard({ userId }: PushNotificationsCardProps) {
   const preferencesQuery = useNotificationPreferences(userId)
   const updatePreferences = useUpdateNotificationPreferences(userId)
   const push = usePushNotifications(userId)
-  const autoSubscribeRequested = useRef(false)
 
   useEffect(() => {
     if (!support.supported || !support.configured) {
@@ -83,43 +79,6 @@ export function PushNotificationsCard({ userId }: PushNotificationsCardProps) {
       },
     )
   }, [queryClient, support.configured, support.supported, userId])
-
-  useEffect(() => {
-    if (!support.supported || !support.configured) {
-      return
-    }
-
-    // Only request permission for installed/standalone PWA contexts.
-    if (!isStandalonePwa()) {
-      return
-    }
-
-    if (autoSubscribeRequested.current) {
-      return
-    }
-
-    // Wait until we know whether the device is already subscribed.
-    if (push.isLoading || push.isSubscribed) {
-      return
-    }
-
-    // If the user explicitly blocked notifications, don't re-prompt.
-    if (
-      typeof Notification !== 'undefined' &&
-      Notification.permission === 'denied'
-    ) {
-      return
-    }
-
-    autoSubscribeRequested.current = true
-    void push.subscribe.mutateAsync()
-  }, [
-    push.isLoading,
-    push.isSubscribed,
-    push.subscribe,
-    support.configured,
-    support.supported,
-  ])
 
   if (preferencesQuery.isPending || push.isLoading) {
     return <Skeleton className="h-40 w-full" />

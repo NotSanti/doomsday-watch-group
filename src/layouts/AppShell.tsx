@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button'
 import { useAuth } from '@/features/auth/use-auth'
 import { GroupSwitcher } from '@/features/groups/GroupSwitcher'
 import { useGroup } from '@/features/groups/use-groups'
+import { usePwaPushPermissionPrompt } from '@/features/notifications/use-pwa-push-permission-prompt'
 import { useRouteMenuOpen } from '@/hooks/use-route-menu-open'
 import { cn } from '@/lib/utils'
 
@@ -69,7 +70,8 @@ export function AppShell() {
   const { groupId } = useParams()
   const location = useLocation()
   const titlePage = useMatch('/groups/:groupId/titles/:titleId')
-  const { signOut } = useAuth()
+  const { signOut, user } = useAuth()
+  usePwaPushPermissionPrompt(user?.id)
   const groupQuery = useGroup(groupId ?? '')
   const [menuOpen, setMenuOpen] = useRouteMenuOpen()
   const isMember = Boolean(groupId && groupQuery.data)

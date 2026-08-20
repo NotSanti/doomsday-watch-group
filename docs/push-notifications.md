@@ -75,11 +75,12 @@ curl -X POST "https://<project-ref>.supabase.co/functions/v1/send-daily-countdow
 
 ## User flow
 
-1. Open **Profile** in the app.
-2. Turn on **Daily Doomsday countdown** to receive one reminder each day around 10:00 AM Eastern (2:00 PM UTC).
-3. Tap **Enable on this device** and allow browser permission (required to receive any push).
-4. Optionally toggle group-activity notification categories.
-5. Use **Send test notification** to verify delivery.
+1. Install the PWA (Home Screen / install prompt). On sign-in in standalone mode, the app asks for notification permission when it has never been decided. If the user previously denied, it does not ask again.
+2. Open **Profile** to manage preferences.
+3. Turn on **Daily Doomsday countdown** to receive one reminder each day around 10:00 AM Eastern (2:00 PM UTC). Countdown preference is separate from device permission.
+4. Use **Enable on this device** if you need to re-subscribe manually after granting permission in browser settings.
+5. Optionally toggle group-activity notification categories.
+6. Use **Send test notification** to verify delivery.
 
 ### iOS
 
