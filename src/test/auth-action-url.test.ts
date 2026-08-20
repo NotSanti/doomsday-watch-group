@@ -44,6 +44,8 @@ describe('normalizeHookSecret', () => {
   })
 })
 
+import { verifyStandardWebhookPayload } from '../../supabase/functions/_shared/auth-webhook.ts'
+
 describe('resolveUserDisplayName', () => {
   it('uses display_name metadata when present', () => {
     expect(
@@ -54,5 +56,44 @@ describe('resolveUserDisplayName', () => {
   it('falls back to there', () => {
     expect(resolveUserDisplayName({})).toBe('there')
     expect(resolveUserDisplayName(undefined)).toBe('there')
+  })
+})
+
+describe('verifyStandardWebhookPayload', () => {
+  it('accepts a valid Standard Webhooks signature', async () => {
+    const secretBytes = new Uint8Array(32).map((_, index) => index + 1)
+    let binary = ''
+    for (const byte of secretBytes) {
+      binary += String.fromCharCode(byte)
+    }
+    const secret = btoa(binary)
+    const payload = JSON.stringify({ ok: true })
+    const id = 'msg_1'
+    const timestamp = '1710000000'
+    const key = await crypto.subtle.importKey(
+      'raw',
+      secretBytes,
+      { name: 'HMAC', hash: 'SHA-256' },
+      false,
+      ['sign'],
+    )
+    const signed = await crypto.subtle.sign(
+      'HMAC',
+      key,
+      new TextEncoder().encode(`${id}.${timestamp}.${payload}`),
+    )
+    const signature = btoa(String.fromCharCode(...new Uint8Array(signed)))
+
+    await expect(
+      verifyStandardWebhookPayload(
+        payload,
+        {
+          'webhook-id': id,
+          'webhook-timestamp': timestamp,
+          'webhook-signature': `v1,${signature}`,
+        },
+        secret,
+      ),
+    ).resolves.toEqual({ ok: true })
   })
 })

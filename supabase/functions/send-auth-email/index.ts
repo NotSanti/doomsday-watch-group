@@ -1,5 +1,3 @@
-import { Webhook } from 'npm:standardwebhooks@1.0.0'
-
 import { buildAuthActionUrl } from '../_shared/auth-action-url.ts'
 import {
   isSupportedAuthEmailAction,
@@ -7,6 +5,7 @@ import {
   resolveAuthEmailTemplateId,
   resolveUserDisplayName,
 } from '../_shared/auth-email-templates.ts'
+import { verifyStandardWebhookPayload } from '../_shared/auth-webhook.ts'
 
 type SendEmailHookPayload = {
   user: {
@@ -29,8 +28,7 @@ type EdgeRuntimeGlobal = {
 }
 
 function getEdgeRuntime(): EdgeRuntimeGlobal | undefined {
-  const runtime = (globalThis as { EdgeRuntime?: EdgeRuntimeGlobal }).EdgeRuntime
-  return runtime
+  return (globalThis as { EdgeRuntime?: EdgeRuntimeGlobal }).EdgeRuntime
 }
 
 function env(name: string): string {
@@ -42,7 +40,7 @@ function env(name: string): string {
   return value
 }
 
-async function sendResendTemplate(input: {
+function sendResendTemplate(input: {
   apiKey: string
   from: string
   to: string
@@ -50,7 +48,7 @@ async function sendResendTemplate(input: {
   actionUrl: string
   userName: string
 }): Promise<void> {
-  const response = await fetch('https://api.resend.com/emails', {
+  return fetch('https://api.resend.com/emails', {
     method: 'POST',
     headers: {
       Authorization: `Bearer ${input.apiKey}`,
@@ -67,12 +65,23 @@ async function sendResendTemplate(input: {
         },
       },
     }),
+    signal: AbortSignal.timeout(8_000),
+  }).then(async (response) => {
+    if (!response.ok) {
+      const detail = await response.text()
+      throw new Error(`Resend ${response.status}: ${detail}`)
+    }
   })
+}
 
-  if (!response.ok) {
-    const detail = await response.text()
-    throw new Error(`Resend ${response.status}: ${detail}`)
+function keepAlive(promise: Promise<unknown>): void {
+  const edgeRuntime = getEdgeRuntime()
+  if (edgeRuntime) {
+    edgeRuntime.waitUntil(promise)
+    return
   }
+
+  void promise
 }
 
 Deno.serve(async (req) => {
@@ -83,11 +92,13 @@ Deno.serve(async (req) => {
   try {
     const payload = await req.text()
     const headers = Object.fromEntries(req.headers)
-    const webhook = new Webhook(normalizeHookSecret(env('SEND_EMAIL_HOOK_SECRET')))
-    const { user, email_data } = webhook.verify(
+    const verified = (await verifyStandardWebhookPayload(
       payload,
       headers,
-    ) as SendEmailHookPayload
+      normalizeHookSecret(env('SEND_EMAIL_HOOK_SECRET')),
+    )) as SendEmailHookPayload
+
+    const { user, email_data } = verified
 
     if (!isSupportedAuthEmailAction(email_data.email_action_type)) {
       throw new Error(
@@ -122,12 +133,7 @@ Deno.serve(async (req) => {
       console.error('send-auth-email Resend failed:', message)
     })
 
-    const edgeRuntime = getEdgeRuntime()
-    if (edgeRuntime) {
-      edgeRuntime.waitUntil(sendPromise)
-    } else {
-      await sendPromise
-    }
+    keepAlive(sendPromise)
 
     return Response.json({}, { status: 200 })
   } catch (error) {
