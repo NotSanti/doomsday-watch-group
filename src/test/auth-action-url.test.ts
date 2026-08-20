@@ -1,7 +1,10 @@
 import { buildAuthActionUrl } from '../../supabase/functions/_shared/auth-action-url.ts'
 import {
   normalizeHookSecret,
+  normalizeResendFromAddress,
+  parseResendFromAddress,
   resolveAuthEmailTemplateId,
+  resolveResendFromAddress,
   resolveUserDisplayName,
 } from '../../supabase/functions/_shared/auth-email-templates.ts'
 
@@ -41,6 +44,48 @@ describe('normalizeHookSecret', () => {
   it('strips quotes and the GoTrue secret prefix', () => {
     expect(normalizeHookSecret('  "v1,whsec_abc123="  ')).toBe('abc123=')
     expect(normalizeHookSecret('abc123=')).toBe('abc123=')
+  })
+})
+
+describe('normalizeResendFromAddress', () => {
+  it('removes literal quotes around the display name', () => {
+    expect(
+      normalizeResendFromAddress(
+        '"Doom Watch Party" <noreply@doomwatchparty.online>',
+      ),
+    ).toBe('Doom Watch Party <noreply@doomwatchparty.online>')
+    expect(
+      normalizeResendFromAddress(
+        '"Doom Watch Party <noreply@doomwatchparty.online>"',
+      ),
+    ).toBe('Doom Watch Party <noreply@doomwatchparty.online>')
+  })
+})
+
+describe('resolveResendFromAddress', () => {
+  it('builds from split name and address secrets', () => {
+    expect(
+      resolveResendFromAddress({
+        RESEND_FROM_NAME: 'Doom Watch Party',
+        RESEND_FROM_ADDRESS: 'noreply@doomwatchparty.online',
+      }),
+    ).toBe('Doom Watch Party <noreply@doomwatchparty.online>')
+  })
+
+  it('falls back to combined RESEND_FROM_EMAIL', () => {
+    expect(
+      resolveResendFromAddress({
+        RESEND_FROM_EMAIL: 'Doom Watch Party <noreply@doomwatchparty.online>',
+      }),
+    ).toBe('Doom Watch Party <noreply@doomwatchparty.online>')
+  })
+})
+
+describe('parseResendFromAddress', () => {
+  it('returns email-only when no display name is provided', () => {
+    expect(parseResendFromAddress('noreply@doomwatchparty.online')).toEqual({
+      email: 'noreply@doomwatchparty.online',
+    })
   })
 })
 

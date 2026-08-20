@@ -3,6 +3,7 @@ import {
   isSupportedAuthEmailAction,
   normalizeHookSecret,
   resolveAuthEmailTemplateId,
+  resolveResendFromAddress,
   resolveUserDisplayName,
 } from '../_shared/auth-email-templates.ts'
 import { verifyStandardWebhookPayload } from '../_shared/auth-webhook.ts'
@@ -115,7 +116,7 @@ Deno.serve(async (req) => {
 
     const sendPromise = sendResendTemplate({
       apiKey: env('RESEND_API_KEY'),
-      from: env('RESEND_FROM_EMAIL'),
+      from: resolveResendFromAddress(Deno.env.toObject()),
       to: user.email,
       templateId: resolveAuthEmailTemplateId(email_data.email_action_type, {
         RESEND_TEMPLATE_CONFIRM_SIGNUP: Deno.env.get(

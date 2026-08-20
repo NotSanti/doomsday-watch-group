@@ -66,10 +66,23 @@ Copy each template’s ID into the Edge Function secrets:
 4. Open [Auth Hooks](https://supabase.com/dashboard/project/mtnptgydaxcjycrrxyuz/auth/hooks) → **Send Email** → HTTPS.
 5. URL: `https://<project-ref>.supabase.co/functions/v1/send-auth-email`
 6. Generate a webhook secret and store it as `SEND_EMAIL_HOOK_SECRET` (`v1,whsec_…` format).
-7. Disable custom SMTP on the Supabase project (the hook replaces built-in sending).
-8. Sign up with a throwaway inbox and confirm delivery + `/auth/callback` redirect.
+7. Leave custom SMTP off unless the Rate Limits page will not let you edit emails-per-hour (see below). The Send Email hook is what actually delivers mail.
+8. Raise the Auth **emails per hour** limit (Resend does not do this for you).
+9. Sign up with a throwaway inbox and confirm delivery + `/auth/callback` redirect.
 
 `RESEND_*` and `SEND_EMAIL_HOOK_SECRET` are documented in `.env.example` as **names only**. Do not prefix them with `VITE_`. Do not add them to Vercel.
+
+## Auth email rate limit (required)
+
+`email rate limit exceeded` / `over_email_send_rate_limit` comes from **Supabase Auth**, not Resend. GoTrue still counts signup/reset emails project-wide. The built-in provider cap is **2 emails per hour**. Switching to Resend (SMTP or Send Email hook) only *unlocks* a higher cap; it does not raise it automatically.
+
+1. Open [Authentication → Rate Limits](https://supabase.com/dashboard/project/mtnptgydaxcjycrrxyuz/auth/rate-limits).
+2. Set **Rate limit for sending emails** to a value that matches testing/production (30 is the usual starting point after custom email; 100 is fine for a small fan app).
+3. Save.
+
+If that field is greyed out, either the Send Email hook is not enabled yet, or the dashboard still requires custom SMTP to be configured. In the SMTP-required case, enable Resend SMTP (`smtp.resend.com`, user `resend`, password = API key, sender = `noreply@doomwatchparty.online`) **and keep the hook enabled**. Auth will still send through the hook; SMTP is only there so the rate-limit setting can be changed.
+
+Wait for the current hour window to reset if you already hit the 2-email cap, or raise the limit and retry.
 
 ## Redirect URLs
 

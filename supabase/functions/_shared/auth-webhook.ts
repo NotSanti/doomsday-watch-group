@@ -47,9 +47,10 @@ export async function verifyStandardWebhookPayload(
   }
 
   const keyBytes = decodeBase64(secret)
+  const keyMaterial = new Uint8Array(keyBytes)
   const key = await crypto.subtle.importKey(
     'raw',
-    keyBytes,
+    keyMaterial,
     { name: 'HMAC', hash: 'SHA-256' },
     false,
     ['sign'],
