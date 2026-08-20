@@ -2,6 +2,10 @@ import { describe, expect, it } from 'vitest'
 import { getPwaPushPermissionAction } from '@/features/notifications/pwa-push-permission'
 
 describe('getPwaPushPermissionAction', () => {
+  it('accepts an empty call and skips in a normal browser test env', () => {
+    expect(getPwaPushPermissionAction()).toBe('skip')
+  })
+
   it('skips outside standalone PWA', () => {
     expect(
       getPwaPushPermissionAction({
