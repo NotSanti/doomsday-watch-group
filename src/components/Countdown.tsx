@@ -35,16 +35,16 @@ function Unit({
       {separator ? (
         <span
           aria-hidden="true"
-          className="metallic-text font-display text-[clamp(1.25rem,5vw,2.25rem)] leading-none tracking-[0.08em]"
+          className="metallic-text shrink-0 px-0.5 font-display text-2xl leading-none tracking-[0.06em] sm:text-3xl lg:text-4xl xl:text-5xl"
         >
           :
         </span>
       ) : null}
-      <div className="min-w-[clamp(2.5rem,14vw,4.75rem)] text-center">
-        <div className="metallic-text font-display text-[clamp(1.25rem,5vw,2.25rem)] tracking-[0.08em]">
+      <div className="min-w-0 flex-1 text-center">
+        <div className="metallic-text font-display text-2xl leading-none tracking-[0.06em] sm:text-3xl lg:text-4xl xl:text-5xl">
           {value}
         </div>
-        <div className="mt-1 text-[clamp(0.55rem,2.5vw,0.65rem)] tracking-[0.18em] text-secondary uppercase">
+        <div className="mt-1 text-xs tracking-[0.14em] text-secondary uppercase sm:text-sm">
           {label}
         </div>
       </div>
@@ -78,7 +78,7 @@ export function Countdown({
   return (
     <div
       className={cn(
-        'mx-auto flex w-full max-w-full flex-wrap items-end justify-center gap-0.5 sm:gap-2',
+        'mx-auto flex w-full min-w-0 flex-nowrap items-end justify-center',
         className,
       )}
       aria-live="polite"
@@ -92,7 +92,7 @@ export function Countdown({
       }
     >
       {parts?.elapsed ? (
-        <p className="gold-text font-display text-2xl tracking-[0.12em] uppercase">
+        <p className="gold-text font-display text-3xl tracking-[0.12em] uppercase sm:text-4xl">
           The date has arrived
         </p>
       ) : (

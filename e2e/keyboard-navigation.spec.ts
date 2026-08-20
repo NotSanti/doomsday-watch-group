@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test'
+import { signUp } from './helpers/auth'
 import { PASSWORD, uniqueEmail } from './helpers/constants'
 
 test('keyboard user can sign in from the auth form', async ({ page }) => {
@@ -8,12 +9,7 @@ test('keyboard user can sign in from the auth form', async ({ page }) => {
     displayName: 'Keyboard User',
   }
 
-  await page.goto('/auth?mode=signup')
-  await page.getByLabel('Display name').fill(user.displayName)
-  await page.getByLabel('Email').fill(user.email)
-  await page.getByLabel('Password', { exact: true }).fill(user.password)
-  await page.getByRole('button', { name: 'Create account' }).click()
-  await page.waitForURL(/\/app/)
+  await signUp(page, user)
 
   await page.getByRole('button', { name: 'Sign out' }).click()
   await page.waitForURL(/\/auth/)
@@ -37,12 +33,7 @@ test('keyboard user can open create-group dialog', async ({ page }) => {
     displayName: 'Keyboard Group Owner',
   }
 
-  await page.goto('/auth?mode=signup')
-  await page.getByLabel('Display name').fill(user.displayName)
-  await page.getByLabel('Email').fill(user.email)
-  await page.getByLabel('Password', { exact: true }).fill(user.password)
-  await page.getByRole('button', { name: 'Create account' }).click()
-  await page.waitForURL(/\/app/)
+  await signUp(page, user)
 
   await page.getByRole('button', { name: 'Create group' }).focus()
   await page.keyboard.press('Enter')

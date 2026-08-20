@@ -31,19 +31,36 @@ export function MemberAvatar({
 }: MemberAvatarProps) {
   const isOwner = highlightOwner && member.role === 'owner'
   const iconId = parseAvatarIconId(member.avatar_url)
+  const framed = highlightOwner
 
   return (
     <span
       className={cn(
-        'inline-flex shrink-0 rounded-full',
-        isOwner
-          ? 'ring-2 ring-gold ring-offset-2 ring-offset-surface-elevated'
-          : null,
+        'box-border inline-flex shrink-0 items-center justify-center overflow-hidden rounded-full',
+        SIZE_CLASS[size],
+        framed && 'border-2',
+        framed && (isOwner ? 'border-gold' : 'border-border'),
         className,
       )}
     >
       {iconId ? (
-        <ProfileIcon id={iconId} size={size} />
+        <ProfileIcon
+          id={iconId}
+          size={size}
+          className="block size-full rounded-full object-cover"
+        />
+      ) : framed ? (
+        <span
+          aria-hidden="true"
+          className={cn(
+            'flex size-full items-center justify-center text-xs font-medium',
+            isOwner
+              ? 'bg-chip-gold-bg text-chip-gold-fg'
+              : 'bg-chip-metal-bg text-chip-metal-fg',
+          )}
+        >
+          {memberInitials(member.display_name)}
+        </span>
       ) : (
         <span
           aria-hidden="true"

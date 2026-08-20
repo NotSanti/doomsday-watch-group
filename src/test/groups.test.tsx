@@ -214,7 +214,8 @@ describe('groups', () => {
       name: 'Owner A (owner)',
     })
     const memberButton = within(tile!).getByRole('button', { name: 'Member B' })
-    expect(ownerButton).toHaveClass('ring-gold')
+    expect(ownerButton.querySelector('span')).toHaveClass('border-gold')
+    expect(memberButton.querySelector('span')).toHaveClass('border-border')
     expect(ownerButton.querySelector('img')).toHaveAttribute(
       'src',
       '/profile-icons/iron-man.svg',

@@ -1,11 +1,13 @@
 import type { Page } from '@playwright/test'
 import { parseInviteToken } from '../../src/features/invites/invite-link'
+import { completeAvatarOnboardingIfNeeded } from './auth'
 
 export async function createGroup(
   page: Page,
   input: { name: string; description?: string },
 ): Promise<string> {
   await page.goto('/app')
+  await completeAvatarOnboardingIfNeeded(page)
   await page.getByRole('button', { name: 'Create group' }).click()
   await page.getByLabel('Group name').fill(input.name)
   if (input.description) {
