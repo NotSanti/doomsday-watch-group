@@ -9,7 +9,7 @@ import {
 } from '../../supabase/functions/_shared/auth-email-templates.ts'
 
 describe('buildAuthActionUrl', () => {
-  it('builds a GoTrue verify URL with encoded redirect', () => {
+  it('builds an SPA callback URL with token_hash for verifyOtp', () => {
     const url = buildAuthActionUrl({
       siteUrl: 'https://abc.supabase.co/',
       tokenHash: 'hash123',
@@ -18,7 +18,20 @@ describe('buildAuthActionUrl', () => {
     })
 
     expect(url).toBe(
-      'https://abc.supabase.co/auth/v1/verify?token=hash123&type=signup&redirect_to=https%3A%2F%2Fdoomwatchparty.online%2Fauth%2Fcallback',
+      'https://doomwatchparty.online/auth/callback?token_hash=hash123&type=signup',
+    )
+  })
+
+  it('preserves existing redirect query params such as next', () => {
+    const url = buildAuthActionUrl({
+      tokenHash: 'hash456',
+      emailActionType: 'recovery',
+      redirectTo:
+        'https://doomwatchparty.online/auth/callback?next=%2Fauth%3Fmode%3Dupdate-password',
+    })
+
+    expect(url).toBe(
+      'https://doomwatchparty.online/auth/callback?next=%2Fauth%3Fmode%3Dupdate-password&token_hash=hash456&type=recovery',
     )
   })
 })

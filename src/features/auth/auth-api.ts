@@ -10,8 +10,36 @@ import {
   toAvatarUrl,
   type ProfileIconId,
 } from '@/features/auth/profile-icons'
+import type { EmailOtpType } from '@supabase/supabase-js'
 
 export const profileQueryKey = (userId: string) => ['profile', userId] as const
+
+const EMAIL_OTP_TYPES = new Set<EmailOtpType>([
+  'signup',
+  'invite',
+  'magiclink',
+  'recovery',
+  'email_change',
+  'email',
+])
+
+export function parseEmailOtpType(value: string | null): EmailOtpType | null {
+  if (!value || !EMAIL_OTP_TYPES.has(value as EmailOtpType)) {
+    return null
+  }
+
+  return value as EmailOtpType
+}
+
+export async function verifyEmailOtp(
+  client: BrowserSupabaseClient,
+  input: { tokenHash: string; type: EmailOtpType },
+) {
+  return client.auth.verifyOtp({
+    token_hash: input.tokenHash,
+    type: input.type,
+  })
+}
 
 const PROFILE_COLUMNS = 'id, display_name, avatar_url, created_at, updated_at'
 

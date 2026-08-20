@@ -8,20 +8,20 @@ export type AuthEmailActionType =
   | 'reauthentication'
 
 export type BuildAuthActionUrlInput = {
-  siteUrl: string
+  /** @deprecated Unused — links go to the SPA callback, not GoTrue /verify. */
+  siteUrl?: string
   tokenHash: string
   emailActionType: AuthEmailActionType
   redirectTo: string
 }
 
-/** Build the GoTrue verify URL Supabase would normally embed in auth emails. */
+/**
+ * Build an app callback URL with token_hash for client-side verifyOtp.
+ * Avoids linking to /auth/v1/verify (Kong requires an apikey on that route).
+ */
 export function buildAuthActionUrl(input: BuildAuthActionUrlInput): string {
-  const siteUrl = input.siteUrl.replace(/\/$/, '')
-  const params = new URLSearchParams({
-    token: input.tokenHash,
-    type: input.emailActionType,
-    redirect_to: input.redirectTo,
-  })
-
-  return `${siteUrl}/auth/v1/verify?${params.toString()}`
+  const url = new URL(input.redirectTo)
+  url.searchParams.set('token_hash', input.tokenHash)
+  url.searchParams.set('type', input.emailActionType)
+  return url.toString()
 }
