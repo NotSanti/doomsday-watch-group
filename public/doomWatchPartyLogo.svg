@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">DWP dark-mode monogram</title>
+  <desc id="desc">A minimal transparent DWP monogram arranged like an armored mask for dark interfaces.</desc>
+
+  <style>
+    .neutral-top { stop-color: #ffffff; }
+    .neutral-bottom { stop-color: #c9d0c9; }
+    .green-top { stop-color: #a8bc96; }
+    .green-bottom { stop-color: #647b69; }
+  </style>
+
+  <defs>
+    <linearGradient id="neutral" x1="0" y1="0" x2="0" y2="1">
+      <stop class="neutral-top" offset="0"/>
+      <stop class="neutral-bottom" offset="1"/>
+    </linearGradient>
+    <linearGradient id="green" x1="0" y1="0" x2="0" y2="1">
+      <stop class="green-top" offset="0"/>
+      <stop class="green-bottom" offset="1"/>
+    </linearGradient>
+  </defs>
+
+  <!-- D: left eye -->
+  <path
+    fill="url(#neutral)"
+    fill-rule="evenodd"
+    d="M78 130h98c59 0 96 31 96 82s-37 82-96 82h-64c-10 0-18-4-23-12l-28-42c-4-6-5-13-3-20Zm56 47-16 50 17 20h39c28 0 43-12 43-35s-15-35-43-35Z"
+  />
+
+  <!-- P: right eye -->
+  <path
+    fill="url(#neutral)"
+    fill-rule="evenodd"
+    d="M240 130h96c60 0 97 31 97 82s-37 82-97 82h-43v30h-53Zm53 47v70h41c29 0 44-12 44-35s-15-35-44-35Z"
+  />
+
+  <!-- W: lower face and jaw -->
+  <path
+    fill="url(#green)"
+    d="M135 270h59l28 100 19-65c3-10 9-15 18-15s15 5 18 15l19 65 28-100h59l-49 148c-4 12-12 18-24 18h-25l-26-77-26 77h-25c-12 0-20-6-24-18Z"
+  />
+
+</svg>
