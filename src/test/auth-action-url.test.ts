@@ -48,6 +48,26 @@ describe('buildAuthActionUrl', () => {
   })
 })
 
+import { buildAuthEmailContent } from '../../supabase/functions/_shared/auth-email-content.ts'
+
+describe('buildAuthEmailContent', () => {
+  it('builds a password reset email with the action link', () => {
+    const content = buildAuthEmailContent({
+      emailActionType: 'recovery',
+      actionUrl:
+        'https://doomwatchparty.vercel.app/auth/callback?token_hash=abc&type=recovery',
+      userName: 'Wanda',
+    })
+
+    expect(content.subject).toMatch(/reset/i)
+    expect(content.html).toContain('Hi Wanda,')
+    expect(content.html).toContain(
+      'https://doomwatchparty.vercel.app/auth/callback?token_hash=abc&amp;type=recovery',
+    )
+    expect(content.html).toContain('Reset password')
+  })
+})
+
 describe('resolveAuthEmailTemplateId', () => {
   const env = {
     RESEND_TEMPLATE_CONFIRM_SIGNUP: 'tmpl_confirm',

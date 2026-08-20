@@ -28,7 +28,7 @@ describe('Resend auth email configuration', () => {
     expect(supabaseConfig).toMatch(/\[auth\.hook\.send_email\]/)
     expect(supabaseConfig).toMatch(/send-auth-email/)
     expect(authEmailDocs).toMatch(/send-auth-email/)
-    expect(authEmailDocs).toMatch(/Resend templates/)
+    expect(authEmailDocs).toMatch(/falls back to branded HTML/)
   })
 
   it('uses Resend triple-brace variables in templates', () => {

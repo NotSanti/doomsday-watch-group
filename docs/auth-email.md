@@ -26,32 +26,22 @@ To test Resend locally:
 4. Run `supabase functions serve send-auth-email --no-verify-jwt` in one terminal and `supabase start` in another.
 5. Sign up with a throwaway inbox and confirm the link lands on `{VITE_APP_URL}/auth/callback`.
 
-## Resend templates
+## Resend templates (optional)
 
-Create three published templates in the [Resend dashboard](https://resend.com/templates). Paste HTML from:
+You can still create published templates in the [Resend dashboard](https://resend.com/templates) and set:
 
-| Template | Subject | HTML source |
-| --- | --- | --- |
-| Confirm signup | `Confirm your Doomsday Watch Group account` | `docs/email-templates/confirm-signup.html` |
-| Password reset | `Reset your Doomsday Watch Group password` | `docs/email-templates/password-reset.html` |
-| Auth action (fallback) | `Doomsday Watch Group sign-in link` | Reuse confirm-signup HTML with a generic subject |
+- `RESEND_TEMPLATE_CONFIRM_SIGNUP`
+- `RESEND_TEMPLATE_PASSWORD_RESET`
+- `RESEND_TEMPLATE_AUTH_ACTION`
 
-Each template needs these **Resend variables** (triple braces in HTML). Set a **fallback** on each in the Inspector so preview/test sends work:
+Paste HTML from `docs/email-templates/` when you do. If a template ID is missing or Resend returns “Template not found”, `send-auth-email` **falls back to branded HTML** generated in the Edge Function so password reset and other auth mail still deliver.
+
+Each optional template should expose:
 
 | Variable | Type | Fallback (for preview) |
 | --- | --- | --- |
 | `ACTION_URL` | string | `https://doomwatchparty.online/auth/callback` |
 | `USER_NAME` | string | `there` |
-
-**Preview text** (Resend template field, separate from HTML): `One last step — confirm your email to join your watch group.`
-
-
-Copy each template’s ID into the Edge Function secrets:
-
-- `RESEND_TEMPLATE_CONFIRM_SIGNUP`
-- `RESEND_TEMPLATE_PASSWORD_RESET`
-- `RESEND_TEMPLATE_AUTH_ACTION` (magic link, invite, email change, etc.)
-
 ## Hosted Supabase (production)
 
 1. Verify your sending domain in Resend (SPF + DKIM).

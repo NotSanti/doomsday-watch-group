@@ -1,4 +1,5 @@
 import { buildAuthActionUrl } from '../_shared/auth-action-url.ts'
+import { buildAuthEmailContent } from '../_shared/auth-email-content.ts'
 import {
   isSupportedAuthEmailAction,
   normalizeHookSecret,
@@ -24,14 +25,6 @@ type SendEmailHookPayload = {
   }
 }
 
-type EdgeRuntimeGlobal = {
-  waitUntil: (promise: Promise<unknown>) => void
-}
-
-function getEdgeRuntime(): EdgeRuntimeGlobal | undefined {
-  return (globalThis as { EdgeRuntime?: EdgeRuntimeGlobal }).EdgeRuntime
-}
-
 function env(name: string): string {
   const value = Deno.env.get(name)?.trim().replaceAll(/^["']|["']$/g, '')
   if (!value) {
@@ -41,15 +34,48 @@ function env(name: string): string {
   return value
 }
 
-function sendResendTemplate(input: {
+function optionalEnv(name: string): string | undefined {
+  const value = Deno.env.get(name)?.trim().replaceAll(/^["']|["']$/g, '')
+  return value && value.length > 0 ? value : undefined
+}
+
+async function sendResendHtml(input: {
+  apiKey: string
+  from: string
+  to: string
+  subject: string
+  html: string
+}): Promise<void> {
+  const response = await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${input.apiKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      from: input.from,
+      to: [input.to],
+      subject: input.subject,
+      html: input.html,
+    }),
+    signal: AbortSignal.timeout(8_000),
+  })
+
+  if (!response.ok) {
+    const detail = await response.text()
+    throw new Error(`Resend ${response.status}: ${detail}`)
+  }
+}
+
+async function sendResendTemplate(input: {
   apiKey: string
   from: string
   to: string
   templateId: string
   actionUrl: string
   userName: string
-}): Promise<void> {
-  return fetch('https://api.resend.com/emails', {
+}): Promise<'sent' | 'missing_template'> {
+  const response = await fetch('https://api.resend.com/emails', {
     method: 'POST',
     headers: {
       Authorization: `Bearer ${input.apiKey}`,
@@ -67,22 +93,18 @@ function sendResendTemplate(input: {
       },
     }),
     signal: AbortSignal.timeout(8_000),
-  }).then(async (response) => {
-    if (!response.ok) {
-      const detail = await response.text()
-      throw new Error(`Resend ${response.status}: ${detail}`)
-    }
   })
-}
 
-function keepAlive(promise: Promise<unknown>): void {
-  const edgeRuntime = getEdgeRuntime()
-  if (edgeRuntime) {
-    edgeRuntime.waitUntil(promise)
-    return
+  if (response.ok) {
+    return 'sent'
   }
 
-  void promise
+  const detail = await response.text()
+  if (response.status === 404 || detail.includes('Template not found')) {
+    return 'missing_template'
+  }
+
+  throw new Error(`Resend ${response.status}: ${detail}`)
 }
 
 Deno.serve(async (req) => {
@@ -113,28 +135,65 @@ Deno.serve(async (req) => {
       emailActionType: email_data.email_action_type,
       redirectTo: email_data.redirect_to,
     })
-
-    const sendPromise = sendResendTemplate({
-      apiKey: env('RESEND_API_KEY'),
-      from: resolveResendFromAddress(Deno.env.toObject()),
-      to: user.email,
-      templateId: resolveAuthEmailTemplateId(email_data.email_action_type, {
-        RESEND_TEMPLATE_CONFIRM_SIGNUP: Deno.env.get(
-          'RESEND_TEMPLATE_CONFIRM_SIGNUP',
-        ),
-        RESEND_TEMPLATE_PASSWORD_RESET: Deno.env.get(
-          'RESEND_TEMPLATE_PASSWORD_RESET',
-        ),
-        RESEND_TEMPLATE_AUTH_ACTION: Deno.env.get('RESEND_TEMPLATE_AUTH_ACTION'),
-      }),
+    const userName = resolveUserDisplayName(user.user_metadata)
+    const apiKey = env('RESEND_API_KEY')
+    const from = resolveResendFromAddress(Deno.env.toObject())
+    const content = buildAuthEmailContent({
+      emailActionType: email_data.email_action_type,
       actionUrl,
-      userName: resolveUserDisplayName(user.user_metadata),
-    }).catch((error: unknown) => {
-      const message = error instanceof Error ? error.message : String(error)
-      console.error('send-auth-email Resend failed:', message)
+      userName,
     })
 
-    keepAlive(sendPromise)
+    const templateEnv = {
+      RESEND_TEMPLATE_CONFIRM_SIGNUP: optionalEnv(
+        'RESEND_TEMPLATE_CONFIRM_SIGNUP',
+      ),
+      RESEND_TEMPLATE_PASSWORD_RESET: optionalEnv(
+        'RESEND_TEMPLATE_PASSWORD_RESET',
+      ),
+      RESEND_TEMPLATE_AUTH_ACTION: optionalEnv('RESEND_TEMPLATE_AUTH_ACTION'),
+    }
+
+    let sentViaTemplate = false
+    try {
+      const templateId = resolveAuthEmailTemplateId(
+        email_data.email_action_type,
+        templateEnv,
+      )
+      const templateResult = await sendResendTemplate({
+        apiKey,
+        from,
+        to: user.email,
+        templateId,
+        actionUrl,
+        userName,
+      })
+      sentViaTemplate = templateResult === 'sent'
+      if (templateResult === 'missing_template') {
+        console.warn(
+          `send-auth-email template missing (${templateId}); falling back to HTML for ${email_data.email_action_type}`,
+        )
+      }
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error)
+      if (message.includes('Missing edge function secret: RESEND_TEMPLATE_')) {
+        console.warn(
+          `send-auth-email template secret missing; falling back to HTML for ${email_data.email_action_type}`,
+        )
+      } else {
+        throw error
+      }
+    }
+
+    if (!sentViaTemplate) {
+      await sendResendHtml({
+        apiKey,
+        from,
+        to: user.email,
+        subject: content.subject,
+        html: content.html,
+      })
+    }
 
     return Response.json({}, { status: 200 })
   } catch (error) {
