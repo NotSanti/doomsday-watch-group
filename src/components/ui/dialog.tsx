@@ -20,12 +20,14 @@ export function DialogContent({
   title,
   description,
   preventDismiss = false,
+  onOpenAutoFocus,
 }: {
   className?: string
   children: ReactNode
   title: string
   description?: string
   preventDismiss?: boolean
+  onOpenAutoFocus?: DialogPrimitive.DialogContentProps['onOpenAutoFocus']
 }) {
   return (
     <DialogPrimitive.Portal>
@@ -35,6 +37,7 @@ export function DialogContent({
           'fixed top-1/2 left-1/2 z-50 w-[min(28rem,calc(100%-2rem))] -translate-x-1/2 -translate-y-1/2 rounded-xl border border-border bg-surface-elevated p-6 shadow-[0_16px_60px_rgba(0,0,0,0.45)]',
           className,
         )}
+        onOpenAutoFocus={onOpenAutoFocus}
         onPointerDownOutside={(event) => {
           if (preventDismiss) {
             event.preventDefault()

@@ -35,8 +35,8 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['doom.svg', 'apple-touch-icon.png', 'doom.ico'],
       manifest: {
-        name: 'Doomsday Watch Group',
-        short_name: 'Doomsday',
+        name: 'Doom Watch Party',
+        short_name: 'Doom Watch Party',
         description:
           'Private MCU watch group on the road to Avengers: Doomsday.',
         theme_color: '#0d1210',

@@ -97,7 +97,15 @@ describe('personal progress and current title', () => {
     expect(
       screen.getByRole('heading', { name: 'Iron Man' }),
     ).toBeInTheDocument()
+    expect(screen.getByLabelText('Doomsday order 01')).toHaveTextContent('#01')
     expect(screen.getByText('1/2 watched')).toBeInTheDocument()
+    expect(
+      screen.getByRole('heading', { name: 'Progress' }),
+    ).toBeInTheDocument()
+    expect(screen.getByRole('progressbar', { name: 'COMPLETION' })).toHaveAttribute(
+      'aria-valuenow',
+      '0',
+    )
     expect(screen.getByText('0 of 3')).toBeInTheDocument()
     expect(screen.getByText('17%')).toBeInTheDocument()
     expect(screen.getByText('50%')).toBeInTheDocument()
@@ -126,6 +134,8 @@ describe('personal progress and current title', () => {
 
     const status = await screen.findByRole('button', { name: 'Not watching' })
     expect(status).toHaveAttribute('aria-pressed', 'false')
+    expect(status).toHaveClass('cursor-pointer')
+    expect(screen.queryByText('My status')).not.toBeInTheDocument()
     await user.click(status)
 
     await waitFor(() => {
@@ -188,9 +198,7 @@ describe('personal progress and current title', () => {
     expect(
       await screen.findByRole('heading', { name: 'WandaVision' }),
     ).toBeInTheDocument()
-    expect(
-      screen.getByText(/current title · doomsday 02/i),
-    ).toBeInTheDocument()
+    expect(screen.getByLabelText('Doomsday order 02')).toHaveTextContent('#02')
   })
 
   it('hides current-title controls from members', async () => {

@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Link, useParams } from 'react-router'
+import { CollapsibleSection } from '@/components/CollapsibleSection'
 import { Countdown } from '@/components/Countdown'
 import { EmptyState } from '@/components/EmptyState'
 import { ErrorState } from '@/components/ErrorState'
@@ -20,6 +21,7 @@ import {
 } from '@/features/groups/use-groups'
 import { ChangeCurrentTitleDialog } from '@/features/progress/ChangeCurrentTitleDialog'
 import { CurrentTitleHero } from '@/features/progress/CurrentTitleHero'
+import { GroupWatchlistProgress } from '@/features/progress/GroupWatchlistProgress'
 import { MemberProgressCard } from '@/features/progress/MemberProgressCard'
 import { MetricCard } from '@/features/progress/MetricCard'
 import {
@@ -158,10 +160,7 @@ export function GroupDashboardPage() {
         <Countdown className="justify-start" />
       </header>
 
-      <section className="space-y-3">
-        <h2 className="font-display text-2xl tracking-[0.08em] text-heading uppercase">
-          Now watching
-        </h2>
+      <CollapsibleSection title="Now watching">
         {currentTitle && currentFraction ? (
           <CurrentTitleHero
             groupId={group.id}
@@ -201,34 +200,41 @@ export function GroupDashboardPage() {
             }
           />
         )}
-      </section>
+      </CollapsibleSection>
 
-      <section className="grid gap-3 sm:grid-cols-3">
-        <MetricCard
-          label="Completed as a group"
-          value={`${String(completedAsGroup)} of ${String(titles.length)}`}
-          description="Titles where every active member has status Watched."
+      <CollapsibleSection title="Progress">
+        <GroupWatchlistProgress
+          activeTitleIds={activeTitleIds}
+          memberIds={memberIds}
+          progress={progress}
         />
-        <MetricCard
-          label="Average completion"
-          value={formatPercent(averageCompletion)}
-          description="Average of each active member’s watched-title percentage."
-        />
-        <MetricCard
-          label="Current title"
-          value={
-            currentCompletion === null
-              ? 'Not set'
-              : formatPercent(currentCompletion)
-          }
-          description="Share of active members who have watched the current title."
-        />
-      </section>
+      </CollapsibleSection>
 
-      <section className="space-y-3">
-        <h2 className="font-display text-2xl tracking-[0.08em] text-heading uppercase">
-          Upcoming
-        </h2>
+      <CollapsibleSection title="Stats">
+        <div className="grid gap-3 sm:grid-cols-3">
+          <MetricCard
+            label="Completed as a group"
+            value={`${String(completedAsGroup)} of ${String(titles.length)}`}
+            description="Titles where every active member has status Watched."
+          />
+          <MetricCard
+            label="Average completion"
+            value={formatPercent(averageCompletion)}
+            description="Average of each active member’s watched-title percentage."
+          />
+          <MetricCard
+            label="Current title"
+            value={
+              currentCompletion === null
+                ? 'Not set'
+                : formatPercent(currentCompletion)
+            }
+            description="Share of active members who have watched the current title."
+          />
+        </div>
+      </CollapsibleSection>
+
+      <CollapsibleSection title="Upcoming">
         {upcoming.length === 0 ? (
           <EmptyState
             title="No upcoming titles"
@@ -269,12 +275,9 @@ export function GroupDashboardPage() {
             })}
           </ul>
         )}
-      </section>
+      </CollapsibleSection>
 
-      <section className="space-y-3">
-        <h2 className="font-display text-2xl tracking-[0.08em] text-heading uppercase">
-          Member progress
-        </h2>
+      <CollapsibleSection title="Member progress">
         {membersQuery.isError ? (
           <ErrorState
             message={toFriendlyGroupMembersError()}
@@ -301,13 +304,11 @@ export function GroupDashboardPage() {
             ))}
           </ul>
         )}
-      </section>
+      </CollapsibleSection>
 
-      <section className="space-y-3">
-        <h2 className="font-display text-2xl tracking-[0.08em] text-heading uppercase">
-          Members
-        </h2>
+      <CollapsibleSection title="Members">
         <MemberRoster
+          compact
           members={members}
           isPending={false}
           isError={membersQuery.isError}
@@ -315,7 +316,7 @@ export function GroupDashboardPage() {
             void membersQuery.refetch()
           }}
         />
-      </section>
+      </CollapsibleSection>
 
       {role === 'owner' ? (
         <ChangeCurrentTitleDialog

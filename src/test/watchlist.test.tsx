@@ -195,12 +195,13 @@ describe('watchlist', () => {
       screen.getByRole('button', { name: 'Not watching' }),
     ).toHaveAttribute('aria-pressed', 'false')
     expect(screen.getByText(/0\/1 watched by the group/i)).toBeInTheDocument()
+    expect(screen.getByLabelText('Back to watchlist')).toBeInTheDocument()
     expect(
       await screen.findByRole('heading', { name: 'Ratings and reviews' }),
     ).toBeInTheDocument()
     expect(screen.getByText('No ratings yet.')).toBeInTheDocument()
 
-    await user.click(screen.getByRole('link', { name: 'Back to watchlist' }))
+    await user.click(screen.getByLabelText('Back to watchlist'))
 
     expect(
       await screen.findByRole('heading', { name: 'Watchlist' }),

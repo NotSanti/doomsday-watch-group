@@ -38,9 +38,16 @@ export function CurrentTitleHero({
   const year = titleYear(title.release_date)
   const runtime = titleRuntimeLabel(title)
   const sequence = sequenceForTitle(title, 'doomsday')
+  const orderLabel = String(sequence).padStart(2, '0')
 
   return (
-    <Card className="grid gap-6 p-4 md:grid-cols-[10rem_minmax(0,1fr)] md:p-6">
+    <Card className="relative grid gap-6 p-4 md:grid-cols-[10rem_minmax(0,1fr)] md:p-6">
+      <span
+        aria-label={`Doomsday order ${orderLabel}`}
+        className="doomsday-order-badge absolute top-4 right-4 rounded-full border border-chip-violet-fg bg-chip-violet-bg px-2.5 py-1 font-display text-sm tracking-[0.12em] text-chip-violet-fg"
+      >
+        #{orderLabel}
+      </span>
       <TitleArtwork
         path={title.poster_path}
         alt={`${title.name} poster`}
@@ -48,7 +55,7 @@ export function CurrentTitleHero({
       />
       <div className="space-y-4">
         <p className="text-xs tracking-[0.14em] text-secondary uppercase">
-          Current title · Doomsday {String(sequence).padStart(2, '0')}
+          Current title
         </p>
         <h2 className="font-display text-3xl tracking-[0.08em] text-heading uppercase">
           {title.name}
@@ -71,7 +78,7 @@ export function CurrentTitleHero({
           onChange={onStatusChange}
         />
         <div className="flex flex-wrap gap-3">
-          <Button asChild variant="secondary">
+          <Button asChild variant="secondary" size="sm">
             <Link to={`/groups/${groupId}/titles/${title.id}`}>
               Open title
             </Link>

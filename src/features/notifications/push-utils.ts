@@ -41,7 +41,7 @@ export function parsePushPayload(payload: Record<string, unknown>): {
   const title =
     typeof payload.title === 'string' && payload.title.trim()
       ? payload.title
-      : 'Doomsday Watch Group'
+      : 'Doom Watch Party'
   const body =
     typeof payload.body === 'string' && payload.body.trim()
       ? payload.body
@@ -70,6 +70,27 @@ export function isPushSupported(): boolean {
     'PushManager' in window &&
     'Notification' in window
   )
+}
+
+export function isStandalonePwa(): boolean {
+  if (typeof window === 'undefined') {
+    return false
+  }
+
+  // iOS Safari uses `navigator.standalone` for installed web apps.
+  const iOSStandalone =
+    'standalone' in navigator
+      ? Boolean(
+          (navigator as Navigator & { standalone?: boolean }).standalone,
+        )
+      : false
+
+  // Most modern browsers expose this via `display-mode`.
+  const displayModeStandalone =
+    typeof window.matchMedia === 'function' &&
+    window.matchMedia('(display-mode: standalone)').matches
+
+  return Boolean(iOSStandalone || displayModeStandalone)
 }
 
 export function urlBase64ToUint8Array(value: string): Uint8Array {

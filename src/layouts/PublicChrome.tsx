@@ -30,7 +30,7 @@ function PublicNavLinks({
             onClick={onNavigate}
             className={({ isActive }) =>
               cn(
-                'block text-sm text-secondary hover:text-heading',
+                'block text-sm text-secondary uppercase tracking-[0.08em] hover:text-heading',
                 linkClassName,
                 isActive && 'text-primary-emphasis',
               )
@@ -56,13 +56,13 @@ export function PublicHeader() {
   ]
 
   return (
-    <header className="border-b border-border/80 bg-surface/90 backdrop-blur-md">
+    <header className="sticky top-0 z-40 bg-surface/60 backdrop-blur-lg md:static md:bg-surface/90 md:backdrop-blur-md">
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-4">
         <Link
           to="/"
           className="min-w-0 break-words font-display text-base tracking-[0.16em] text-heading uppercase sm:text-lg"
         >
-          Doomsday Watch Group
+          Doom Watch Party
         </Link>
         <nav aria-label="Public" className="hidden md:block">
           <PublicNavLinks

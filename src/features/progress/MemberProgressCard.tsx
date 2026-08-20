@@ -1,5 +1,7 @@
 import { ProgressBar } from '@/components/ProgressBar'
 import { Badge } from '@/components/ui/badge'
+import { MemberAvatar } from '@/features/groups/MemberAvatar'
+import { MemberName } from '@/features/groups/MemberName'
 import type { GroupMember } from '@/features/groups/group-schemas'
 import {
   completionPercent,
@@ -12,21 +14,12 @@ import {
   isTitleWatched,
   type TitleRow,
 } from '@/features/watchlist/title-schemas'
-import { chipClasses } from '@/lib/chip-styles'
-import { cn } from '@/lib/utils'
 
 type MemberProgressCardProps = {
   member: GroupMember
   titles: readonly TitleRow[]
   progress: readonly GroupProgressRow[]
   currentTitleId: string | null
-}
-
-function initials(name: string): string {
-  const parts = name.trim().split(/\s+/).slice(0, 2)
-  const letters = parts.map((part) => part[0]?.toUpperCase() ?? '').join('')
-
-  return letters || '?'
 }
 
 export function MemberProgressCard({
@@ -45,17 +38,11 @@ export function MemberProgressCard({
   return (
     <article className="elevated-card space-y-3 rounded-xl p-4">
       <div className="flex items-center gap-3">
-        <span
-          aria-hidden="true"
-          className={cn(
-            chipClasses(member.role === 'owner' ? 'gold' : 'metal', 'pill'),
-            'size-10 justify-center rounded-full px-0 text-sm',
-          )}
-        >
-          {initials(member.display_name)}
-        </span>
+        <MemberAvatar member={member} highlightOwner />
         <div className="min-w-0">
-          <p className="truncate text-heading">{member.display_name}</p>
+          <MemberName as="p" className="truncate text-heading">
+            {member.display_name}
+          </MemberName>
           <p className="text-xs text-muted">
             {watched} of {titles.length} watched
           </p>
@@ -63,7 +50,7 @@ export function MemberProgressCard({
       </div>
       <ProgressBar
         value={percent}
-        label={`${member.display_name} completion`}
+        label={`${member.display_name} COMPLETION`}
       />
       {currentStatus ? (
         <p className="text-sm text-secondary">

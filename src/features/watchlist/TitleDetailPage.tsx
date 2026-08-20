@@ -138,20 +138,22 @@ export function TitleDetailPage() {
             {formatWatchedFraction(fraction.watched, fraction.total)} by the
             group
           </p>
-          <StatusControl
-            value={progressStatusFor(
-              progressQuery.data ?? [],
-              user?.id ?? '',
-              title.id,
-            )}
-            disabled={setStatus.isPending}
-            onChange={(status) => {
-              setStatus.mutate({ titleId: title.id, status })
-            }}
-          />
-          <Button asChild variant="secondary">
-            <Link to={watchlistHref}>Back to watchlist</Link>
-          </Button>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <StatusControl
+              value={progressStatusFor(
+                progressQuery.data ?? [],
+                user?.id ?? '',
+                title.id,
+              )}
+              disabled={setStatus.isPending}
+              onChange={(status) => {
+                setStatus.mutate({ titleId: title.id, status })
+              }}
+            />
+            <Button asChild variant="secondary" className="hidden uppercase md:inline-flex">
+              <Link to={watchlistHref}>Back to watchlist</Link>
+            </Button>
+          </div>
         </div>
       </div>
       <TitleReviews

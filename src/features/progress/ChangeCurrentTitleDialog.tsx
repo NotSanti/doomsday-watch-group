@@ -38,10 +38,12 @@ export function CurrentTitleForm({
       }}
     >
       <label className="block">
-        <span className="mb-1 block text-sm text-secondary">Current title</span>
+        <span className="mb-1 block text-sm text-secondary uppercase tracking-[0.08em]">
+          Current title
+        </span>
         <select
           aria-label="Current title"
-          className="h-11 w-full rounded-md border border-border bg-surface-card px-3 text-sm text-heading"
+          className="h-11 w-full rounded-md border border-border bg-surface-card px-3 text-sm text-heading uppercase tracking-[0.08em]"
           value={selected}
           onChange={(event) => {
             setSelected(event.target.value)

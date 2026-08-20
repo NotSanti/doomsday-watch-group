@@ -43,7 +43,7 @@ export function DropdownMenuItem({
   return (
     <DropdownMenuPrimitive.Item
       className={cn(
-        'flex w-full cursor-pointer items-center justify-start rounded-sm px-2 py-1.5 text-left text-sm outline-none',
+        'flex w-full cursor-pointer items-center justify-start rounded-sm px-2 py-1.5 text-left text-sm uppercase tracking-[0.08em] outline-none',
         'focus:bg-surface-hover data-disabled:pointer-events-none data-disabled:opacity-50',
         className,
       )}

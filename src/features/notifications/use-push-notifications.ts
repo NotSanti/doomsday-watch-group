@@ -68,6 +68,14 @@ export function usePushNotifications(userId: string | undefined) {
       toast.success('Notifications enabled on this device')
     },
     onError: (error: unknown) => {
+      if (
+        error instanceof Error &&
+        error.message === 'Notification permission was not granted.'
+      ) {
+        // Expected outcome when the user dismisses/denies the permission prompt.
+        return
+      }
+
       toast.error(
         error instanceof Error
           ? error.message

@@ -7,7 +7,7 @@ export function AboutPage() {
         About
       </h1>
       <p className="mt-4 text-text">
-        Doomsday Watch Group is an unofficial fan project. Not affiliated with
+        Doom Watch Party is an unofficial fan project. Not affiliated with
         or endorsed by Marvel or Disney.
       </p>
       <p className="mt-4 text-muted">

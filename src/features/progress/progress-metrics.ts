@@ -54,6 +54,21 @@ export function titlesCompletedAsAGroup(
   ).length
 }
 
+export function groupWatchlistCompletionPercent(
+  activeTitleIds: readonly string[],
+  memberIds: readonly string[],
+  rows: readonly ProgressStatusRow[],
+): number {
+  if (activeTitleIds.length === 0) {
+    return 0
+  }
+
+  return completionPercent(
+    titlesCompletedAsAGroup(activeTitleIds, memberIds, rows),
+    activeTitleIds.length,
+  )
+}
+
 export function averageCompletionPercent(
   memberIds: readonly string[],
   activeTitleCount: number,

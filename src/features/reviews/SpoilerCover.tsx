@@ -10,7 +10,9 @@ export function SpoilerCover({ active, children }: SpoilerCoverProps) {
   const [revealed, setRevealed] = useState(false)
 
   if (!active || revealed) {
-    return <p className="whitespace-pre-wrap text-muted">{children}</p>
+    return (
+      <p className="whitespace-pre-wrap text-muted uppercase">{children}</p>
+    )
   }
 
   return (

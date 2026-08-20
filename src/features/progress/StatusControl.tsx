@@ -22,29 +22,27 @@ export function StatusControl({
   const watched = isTitleWatched(value)
 
   return (
-    <div className={cn('space-y-1', className)}>
-      <p className="text-sm text-secondary">My status</p>
-      <button
-        type="button"
-        disabled={disabled}
-        aria-pressed={watched}
-        onClick={() => {
-          onChange(watched ? 'not_started' : 'watched')
-        }}
-        className={cn(
-          'gap-1.5 rounded-full px-3 py-1.5 text-sm transition-colors duration-200',
-          watched
-            ? chipClasses('green', 'pill')
-            : cn(
-                chipClasses('metal', 'pill'),
-                'hover:border-chip-metal-fg hover:text-chip-metal-fg',
-              ),
-          disabled && 'cursor-not-allowed opacity-60',
-        )}
-      >
-        {watched ? <Check className="size-4" aria-hidden="true" /> : null}
-        {watched ? 'Watched' : 'Not watching'}
-      </button>
-    </div>
+    <button
+      type="button"
+      disabled={disabled}
+      aria-pressed={watched}
+      onClick={() => {
+        onChange(watched ? 'not_started' : 'watched')
+      }}
+      className={cn(
+        'cursor-pointer gap-1.5 rounded-full px-3 py-1.5 text-sm transition-colors duration-200',
+        watched
+          ? chipClasses('green', 'pill')
+          : cn(
+              chipClasses('metal', 'pill'),
+              'hover:border-chip-metal-fg hover:text-chip-metal-fg',
+            ),
+        disabled && 'cursor-not-allowed opacity-60',
+        className,
+      )}
+    >
+      {watched ? <Check className="size-4" aria-hidden="true" /> : null}
+      {watched ? 'Watched' : 'Not watching'}
+    </button>
   )
 }

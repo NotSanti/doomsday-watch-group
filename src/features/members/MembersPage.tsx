@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge'
 import { toFriendlyGroupDetailError, toFriendlyGroupMembersError } from '@/features/groups/group-errors'
 import { useGroup, useGroupMembers } from '@/features/groups/use-groups'
 import { MemberComparisonGrid } from '@/features/members/MemberComparisonGrid'
+import { MonthlyWatchTracker } from '@/features/members/MonthlyWatchTracker'
 import {
   isMemberSort,
   sortGroupMembers,
@@ -20,7 +21,7 @@ import { useTitleList } from '@/features/watchlist/use-titles'
 import { cn } from '@/lib/utils'
 
 const selectClassName = cn(
-  'h-11 rounded-md border border-border bg-surface px-3 text-sm text-heading',
+  'h-11 rounded-md border border-border bg-surface px-3 text-sm text-heading uppercase tracking-[0.08em]',
   'hover:border-border-strong focus-visible:outline-none',
 )
 
@@ -111,7 +112,9 @@ export function MembersPage() {
           </p>
         </div>
         <label className="block">
-          <span className="mb-1 block text-sm text-secondary">Sort by</span>
+          <span className="mb-1 block text-sm text-secondary uppercase tracking-[0.08em]">
+            Sort by
+          </span>
           <select
             className={selectClassName}
             aria-label="Sort by"
@@ -168,6 +171,22 @@ export function MembersPage() {
               </li>
             ))}
           </ul>
+          <section className="space-y-3">
+            <h2 className="font-display text-2xl tracking-[0.08em] text-heading uppercase">
+              Progress
+            </h2>
+            <ul className="grid gap-3">
+              {sorted.map((member) => (
+                <li key={`progress:${member.group_id}:${member.user_id}`}>
+                  <MonthlyWatchTracker
+                    member={member}
+                    progress={progress}
+                    timeZone={group.timezone}
+                  />
+                </li>
+              ))}
+            </ul>
+          </section>
           <section className="space-y-3">
             <h2 className="font-display text-2xl tracking-[0.08em] text-heading uppercase">
               Next titles

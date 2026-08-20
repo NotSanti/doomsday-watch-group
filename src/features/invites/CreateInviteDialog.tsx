@@ -17,7 +17,7 @@ import { getClientEnv } from '@/lib/env'
 import { cn } from '@/lib/utils'
 
 const selectClassName = cn(
-  'h-11 w-full rounded-md border border-border bg-surface px-3 text-sm text-heading',
+  'h-11 w-full rounded-md border border-border bg-surface px-3 text-sm text-heading uppercase tracking-[0.08em]',
   'hover:border-border-strong focus-visible:outline-none',
 )
 
@@ -94,7 +94,7 @@ function CreateInviteForm({
       ) : null}
       <div>
         <label
-          className="mb-1 block text-sm text-secondary"
+          className="mb-1 block text-sm text-secondary uppercase tracking-[0.08em]"
           htmlFor="invite-expiry"
         >
           Expires

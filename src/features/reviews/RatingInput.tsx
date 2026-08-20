@@ -1,5 +1,8 @@
-import { useState } from 'react'
-import { Star } from 'lucide-react'
+import { useId, useState } from 'react'
+import {
+  RatingGoldGradientDefs,
+  RatingStarIcon,
+} from '@/features/reviews/RatingStars'
 import { formatRating, starFill } from '@/features/reviews/review-metrics'
 import { RATING_MAX, RATING_MIN } from '@/features/reviews/review-schemas'
 import { cn } from '@/lib/utils'
@@ -12,41 +15,6 @@ type RatingInputProps = {
 
 const STARS = Array.from({ length: RATING_MAX }, (_, index) => index + 1)
 const RATING_STEP_HALF = 0.5
-const RATING_GOLD_GRADIENT_ID = 'rating-gold-gradient'
-
-function RatingGoldGradientDefs() {
-  return (
-    <svg width="0" height="0" className="absolute" aria-hidden="true">
-      <defs>
-        <linearGradient id={RATING_GOLD_GRADIENT_ID} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="var(--color-gold-gradient-start)" />
-          <stop offset="48%" stopColor="var(--color-gold-gradient-mid)" />
-          <stop offset="100%" stopColor="var(--color-gold-gradient-end)" />
-        </linearGradient>
-      </defs>
-    </svg>
-  )
-}
-
-function RatingStarIcon({ fill }: { fill: 0 | 0.5 | 1 }) {
-  const gradient = `url(#${RATING_GOLD_GRADIENT_ID})`
-
-  return (
-    <span className="pointer-events-none relative block size-8" aria-hidden="true">
-      <Star className="size-8 text-muted" strokeWidth={1.5} />
-      <span
-        className="absolute inset-y-0 left-0 overflow-hidden"
-        style={{ width: fill === 0 ? '0%' : fill === 0.5 ? '50%' : '100%' }}
-      >
-        <Star
-          className="size-8"
-          strokeWidth={1.5}
-          style={{ fill: gradient, stroke: gradient, color: gradient }}
-        />
-      </span>
-    </span>
-  )
-}
 
 export function RatingInput({
   value,
@@ -55,6 +23,7 @@ export function RatingInput({
 }: RatingInputProps) {
   const [preview, setPreview] = useState<number | null>(null)
   const shown = preview ?? value
+  const gradientId = `rating-input-gold-${useId().replaceAll(':', '')}`
 
   function choose(step: number) {
     if (disabled) {
@@ -66,7 +35,7 @@ export function RatingInput({
 
   return (
     <div>
-      <RatingGoldGradientDefs />
+      <RatingGoldGradientDefs id={gradientId} />
       <p className="mb-2 text-sm text-secondary" id="rating-label">
         Your rating
       </p>
@@ -90,7 +59,7 @@ export function RatingInput({
               data-fill={String(fill)}
               className="relative inline-flex size-8 rounded-sm has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-focus"
             >
-              <RatingStarIcon fill={fill} />
+              <RatingStarIcon fill={fill} size="md" gradientId={gradientId} />
               {showHalfTarget ? (
                 <RatingHitTarget
                   step={half}
@@ -152,7 +121,7 @@ function RatingHitTarget({
         side === 'right' && 'right-0 w-1/2',
         side === 'full' && 'inset-0',
       )}
-      onMouseEnter={() => {
+      onMouseMove={() => {
         if (!disabled) {
           onPreview(step)
         }
@@ -169,12 +138,7 @@ function RatingHitTarget({
         onChange={() => {
           onChoose(step)
         }}
-        onMouseEnter={() => {
-          if (!disabled) {
-            onPreview(step)
-          }
-        }}
-        onFocus={() => {
+        onMouseMove={() => {
           if (!disabled) {
             onPreview(step)
           }

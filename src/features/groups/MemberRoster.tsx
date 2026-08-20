@@ -8,6 +8,7 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip'
 import { MemberAvatar } from '@/features/groups/MemberAvatar'
+import { MemberName } from '@/features/groups/MemberName'
 import { toFriendlyGroupMembersError } from '@/features/groups/group-errors'
 import type { GroupMember } from '@/features/groups/group-schemas'
 import { chipClasses } from '@/lib/chip-styles'
@@ -108,7 +109,7 @@ function MemberIcon({ member }: { member: GroupMember }) {
         </button>
       </TooltipTrigger>
       <TooltipContent className="px-2.5 py-1.5" side="top">
-        {member.display_name}
+        <MemberName>{member.display_name}</MemberName>
       </TooltipContent>
     </Tooltip>
   )
@@ -127,7 +128,7 @@ function MemberPill({ member }: { member: GroupMember }) {
       {isOwner ? (
         <Crown className="size-3.5 shrink-0" aria-hidden="true" />
       ) : null}
-      <span>{member.display_name}</span>
+      <MemberName>{member.display_name}</MemberName>
       {isOwner ? <span className="sr-only"> (owner)</span> : null}
     </span>
   )

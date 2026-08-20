@@ -2,7 +2,6 @@ import { Controller, useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { Dialog, DialogContent } from '@/components/ui/dialog'
 import { Textarea } from '@/components/ui/textarea'
 import { RatingInput } from '@/features/reviews/RatingInput'
 import {
@@ -16,19 +15,16 @@ import {
 type ReviewFormProps = {
   existing: ReviewRow | null
   isSaving: boolean
-  isDeleting: boolean
   onSave: (values: ReviewFormValues) => Promise<unknown> | void
-  onDelete?: () => Promise<unknown> | void
+  onCancel: () => void
 }
 
 export function ReviewForm({
   existing,
   isSaving,
-  isDeleting,
   onSave,
-  onDelete,
+  onCancel,
 }: ReviewFormProps) {
-  const [confirmOpen, setConfirmOpen] = useState(false)
   const [bodyLength, setBodyLength] = useState((existing?.body ?? '').length)
   const [canSave, setCanSave] = useState(existing === null)
   const form = useForm<ReviewFormValues>({
@@ -39,7 +35,7 @@ export function ReviewForm({
       contains_spoilers: existing?.contains_spoilers ?? false,
     },
   })
-  const busy = isSaving || isDeleting || form.formState.isSubmitting
+  const busy = isSaving || form.formState.isSubmitting
 
   function syncDirty(next: Partial<ReviewFormValues>) {
     if (!existing) {
@@ -127,47 +123,10 @@ export function ReviewForm({
         <Button type="submit" disabled={busy || !canSave}>
           {isSaving ? 'Saving…' : existing ? 'Update review' : 'Save review'}
         </Button>
-        {existing && onDelete ? (
-          <Button
-            type="button"
-            variant="danger"
-            disabled={busy}
-            onClick={() => {
-              setConfirmOpen(true)
-            }}
-          >
-            Delete review
-          </Button>
-        ) : null}
+        <Button type="button" variant="secondary" disabled={busy} onClick={onCancel}>
+          Cancel
+        </Button>
       </div>
-
-      <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
-        <DialogContent title="Delete review">
-          <p className="text-sm text-muted">
-            This removes your rating and review for this title.
-          </p>
-          <div className="mt-4 flex flex-wrap gap-3">
-            <Button
-              variant="danger"
-              disabled={busy}
-              onClick={async () => {
-                await onDelete?.()
-                setConfirmOpen(false)
-              }}
-            >
-              {isDeleting ? 'Deleting…' : 'Delete review'}
-            </Button>
-            <Button
-              variant="secondary"
-              onClick={() => {
-                setConfirmOpen(false)
-              }}
-            >
-              Cancel
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
     </form>
   )
 }

@@ -1,4 +1,5 @@
 import { Badge } from '@/components/ui/badge'
+import { MemberName } from '@/features/groups/MemberName'
 import type { GroupMember } from '@/features/groups/group-schemas'
 import { progressStatusFor } from '@/features/progress/progress-metrics'
 import type { GroupProgressRow } from '@/features/progress/progress-schemas'
@@ -49,7 +50,7 @@ export function MemberComparisonGrid({
           {members.map((member) => (
             <tr key={`${member.group_id}:${member.user_id}`} className="border-t border-border">
               <th scope="row" className="px-3 py-2 font-medium text-heading">
-                {member.display_name}
+                <MemberName>{member.display_name}</MemberName>
               </th>
               {titles.map((title) => {
                 const status = progressStatusFor(

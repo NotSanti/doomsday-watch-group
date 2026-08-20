@@ -107,9 +107,10 @@ describe('groups', () => {
       .closest('section')
     expect(createdRoster).not.toBeNull()
     expect(
-      await within(createdRoster!).findByText('Owner A'),
+      await within(createdRoster!).findByRole('button', {
+        name: 'Owner A (owner)',
+      }),
     ).toBeInTheDocument()
-    expect(screen.getByText('(owner)')).toBeInTheDocument()
   })
 
   it('shows a friendly error when group creation fails', async () => {
@@ -173,8 +174,21 @@ describe('groups', () => {
       .closest('section')
     expect(dashboardRoster).not.toBeNull()
     expect(
-      await within(dashboardRoster!).findByText('Owner A'),
+      await within(dashboardRoster!).findByRole('button', {
+        name: 'Owner A (owner)',
+      }),
     ).toBeInTheDocument()
+    const membersToggle = within(dashboardRoster!).getByRole('button', {
+      name: 'Members',
+    })
+    expect(membersToggle).toHaveAttribute('aria-expanded', 'true')
+    await user.click(membersToggle)
+    expect(membersToggle).toHaveAttribute('aria-expanded', 'false')
+    expect(
+      within(dashboardRoster!).queryByRole('button', {
+        name: 'Owner A (owner)',
+      }),
+    ).not.toBeInTheDocument()
   })
 
   it('lists each group’s members as icons and highlights the owner', async () => {
@@ -237,9 +251,13 @@ describe('groups', () => {
     })
     const roster = membersHeading.closest('section')
     expect(roster).not.toBeNull()
-    expect(await within(roster!).findByText('Owner A')).toBeInTheDocument()
-    expect(within(roster!).getByText('(owner)')).toBeInTheDocument()
-    expect(within(roster!).getByText('Member B')).toBeInTheDocument()
+    const dashboardOwner = await within(roster!).findByRole('button', {
+      name: 'Owner A (owner)',
+    })
+    expect(dashboardOwner.querySelector('span')).toHaveClass('border-gold')
+    expect(
+      within(roster!).getByRole('button', { name: 'Member B' }),
+    ).toBeInTheDocument()
   })
 
   it('keeps group tile actions aligned when a group has no notes', async () => {

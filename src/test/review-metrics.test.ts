@@ -5,6 +5,7 @@ import {
   ratingsForTitle,
   reviewHoverPreview,
   starFill,
+  visibleStarCount,
 } from '@/features/reviews/review-metrics'
 import { isValidRating, ratingValueSchema } from '@/features/reviews/review-schemas'
 
@@ -30,6 +31,9 @@ describe('review metrics', () => {
     expect(starFill(10, 9)).toBe(0)
     expect(starFill(1, null)).toBe(0)
     expect(starFill(4, 4)).toBe(1)
+    expect(visibleStarCount(4.5)).toBe(5)
+    expect(visibleStarCount(8)).toBe(8)
+    expect(visibleStarCount(10)).toBe(10)
   })
 
   it('formats labels and filters ratings for a title', () => {

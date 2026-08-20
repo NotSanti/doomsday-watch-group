@@ -194,7 +194,7 @@ async function handleOutbox(outboxId: number): Promise<Response> {
 async function handleTest(userId: string): Promise<Response> {
   const payload = parsePushPayload({
     title: 'Notifications are working',
-    body: 'Doomsday Watch Group can reach this device.',
+    body: 'Doom Watch Party can reach this device.',
     url: '/profile',
   })
 

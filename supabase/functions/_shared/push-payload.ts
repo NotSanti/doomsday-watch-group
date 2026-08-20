@@ -55,7 +55,7 @@ export function parsePushPayload(payload: Record<string, unknown>): {
   const title =
     typeof payload.title === 'string' && payload.title.trim()
       ? payload.title
-      : 'Doomsday Watch Group'
+      : 'Doom Watch Party'
   const body =
     typeof payload.body === 'string' && payload.body.trim()
       ? payload.body

@@ -47,7 +47,9 @@ export function GroupSwitcher() {
           aria-label="Switch group"
           className="h-8 min-w-0 max-w-40 justify-start gap-1 px-2.5 text-xs"
         >
-          <span className="truncate">{selected?.name ?? 'All'}</span>
+          <span className="truncate uppercase tracking-[0.08em]">
+            {selected?.name ?? 'All'}
+          </span>
           <ChevronDown className="size-3.5 shrink-0" aria-hidden="true" />
         </Button>
       </DropdownMenuTrigger>

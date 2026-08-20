@@ -2,7 +2,8 @@ import { cn } from '@/lib/utils'
 
 export type ChipTone = 'gold' | 'green' | 'violet' | 'metal' | 'danger'
 
-export const CHIP_BASE = 'inline-flex items-center border font-medium'
+export const CHIP_BASE =
+  'inline-flex items-center border font-medium uppercase tracking-[0.08em]'
 
 export const CHIP_PILL = 'rounded-full px-2.5 py-0.5 text-xs'
 

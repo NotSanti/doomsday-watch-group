@@ -1,5 +1,5 @@
-import { Menu, X } from 'lucide-react'
-import { Link, NavLink, Outlet, useParams } from 'react-router'
+import { ArrowLeft, Menu, X } from 'lucide-react'
+import { Link, NavLink, Outlet, useLocation, useMatch, useParams } from 'react-router'
 import { Button } from '@/components/ui/button'
 import { useAuth } from '@/features/auth/use-auth'
 import { GroupSwitcher } from '@/features/groups/GroupSwitcher'
@@ -36,7 +36,7 @@ function AppNavLinks({
             onClick={onNavigate}
             className={({ isActive }) =>
               cn(
-                'block rounded-md px-3 py-2 text-sm text-secondary hover:bg-surface-hover hover:text-heading',
+                'block rounded-md px-3 py-2 text-sm text-secondary uppercase tracking-[0.08em] hover:bg-surface-hover hover:text-heading',
                 linkClassName,
                 isActive &&
                   'bg-surface-hover text-heading ring-1 ring-primary-emphasis/40',
@@ -67,11 +67,16 @@ function AppNavLinks({
 
 export function AppShell() {
   const { groupId } = useParams()
+  const location = useLocation()
+  const titlePage = useMatch('/groups/:groupId/titles/:titleId')
   const { signOut } = useAuth()
   const groupQuery = useGroup(groupId ?? '')
   const [menuOpen, setMenuOpen] = useRouteMenuOpen()
   const isMember = Boolean(groupId && groupQuery.data)
   const base = isMember ? `/groups/${groupId}` : '/app'
+  const watchlistHref = titlePage
+    ? `/groups/${titlePage.params.groupId}/watchlist${location.search}`
+    : null
 
   const links: AppNavLink[] = [
     { to: '/app', label: 'Groups', end: true },
@@ -94,14 +99,26 @@ export function AppShell() {
       >
         Skip to content
       </a>
-      <header className="border-b border-border bg-surface/90 backdrop-blur-md">
+      <header className="sticky top-0 z-40 bg-surface/60 backdrop-blur-lg md:static md:bg-surface/90 md:backdrop-blur-md">
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-4">
           <div className="flex min-w-0 flex-1 items-center gap-3">
+            {watchlistHref ? (
+              <Button
+                asChild
+                className="shrink-0 px-2 md:hidden"
+                size="sm"
+                variant="ghost"
+              >
+                <Link to={watchlistHref} aria-label="Back to watchlist">
+                  <ArrowLeft aria-hidden="true" className="size-5" />
+                </Link>
+              </Button>
+            ) : null}
             <Link
               to="/app"
               className="min-w-0 break-words font-display text-base tracking-[0.16em] text-heading uppercase sm:text-lg"
             >
-              Doomsday Watch Group
+              Doom Watch Party
             </Link>
             <GroupSwitcher />
           </div>

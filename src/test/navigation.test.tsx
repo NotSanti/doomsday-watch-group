@@ -31,6 +31,7 @@ describe('navigation', () => {
 
     const menuButton = screen.getByRole('button', { name: 'Open menu' })
     expect(menuButton).toBeInTheDocument()
+    expect(screen.getByRole('banner')).toHaveClass('sticky', 'top-0', 'backdrop-blur-lg')
 
     const mobileNav = await openMobileNav(user, 'Public')
     expect(

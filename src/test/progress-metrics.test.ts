@@ -1,6 +1,7 @@
 import {
   averageCompletionPercent,
   currentTitleCompletionPercent,
+  groupWatchlistCompletionPercent,
   groupWatchedFraction,
   progressStatusFor,
   titlesCompletedAsAGroup,
@@ -54,6 +55,12 @@ describe('progress metrics', () => {
     expect(
       titlesCompletedAsAGroup([IRON, WANDA, THOR], [OWNER, MEMBER], rows),
     ).toBe(1)
+  })
+
+  it('reports group watchlist completion as fully-watched titles over the catalog', () => {
+    expect(
+      groupWatchlistCompletionPercent([IRON, WANDA, THOR], [OWNER, MEMBER], rows),
+    ).toBeCloseTo(100 / 3)
   })
 
   it('averages each member’s watched-title percentage', () => {

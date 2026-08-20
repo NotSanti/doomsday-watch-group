@@ -6,6 +6,7 @@ import { Skeleton } from '@/components/Skeleton'
 import { Button } from '@/components/ui/button'
 import { Card, CardTitle } from '@/components/ui/card'
 import { useAuth } from '@/features/auth/use-auth'
+import { MemberName } from '@/features/groups/MemberName'
 import {
   toFriendlyInvitePreviewError,
   toFriendlyInvitePreviewReason,
@@ -83,8 +84,11 @@ export function InvitePage() {
         <CardTitle>Join a watch group</CardTitle>
         <p className="mt-3 text-heading">{preview.group_name}</p>
         <p className="mt-2 text-sm text-muted">
-          Owner {preview.owner_display_name} ·{' '}
-          {memberCountLabel(preview.member_count)}
+          Owner{' '}
+          {preview.owner_display_name ? (
+            <MemberName>{preview.owner_display_name}</MemberName>
+          ) : null}{' '}
+          · {memberCountLabel(preview.member_count)}
         </p>
         <p className="mt-4 text-sm text-muted">
           Private reviews and watch progress stay inside the group.

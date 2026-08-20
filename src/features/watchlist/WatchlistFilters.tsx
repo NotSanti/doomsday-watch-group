@@ -16,7 +16,7 @@ import {
 } from '@/features/watchlist/title-filters'
 
 const selectClassName = cn(
-  'h-11 w-full rounded-md border border-border bg-surface px-3 text-sm text-heading',
+  'h-11 w-full rounded-md border border-border bg-surface px-3 text-sm text-heading uppercase tracking-[0.08em]',
   'hover:border-border-strong focus-visible:outline-none',
 )
 
@@ -96,18 +96,25 @@ function WatchlistFiltersFields({
       )}
     >
       <div className={cn(isDesktop && 'md:col-span-2 lg:col-span-1')}>
-        <label className="mb-1 block text-sm text-secondary" htmlFor={searchId}>
+        <label
+          className="mb-1 block text-sm text-secondary uppercase tracking-[0.08em]"
+          htmlFor={searchId}
+        >
           Search
         </label>
         <Input
           id={searchId}
+          className="uppercase tracking-[0.08em] placeholder:uppercase placeholder:tracking-[0.08em]"
           value={filters.q}
           placeholder="Title name"
           onChange={(event) => onChange({ ...filters, q: event.target.value })}
         />
       </div>
       <div>
-        <label className="mb-1 block text-sm text-secondary" htmlFor={typeId}>
+        <label
+          className="mb-1 block text-sm text-secondary uppercase tracking-[0.08em]"
+          htmlFor={typeId}
+        >
           Type
         </label>
         <select
@@ -128,7 +135,7 @@ function WatchlistFiltersFields({
       </div>
       <div>
         <label
-          className="mb-1 block text-sm text-secondary"
+          className="mb-1 block text-sm text-secondary uppercase tracking-[0.08em]"
           htmlFor={importanceId}
         >
           Importance
@@ -150,7 +157,10 @@ function WatchlistFiltersFields({
         </select>
       </div>
       <div>
-        <label className="mb-1 block text-sm text-secondary" htmlFor={statusId}>
+        <label
+          className="mb-1 block text-sm text-secondary uppercase tracking-[0.08em]"
+          htmlFor={statusId}
+        >
           My status
         </label>
         <select
@@ -169,7 +179,10 @@ function WatchlistFiltersFields({
         </select>
       </div>
       <div>
-        <label className="mb-1 block text-sm text-secondary" htmlFor={sortId}>
+        <label
+          className="mb-1 block text-sm text-secondary uppercase tracking-[0.08em]"
+          htmlFor={sortId}
+        >
           Order
         </label>
         <select

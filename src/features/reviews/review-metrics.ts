@@ -19,6 +19,10 @@ export function starFill(star: number, rating: number | null): 0 | 0.5 | 1 {
   return 0.5
 }
 
+export function visibleStarCount(rating: number): number {
+  return Math.max(1, Math.ceil(rating))
+}
+
 export function formatRating(value: number): string {
   return Number.isInteger(value) ? String(value) : value.toFixed(1)
 }

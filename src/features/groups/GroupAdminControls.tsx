@@ -10,10 +10,11 @@ import {
   useRemoveGroupMember,
   useTransferOwnership,
 } from '@/features/groups/use-groups'
+import { MemberName } from '@/features/groups/MemberName'
 import { cn } from '@/lib/utils'
 
 const selectClassName = cn(
-  'h-11 w-full rounded-md border border-border bg-surface px-3 text-sm text-heading',
+  'h-11 w-full rounded-md border border-border bg-surface px-3 text-sm text-heading uppercase tracking-[0.08em]',
   'hover:border-border-strong focus-visible:outline-none',
 )
 
@@ -40,7 +41,9 @@ export function MemberAdminList({
             className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border bg-surface-card px-4 py-3"
           >
             <div>
-              <p className="text-heading">{member.display_name}</p>
+              <MemberName as="p" className="text-heading">
+                {member.display_name}
+              </MemberName>
               <p className="text-xs text-muted">
                 {member.role === 'owner' ? 'Owner' : 'Member'}
               </p>
@@ -70,7 +73,12 @@ export function MemberAdminList({
         <DialogContent title="Remove member">
           <p className="text-sm text-muted">
             {pending
-              ? `${pending.display_name} will lose access to this group immediately.`
+              ? (
+                  <>
+                    <MemberName>{pending.display_name}</MemberName>
+                    {' will lose access to this group immediately.'}
+                  </>
+                )
               : null}
           </p>
           <div className="mt-4 flex justify-end gap-2">
@@ -143,7 +151,9 @@ export function TransferOwnershipForm({
         The group needs exactly one owner. Transfer before leaving.
       </p>
       <label className="block">
-        <span className="mb-1 block text-sm text-secondary">New owner</span>
+        <span className="mb-1 block text-sm text-secondary uppercase tracking-[0.08em]">
+          New owner
+        </span>
         <select
           aria-label="New owner"
           className={selectClassName}
@@ -153,7 +163,7 @@ export function TransferOwnershipForm({
           }}
         >
           {candidates.map((member) => (
-            <option key={member.user_id} value={member.user_id}>
+            <option key={member.user_id} value={member.user_id} className="uppercase">
               {member.display_name}
             </option>
           ))}

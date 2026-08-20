@@ -66,7 +66,7 @@ function seedGroup(): void {
       user_id: MEMBER_ID,
       title_id: IRON_ID,
       status: 'watched',
-      watched_at: '2026-04-01T00:00:00.000Z',
+      watched_at: '2026-04-01T04:00:00.000Z',
     }),
   ])
 }
@@ -89,6 +89,31 @@ describe('members', () => {
 
     await user.selectOptions(screen.getByLabelText('Sort by'), 'name')
     expect(screen.getByLabelText('Sort by')).toHaveValue('name')
+  })
+
+  it('shows yearly watch activity in the progress section', async () => {
+    const user = userEvent.setup()
+    seedGroup()
+    renderApp(`/groups/${GROUP_A}/members`)
+
+    expect(
+      await screen.findByRole('heading', { name: 'Progress' }),
+    ).toBeInTheDocument()
+
+    expect(
+      screen.getByRole('gridcell', { name: /1 WATCH ON APRIL 1ST/i }),
+    ).toBeInTheDocument()
+
+    const watchedSquare = screen.getByRole('gridcell', {
+      name: /1 WATCH ON APRIL 1ST/i,
+    })
+    await user.hover(watchedSquare)
+
+    expect(
+      await screen.findByRole('tooltip', {
+        name: /1 WATCH ON APRIL 1ST/i,
+      }),
+    ).toBeInTheDocument()
   })
 
   it('shows a friendly error when members cannot load', async () => {

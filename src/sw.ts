@@ -28,7 +28,7 @@ function parsePushPayload(data: PushEvent['data']): PushPayload {
 
 self.addEventListener('push', (event) => {
   const payload = parsePushPayload(event.data)
-  const title = payload.title ?? 'Doomsday Watch Group'
+  const title = payload.title ?? 'Doom Watch Party'
   const options: NotificationOptions = {
     body: payload.body ?? 'You have a new update from your watch group.',
     icon: '/apple-touch-icon.png',

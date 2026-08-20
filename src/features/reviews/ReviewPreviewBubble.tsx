@@ -1,5 +1,6 @@
 import { PLACEHOLDER_DISPLAY_NAME } from '@/features/auth/auth-schemas'
 import { MemberAvatar } from '@/features/groups/MemberAvatar'
+import { MemberName } from '@/features/groups/MemberName'
 import type { GroupMember } from '@/features/groups/group-schemas'
 import {
   formatRating,
@@ -87,14 +88,17 @@ export function ReviewPreviewBubble({
                 <div className="min-w-0 flex-1 space-y-1">
                   <p className="flex items-baseline justify-between gap-3">
                     <span className="truncate text-heading">
-                      {member.display_name}
-                      {isOwn ? ' (you)' : ''}
+                      <MemberName>
+                        {isOwn
+                          ? `${member.display_name} (you)`
+                          : member.display_name}
+                      </MemberName>
                     </span>
                     <span className="gold-text shrink-0 text-xs">
                       {formatRating(review.rating)} / 10
                     </span>
                   </p>
-                  <p className="text-muted">
+                  <p className="text-muted uppercase tracking-[0.08em]">
                     {reviewHoverPreview(review, isOwn)}
                   </p>
                 </div>
