@@ -3,8 +3,23 @@ import { Countdown } from '@/components/Countdown'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardTitle } from '@/components/ui/card'
+import { PwaWelcomeScreen } from '@/features/auth/PwaWelcomeScreen'
+import { shouldShowPwaWelcomeGate } from '@/features/auth/pwa-welcome'
+import { useAuth } from '@/features/auth/use-auth'
+import { isStandalonePwa } from '@/features/notifications/push-utils'
 
 export function LandingPage() {
+  const { status } = useAuth()
+
+  if (
+    shouldShowPwaWelcomeGate({
+      isStandalone: isStandalonePwa(),
+      authStatus: status,
+    })
+  ) {
+    return <PwaWelcomeScreen authStatus={status} />
+  }
+
   return (
     <main>
       <section className="hero-background relative overflow-hidden">
