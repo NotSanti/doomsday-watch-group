@@ -4,6 +4,7 @@ import { QueryClientProvider } from '@tanstack/react-query'
 import { AppRouter } from '@/app/router'
 import { createQueryClient } from '@/app/query-client'
 import { ErrorState } from '@/components/ErrorState'
+import { VercelTelemetry } from '@/components/VercelTelemetry'
 import { CLIENT_ENV_ERROR, getClientEnv } from '@/lib/env'
 import './index.css'
 
@@ -25,6 +26,7 @@ try {
 
 createRoot(rootElement).render(
   <StrictMode>
+    <VercelTelemetry />
     {envError ? (
       <div className="mx-auto max-w-lg px-4 py-16">
         <ErrorState message={envError} />
