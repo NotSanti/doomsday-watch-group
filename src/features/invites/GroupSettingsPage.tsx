@@ -13,8 +13,10 @@ import { toFriendlyGroupDetailError, toFriendlyGroupMembersError } from '@/featu
 import { groupRoleForUser } from '@/features/groups/group-schemas'
 import { useGroup, useGroupMembers, useSetCurrentTitle } from '@/features/groups/use-groups'
 import { CurrentTitleForm } from '@/features/progress/ChangeCurrentTitleDialog'
+import { useGroupProgress } from '@/features/progress/use-progress'
 import { InviteManager } from '@/features/invites/InviteManager'
 import { toFriendlyTitleListError } from '@/features/watchlist/title-errors'
+import { useGroupSkippedTitles } from '@/features/watchlist/use-skipped-titles'
 import { useTitleList } from '@/features/watchlist/use-titles'
 import { useParams } from 'react-router'
 
@@ -24,10 +26,18 @@ export function GroupSettingsPage() {
   const groupQuery = useGroup(groupId)
   const membersQuery = useGroupMembers(groupId)
   const titlesQuery = useTitleList()
+  const progressQuery = useGroupProgress(groupId)
+  const skippedQuery = useGroupSkippedTitles(groupId)
   const setCurrentTitle = useSetCurrentTitle(groupId)
   const group = groupQuery.data
   const isOwner = Boolean(
     group && user && groupRoleForUser(group, user.id) === 'owner',
+  )
+  const myProgress = (progressQuery.data ?? [])
+    .filter((row) => row.user_id === user?.id)
+    .map((row) => ({ title_id: row.title_id, status: row.status }))
+  const skippedTitleIds = new Set(
+    (skippedQuery.data ?? []).map((row) => row.title_id),
   )
 
   if (groupQuery.isPending) {
@@ -90,6 +100,8 @@ export function GroupSettingsPage() {
               <CurrentTitleForm
                 key={group.current_title_id ?? 'none'}
                 titles={titlesQuery.data ?? []}
+                myProgress={myProgress}
+                skippedTitleIds={skippedTitleIds}
                 currentTitleId={group.current_title_id}
                 isPending={setCurrentTitle.isPending}
                 onSave={(titleId) => setCurrentTitle.mutateAsync(titleId)}

@@ -19,7 +19,9 @@ import {
   setMockProgress,
   setMockReviews,
   setMockSession,
+  setMockSkippedTitles,
   setMockTitles,
+  getMockSkippedTitles,
 } from '@/test/supabase-mock'
 
 const GROUP_A = '22222222-2222-4222-8222-222222222222'
@@ -108,6 +110,12 @@ describe('watchlist', () => {
     expect(screen.getAllByText('WandaVision').length).toBeGreaterThan(0)
     expect(screen.getAllByText('Werewolf by Night').length).toBeGreaterThan(0)
     expect(screen.getAllByText('Iron Man').length).toBeGreaterThan(0)
+    const ironManHeading = screen.getAllByText('Iron Man')[0]
+    expect(
+      ironManHeading.closest('[class*="opacity-50"]'),
+    ).not.toBeNull()
+    const wandaHeading = screen.getAllByText('WandaVision')[0]
+    expect(wandaHeading.closest('[class*="opacity-50"]')).toBeNull()
     expect(screen.getAllByText('FILM').length).toBeGreaterThan(0)
     expect(screen.getAllByText('TV').length).toBeGreaterThan(0)
     expect(screen.getAllByText('SPC').length).toBeGreaterThan(0)
@@ -192,7 +200,7 @@ describe('watchlist', () => {
     ).toBeInTheDocument()
     expect(screen.getByText(/9 episodes/)).toBeInTheDocument()
     expect(
-      screen.getByRole('button', { name: 'Not watching' }),
+      screen.getByRole('button', { name: 'Not watched' }),
     ).toHaveAttribute('aria-pressed', 'false')
     expect(screen.getByText(/0\/1 watched by the group/i)).toBeInTheDocument()
     expect(screen.getByLabelText('Back to watchlist')).toBeInTheDocument()
@@ -242,6 +250,59 @@ describe('watchlist', () => {
     expect(
       await screen.findByRole('heading', { name: 'No titles yet' }),
     ).toBeInTheDocument()
+  })
+
+  it('lets the owner skip a title and reveal it with Show skipped', async () => {
+    const user = userEvent.setup()
+    signInAsOwner()
+    seedCatalog()
+    renderApp(`/groups/${GROUP_A}/watchlist`)
+
+    expect(
+      await screen.findByRole('heading', { name: 'Watchlist' }),
+    ).toBeInTheDocument()
+    const skipButtons = await screen.findAllByRole('button', {
+      name: 'Skip title',
+    })
+    await user.click(skipButtons[0]!)
+
+    expect(getMockSkippedTitles()).toEqual([
+      expect.objectContaining({
+        group_id: GROUP_A,
+        title_id: WANDA_ID,
+      }),
+    ])
+    expect(screen.queryByText('WandaVision')).not.toBeInTheDocument()
+
+    await openWatchlistFilters(user)
+    await user.click(
+      within(filterDialog()).getByRole('checkbox', { name: 'Show skipped' }),
+    )
+    await applyWatchlistFilters(user)
+
+    expect(screen.getAllByText('WandaVision').length).toBeGreaterThan(0)
+    expect(
+      screen.getAllByRole('button', { name: 'Unskip title' }).length,
+    ).toBeGreaterThan(0)
+  })
+
+  it('hides seed-skipped titles until Show skipped is enabled', async () => {
+    signInAsOwner()
+    seedCatalog()
+    setMockSkippedTitles([
+      {
+        group_id: GROUP_A,
+        title_id: WEREWOLF_ID,
+        skipped_by: '11111111-1111-4111-8111-111111111111',
+      },
+    ])
+    renderApp(`/groups/${GROUP_A}/watchlist`)
+
+    expect(
+      await screen.findByRole('heading', { name: 'Watchlist' }),
+    ).toBeInTheDocument()
+    expect(screen.queryByText('Werewolf by Night')).not.toBeInTheDocument()
+    expect(screen.getByText('Showing 2 of 3 titles')).toBeInTheDocument()
   })
 
   it('shows a friendly error when the catalog cannot load', async () => {

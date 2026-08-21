@@ -157,9 +157,7 @@ describe('groups', () => {
     ).toBeInTheDocument()
     expect(screen.getByText('First room')).toBeInTheDocument()
     expect(screen.getByText('Owner')).toBeInTheDocument()
-    expect(
-      await screen.findByRole('button', { name: 'Owner A (owner)' }),
-    ).toBeInTheDocument()
+    expect(await screen.findByText('Owner A')).toBeInTheDocument()
 
     await user.click(screen.getByRole('link', { name: 'Open group' }))
 
@@ -224,25 +222,20 @@ describe('groups', () => {
     })
     const tile = tileHeading.closest('li')
     expect(tile).not.toBeNull()
-    const ownerButton = await within(tile!).findByRole('button', {
-      name: 'Owner A (owner)',
-    })
-    const memberButton = within(tile!).getByRole('button', { name: 'Member B' })
-    expect(ownerButton.querySelector('span')).toHaveClass('border-gold')
-    expect(memberButton.querySelector('span')).toHaveClass('border-border')
-    expect(ownerButton.querySelector('img')).toHaveAttribute(
+    expect(await within(tile!).findByText('Owner A')).toBeInTheDocument()
+    expect(within(tile!).getByText('Member B')).toBeInTheDocument()
+    const ownerAvatar = within(tile!).getByText('Owner A').previousElementSibling
+    const memberAvatar = within(tile!).getByText('Member B').previousElementSibling
+    expect(ownerAvatar).toHaveClass('border-gold')
+    expect(memberAvatar).toHaveClass('border-border')
+    expect(ownerAvatar?.querySelector('img')).toHaveAttribute(
       'src',
       '/profile-icons/iron-man.svg',
     )
-    expect(memberButton.querySelector('img')).toHaveAttribute(
+    expect(memberAvatar?.querySelector('img')).toHaveAttribute(
       'src',
       '/profile-icons/spider-man.svg',
     )
-
-    await user.hover(memberButton)
-    expect(
-      await screen.findByRole('tooltip', { name: 'Member B' }),
-    ).toBeInTheDocument()
 
     await user.click(within(tile!).getByRole('link', { name: 'Open group' }))
 

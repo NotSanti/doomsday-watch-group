@@ -31,8 +31,10 @@ export function sortGroupMembers(
   titles: readonly TitleRow[],
   progress: readonly GroupProgressRow[],
   sort: MemberSort,
+  skippedTitleIds: ReadonlySet<string> = new Set(),
 ): GroupMember[] {
-  const activeIds = new Set(titles.map((title) => title.id))
+  const pathTitles = titles.filter((title) => !skippedTitleIds.has(title.id))
+  const activeIds = new Set(pathTitles.map((title) => title.id))
   const copy = [...members]
 
   copy.sort((left, right) => {
@@ -48,11 +50,11 @@ export function sortGroupMembers(
 
     const leftPercent = completionPercent(
       watchedTitleCount(progress, left.user_id, activeIds),
-      titles.length,
+      pathTitles.length,
     )
     const rightPercent = completionPercent(
       watchedTitleCount(progress, right.user_id, activeIds),
-      titles.length,
+      pathTitles.length,
     )
 
     if (leftPercent !== rightPercent) {

@@ -24,6 +24,9 @@ type WatchlistFiltersProps = {
   filters: WatchlistFilters
   onChange: (filters: WatchlistFilters) => void
   matchCount: (filters: WatchlistFilters) => number
+  /** Always show filter fields inline (no mobile overlay). */
+  variant?: 'page' | 'embedded'
+  showDisplayToggles?: boolean
 }
 
 function FilterCheckButton({
@@ -72,12 +75,14 @@ function WatchlistFiltersFields({
   idPrefix = '',
   layout = 'stack',
   showClearLink = false,
+  showDisplayToggles = true,
 }: {
   filters: WatchlistFilters
   onChange: (filters: WatchlistFilters) => void
   idPrefix?: string
   layout?: 'stack' | 'desktop'
   showClearLink?: boolean
+  showDisplayToggles?: boolean
 }) {
   const searchId = `${idPrefix}watchlist-search`
   const typeId = `${idPrefix}watchlist-type`
@@ -174,7 +179,7 @@ function WatchlistFiltersFields({
           }}
         >
           <option value="all">All statuses</option>
-          <option value="unwatched">Not watching</option>
+          <option value="unwatched">Not watched</option>
           <option value="watched">Watched</option>
         </select>
       </div>
@@ -199,19 +204,20 @@ function WatchlistFiltersFields({
           <option value="release">Release order</option>
         </select>
       </div>
-      <div
-        className={cn(
-          'flex flex-wrap gap-2',
-          isDesktop && 'md:col-span-2 lg:col-span-5',
-        )}
-      >
-        <FilterCheckButton
-          id={showRatingId}
-          label="Show rating"
-          tone="gold"
-          checked={filters.showRating}
-          onChange={(showRating) => onChange({ ...filters, showRating })}
-        />
+      {showDisplayToggles ? (
+        <div
+          className={cn(
+            'flex flex-wrap gap-2',
+            isDesktop && 'md:col-span-2 lg:col-span-5',
+          )}
+        >
+          <FilterCheckButton
+            id={showRatingId}
+            label="Show rating"
+            tone="gold"
+            checked={filters.showRating}
+            onChange={(showRating) => onChange({ ...filters, showRating })}
+          />
         <FilterCheckButton
           id={showReviewsId}
           label="Show reviews"
@@ -219,7 +225,15 @@ function WatchlistFiltersFields({
           checked={filters.showReviews}
           onChange={(showReviews) => onChange({ ...filters, showReviews })}
         />
+        <FilterCheckButton
+          id={`${idPrefix}watchlist-show-skipped`}
+          label="Show skipped"
+          tone="danger"
+          checked={filters.showSkipped}
+          onChange={(showSkipped) => onChange({ ...filters, showSkipped })}
+        />
       </div>
+      ) : null}
       {showClearLink && countActiveWatchlistFilters(filters) > 0 ? (
         <div className={cn(isDesktop && 'md:col-span-2 lg:col-span-5')}>
           <button
@@ -244,6 +258,7 @@ function WatchlistFiltersOverlay({
   onClose,
   onClearAll,
   onShowResults,
+  showDisplayToggles = true,
 }: {
   draft: WatchlistFilters
   activeCount: number
@@ -253,6 +268,7 @@ function WatchlistFiltersOverlay({
   onClose: () => void
   onClearAll: () => void
   onShowResults: () => void
+  showDisplayToggles?: boolean
 }) {
   return createPortal(
     <div
@@ -291,6 +307,7 @@ function WatchlistFiltersOverlay({
           filters={draft}
           idPrefix="mobile-"
           onChange={onDraftChange}
+          showDisplayToggles={showDisplayToggles}
         />
       </div>
       <footer className="flex shrink-0 items-center justify-between gap-3 border-t border-border px-4 pt-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
@@ -310,6 +327,8 @@ export function WatchlistFilters({
   filters,
   onChange,
   matchCount,
+  variant = 'page',
+  showDisplayToggles = true,
 }: WatchlistFiltersProps) {
   const titleId = useId()
   const [overlayOpen, setOverlayOpen] = useState(false)
@@ -337,6 +356,19 @@ export function WatchlistFilters({
   function closeOverlay() {
     setOverlayOpen(false)
     setDraft(filters)
+  }
+
+  if (variant === 'embedded') {
+    return (
+      <div className="space-y-3">
+        <WatchlistFiltersFields
+          filters={filters}
+          onChange={onChange}
+          showClearLink
+          showDisplayToggles={showDisplayToggles}
+        />
+      </div>
+    )
   }
 
   return (
@@ -373,6 +405,7 @@ export function WatchlistFilters({
           layout="desktop"
           onChange={onChange}
           showClearLink
+          showDisplayToggles={showDisplayToggles}
         />
       </form>
       {overlayOpen ? (
@@ -390,6 +423,7 @@ export function WatchlistFilters({
           }}
           resultCount={draftResultCount}
           titleId={titleId}
+          showDisplayToggles={showDisplayToggles}
         />
       ) : null}
     </>

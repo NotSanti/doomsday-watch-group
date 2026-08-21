@@ -3,7 +3,8 @@ import { EmptyState } from '@/components/EmptyState'
 import { ErrorState } from '@/components/ErrorState'
 import { Skeleton } from '@/components/Skeleton'
 import { useAuth } from '@/features/auth/use-auth'
-import { useGroupMembers } from '@/features/groups/use-groups'
+import { groupRoleForUser } from '@/features/groups/group-schemas'
+import { useGroup, useGroupMembers } from '@/features/groups/use-groups'
 import {
   formatWatchedFraction,
   groupWatchedFraction,
@@ -17,6 +18,7 @@ import {
   reviewsForTitle,
 } from '@/features/reviews/review-metrics'
 import { useGroupReviews } from '@/features/reviews/use-reviews'
+import { toFriendlySkipListError } from '@/features/watchlist/skip-errors'
 import { toFriendlyTitleListError } from '@/features/watchlist/title-errors'
 import {
   filterTitles,
@@ -28,6 +30,10 @@ import { groupTitlesByEra } from '@/features/watchlist/title-groups'
 import { TitleCard } from '@/features/watchlist/TitleCard'
 import { TitleRow } from '@/features/watchlist/TitleRow'
 import { TmdbCredit } from '@/features/watchlist/TmdbCredit'
+import {
+  useGroupSkippedTitles,
+  useToggleGroupTitleSkip,
+} from '@/features/watchlist/use-skipped-titles'
 import { useTitleList } from '@/features/watchlist/use-titles'
 import { WatchlistFilters as WatchlistFiltersPanel } from '@/features/watchlist/WatchlistFilters'
 
@@ -46,37 +52,63 @@ export function WatchlistPage() {
   const { groupId = '' } = useParams()
   const { user } = useAuth()
   const [searchParams, setSearchParams] = useSearchParams()
+  const groupQuery = useGroup(groupId)
   const titlesQuery = useTitleList()
   const progressQuery = useGroupProgress(groupId)
   const reviewsQuery = useGroupReviews(groupId)
   const membersQuery = useGroupMembers(groupId)
+  const skippedQuery = useGroupSkippedTitles(groupId)
+  const toggleSkip = useToggleGroupTitleSkip(groupId)
   const filters = parseWatchlistFilters(searchParams)
   const titles = titlesQuery.data ?? []
   const progress = progressQuery.data ?? []
   const reviews = reviewsQuery.data ?? []
+  const skippedTitleIds = new Set(
+    (skippedQuery.data ?? []).map((row) => row.title_id),
+  )
   const memberIds = (membersQuery.data ?? []).map((member) => member.user_id)
   const myProgress = progress
     .filter((row) => row.user_id === user?.id)
     .map((row) => ({ title_id: row.title_id, status: row.status }))
-  const visible = filterTitles(titles, myProgress, filters)
+  const visible = filterTitles(titles, myProgress, filters, skippedTitleIds)
   const groups = groupTitlesByEra(visible)
+  const isOwner = Boolean(
+    groupQuery.data &&
+      user &&
+      groupRoleForUser(groupQuery.data, user.id) === 'owner',
+  )
 
   function updateFilters(next: WatchlistFilters) {
     setSearchParams(serializeWatchlistFilters(next), { replace: true })
   }
 
-  if (titlesQuery.isPending || progressQuery.isPending || reviewsQuery.isPending) {
+  if (
+    titlesQuery.isPending ||
+    progressQuery.isPending ||
+    reviewsQuery.isPending ||
+    skippedQuery.isPending
+  ) {
     return <WatchlistSkeleton />
   }
 
-  if (titlesQuery.isError || progressQuery.isError || reviewsQuery.isError) {
+  if (
+    titlesQuery.isError ||
+    progressQuery.isError ||
+    reviewsQuery.isError ||
+    skippedQuery.isError
+  ) {
     return (
       <ErrorState
-        message={toFriendlyTitleListError()}
+        message={
+          skippedQuery.isError
+            ? toFriendlySkipListError()
+            : toFriendlyTitleListError()
+        }
         onRetry={() => {
           void titlesQuery.refetch()
           void progressQuery.refetch()
           void reviewsQuery.refetch()
+          void skippedQuery.refetch()
         }}
       />
     )
@@ -99,7 +131,7 @@ export function WatchlistPage() {
       <WatchlistFiltersPanel
         filters={filters}
         matchCount={(candidate: WatchlistFilters) =>
-          filterTitles(titles, myProgress, candidate).length
+          filterTitles(titles, myProgress, candidate, skippedTitleIds).length
         }
         onChange={updateFilters}
       />
@@ -132,6 +164,7 @@ export function WatchlistPage() {
                   )
                   const titleRatings = ratingsForTitle(reviews, title.id)
                   const titleReviews = reviewsForTitle(reviews, title.id)
+                  const skipped = skippedTitleIds.has(title.id)
 
                   return (
                     <li key={title.id}>
@@ -154,6 +187,15 @@ export function WatchlistPage() {
                         )}
                         showRating={filters.showRating}
                         showReviews={filters.showReviews}
+                        skipped={skipped}
+                        canToggleSkip={isOwner}
+                        skipDisabled={toggleSkip.isPending}
+                        onToggleSkip={(nextSkipped) => {
+                          toggleSkip.mutate({
+                            titleId: title.id,
+                            skipped: nextSkipped,
+                          })
+                        }}
                         reviews={titleReviews}
                         members={membersQuery.data ?? []}
                         currentUserId={user?.id ?? ''}
@@ -171,6 +213,7 @@ export function WatchlistPage() {
                   )
                   const titleRatings = ratingsForTitle(reviews, title.id)
                   const titleReviews = reviewsForTitle(reviews, title.id)
+                  const skipped = skippedTitleIds.has(title.id)
 
                   return (
                     <li key={title.id}>
@@ -193,6 +236,15 @@ export function WatchlistPage() {
                         )}
                         showRating={filters.showRating}
                         showReviews={filters.showReviews}
+                        skipped={skipped}
+                        canToggleSkip={isOwner}
+                        skipDisabled={toggleSkip.isPending}
+                        onToggleSkip={(nextSkipped) => {
+                          toggleSkip.mutate({
+                            titleId: title.id,
+                            skipped: nextSkipped,
+                          })
+                        }}
                         reviews={titleReviews}
                         members={membersQuery.data ?? []}
                         currentUserId={user?.id ?? ''}

@@ -62,7 +62,7 @@ export function MemberProgressCard({
           </Badge>
         </p>
       ) : (
-        <p className="text-sm text-secondary">Not watching</p>
+        <p className="text-sm text-secondary">Not watched</p>
       )}
     </article>
   )

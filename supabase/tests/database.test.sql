@@ -1,5 +1,5 @@
 begin;
-select plan(79);
+select plan(84);
 
 create temp table test_users (
   label text primary key,
@@ -1122,6 +1122,114 @@ select is(
   ),
   'aa000000-0000-4000-8000-000000000002'::uuid,
   'current title advances to the next doomsday_order title when everyone watched'
+);
+
+-- Group skipped titles RLS + advance over skips
+select set_config('request.jwt.claim.sub', (select id::text from test_users where label = 'owner-b'), true);
+select set_config(
+  'request.jwt.claims',
+  json_build_object(
+    'sub', (select id::text from test_users where label = 'owner-b'),
+    'role', 'authenticated'
+  )::text,
+  true
+);
+
+select lives_ok(
+  format(
+    $$insert into public.group_skipped_titles (group_id, title_id, skipped_by)
+      values (%L, 'aa000000-0000-4000-8000-000000000003', %L)$$,
+    (select id from test_groups where label = 'beta'),
+    (select id from test_users where label = 'owner-b')
+  ),
+  'owner can skip a title on the group path'
+);
+
+select set_config('request.jwt.claim.sub', (select id::text from test_users where label = 'outsider'), true);
+select set_config(
+  'request.jwt.claims',
+  json_build_object(
+    'sub', (select id::text from test_users where label = 'outsider'),
+    'role', 'authenticated'
+  )::text,
+  true
+);
+
+select throws_ok(
+  format(
+    $$insert into public.group_skipped_titles (group_id, title_id, skipped_by)
+      values (%L, 'aa000000-0000-4000-8000-000000000004', %L)$$,
+    (select id from test_groups where label = 'beta'),
+    (select id from test_users where label = 'outsider')
+  ),
+  '42501',
+  null,
+  'non-owner cannot skip a title'
+);
+
+select isnt_empty(
+  format(
+    $$select 1 from public.group_skipped_titles where group_id = %L$$,
+    (select id from test_groups where label = 'beta')
+  ),
+  'group members can read skipped titles'
+);
+
+select set_config('request.jwt.claim.sub', (select id::text from test_users where label = 'outsider-2'), true);
+select set_config(
+  'request.jwt.claims',
+  json_build_object(
+    'sub', (select id::text from test_users where label = 'outsider-2'),
+    'role', 'authenticated'
+  )::text,
+  true
+);
+
+select is_empty(
+  format(
+    $$select 1 from public.group_skipped_titles where group_id = %L$$,
+    (select id from test_groups where label = 'beta')
+  ),
+  'outsiders cannot read skipped titles'
+);
+
+select set_config('request.jwt.claim.sub', (select id::text from test_users where label = 'owner-b'), true);
+select set_config(
+  'request.jwt.claims',
+  json_build_object(
+    'sub', (select id::text from test_users where label = 'owner-b'),
+    'role', 'authenticated'
+  )::text,
+  true
+);
+
+update public.groups
+set current_title_id = 'aa000000-0000-4000-8000-000000000002'
+where id = (select id from test_groups where label = 'beta');
+
+insert into public.member_title_progress (group_id, user_id, title_id, status, watched_at)
+values
+  (
+    (select id from test_groups where label = 'beta'),
+    (select id from test_users where label = 'owner-b'),
+    'aa000000-0000-4000-8000-000000000002',
+    'watched',
+    now()
+  ),
+  (
+    (select id from test_groups where label = 'beta'),
+    (select id from test_users where label = 'outsider'),
+    'aa000000-0000-4000-8000-000000000002',
+    'watched',
+    now()
+  )
+on conflict (group_id, user_id, title_id) do update
+set status = excluded.status, watched_at = excluded.watched_at;
+
+select is(
+  public.advance_current_title_if_ready((select id from test_groups where label = 'beta')),
+  'aa000000-0000-4000-8000-000000000004'::uuid,
+  'advance skips titles omitted by the group'
 );
 
 select * from finish();

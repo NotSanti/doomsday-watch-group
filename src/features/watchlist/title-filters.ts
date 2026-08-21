@@ -31,6 +31,7 @@ export const watchlistFiltersSchema = z.object({
   sort: watchlistSortSchema,
   showRating: z.boolean(),
   showReviews: z.boolean(),
+  showSkipped: z.boolean(),
 })
 
 export type WatchlistSort = z.infer<typeof watchlistSortSchema>
@@ -45,6 +46,7 @@ export const DEFAULT_WATCHLIST_FILTERS: WatchlistFilters = {
   sort: 'doomsday',
   showRating: true,
   showReviews: true,
+  showSkipped: false,
 }
 
 export function countActiveWatchlistFilters(filters: WatchlistFilters): number {
@@ -75,6 +77,10 @@ export function countActiveWatchlistFilters(filters: WatchlistFilters): number {
   }
 
   if (filters.showReviews !== DEFAULT_WATCHLIST_FILTERS.showReviews) {
+    count += 1
+  }
+
+  if (filters.showSkipped !== DEFAULT_WATCHLIST_FILTERS.showSkipped) {
     count += 1
   }
 
@@ -135,6 +141,10 @@ export function parseWatchlistFilters(
       params.get('showReviews'),
       DEFAULT_WATCHLIST_FILTERS.showReviews,
     ),
+    showSkipped: readBoolean(
+      params.get('showSkipped'),
+      DEFAULT_WATCHLIST_FILTERS.showSkipped,
+    ),
   }
 }
 
@@ -171,6 +181,10 @@ export function serializeWatchlistFilters(
     params.set('showReviews', filters.showReviews ? '1' : '0')
   }
 
+  if (filters.showSkipped !== DEFAULT_WATCHLIST_FILTERS.showSkipped) {
+    params.set('showSkipped', filters.showSkipped ? '1' : '0')
+  }
+
   return params
 }
 
@@ -187,6 +201,7 @@ export function filterTitles(
   titles: readonly TitleRow[],
   progress: readonly TitleProgress[],
   filters: WatchlistFilters,
+  skippedTitleIds: ReadonlySet<string> = new Set(),
 ): TitleRow[] {
   const query = filters.q.trim().toLowerCase()
 
@@ -196,6 +211,10 @@ export function filterTitles(
     }
 
     if (filters.sort === 'doomsday' && title.doomsday_order == null) {
+      return false
+    }
+
+    if (skippedTitleIds.has(title.id) && !filters.showSkipped) {
       return false
     }
 

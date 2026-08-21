@@ -56,8 +56,8 @@ export const IMPORTANCE_LABEL: Record<Importance, string> = {
 }
 
 export const TITLE_STATUS_LABEL: Record<TitleStatus, string> = {
-  not_started: 'Not watching',
-  watching: 'Not watching',
+  not_started: 'Not watched',
+  watching: 'Not watched',
   watched: 'Watched',
 }
 

@@ -91,6 +91,7 @@ export function GroupHomePage() {
                   <div className="mt-2">
                     <MemberRoster
                       compact
+                      labeled
                       members={
                         membersQuery.data?.filter(
                           (member) => member.group_id === group.id,

@@ -47,6 +47,13 @@ let revokeError: { code?: string; message: string } | null = null
 let deleteInviteError: { code?: string; message: string } | null = null
 let titles: TitleRow[] = []
 let titlesError: { message: string } | null = null
+let skippedTitles: {
+  group_id: string
+  title_id: string
+  skipped_by: string
+  skipped_at: string
+}[] = []
+let skippedTitlesError: { message: string } | null = null
 let progress: MockTitleProgress[] = []
 let progressError: { message: string } | null = null
 let progressWriteError: { code?: string; message: string } | null = null
@@ -292,6 +299,28 @@ export function setMockTitles(
   titlesError = error
 }
 
+export function setMockSkippedTitles(
+  next: {
+    group_id: string
+    title_id: string
+    skipped_by: string
+    skipped_at?: string
+  }[],
+  error: { message: string } | null = null,
+): void {
+  skippedTitles = next.map((row) => ({
+    skipped_at: row.skipped_at ?? '2026-08-21T00:00:00.000Z',
+    group_id: row.group_id,
+    title_id: row.title_id,
+    skipped_by: row.skipped_by,
+  }))
+  skippedTitlesError = error
+}
+
+export function getMockSkippedTitles() {
+  return skippedTitles
+}
+
 export function setMockProgress(
   next: MockTitleProgress[],
   error: { message: string } | null = null,
@@ -385,6 +414,20 @@ type RpcError = { code?: string; message: string }
 function isOwnerOf(groupId: string): boolean {
   const group = groups.find((item) => item.id === groupId)
   return Boolean(session && group && group.owner_id === session.user.id)
+}
+
+function isMemberOf(groupId: string): boolean {
+  if (isOwnerOf(groupId)) {
+    return true
+  }
+
+  return Boolean(
+    session &&
+      members.some(
+        (member) =>
+          member.group_id === groupId && member.user_id === session.user.id,
+      ),
+  )
 }
 
 function memberToRow(member: MockMember) {
@@ -1178,6 +1221,146 @@ export const supabaseFromMock = vi.fn((table: string) => {
     }
   }
 
+  if (table === 'group_skipped_titles') {
+    const filters: Record<string, string> = {}
+
+    const selectApi = {
+      eq(column: string, value: string) {
+        filters[column] = value
+        return selectApi
+      },
+      then(
+        onFulfilled?: (value: {
+          data: typeof skippedTitles | null
+          error: { message: string } | null
+        }) => unknown,
+        onRejected?: (reason: unknown) => unknown,
+      ) {
+        if (skippedTitlesError) {
+          return Promise.resolve({
+            data: null,
+            error: skippedTitlesError,
+          }).then(onFulfilled, onRejected)
+        }
+
+        if (!session) {
+          return Promise.resolve({
+            data: null,
+            error: { message: 'not authenticated' },
+          }).then(onFulfilled, onRejected)
+        }
+
+        const groupId = filters.group_id
+        if (groupId && !isMemberOf(groupId)) {
+          return Promise.resolve({ data: [], error: null }).then(
+            onFulfilled,
+            onRejected,
+          )
+        }
+
+        const data = skippedTitles.filter((row) => {
+          if (filters.group_id && row.group_id !== filters.group_id) {
+            return false
+          }
+          if (filters.title_id && row.title_id !== filters.title_id) {
+            return false
+          }
+          return true
+        })
+
+        return Promise.resolve({ data, error: null }).then(
+          onFulfilled,
+          onRejected,
+        )
+      },
+    }
+
+    return {
+      select: () => selectApi,
+      insert: (values: {
+        group_id: string
+        title_id: string
+        skipped_by: string
+      }) => ({
+        select: () => ({
+          maybeSingle: async () => {
+            if (!session || !isOwnerOf(values.group_id)) {
+              return {
+                data: null,
+                error: { code: '42501', message: 'permission denied' },
+              }
+            }
+
+            if (values.skipped_by !== session.user.id) {
+              return {
+                data: null,
+                error: { code: '42501', message: 'permission denied' },
+              }
+            }
+
+            const row = {
+              group_id: values.group_id,
+              title_id: values.title_id,
+              skipped_by: values.skipped_by,
+              skipped_at: new Date().toISOString(),
+            }
+            skippedTitles = [
+              ...skippedTitles.filter(
+                (existing) =>
+                  !(
+                    existing.group_id === row.group_id &&
+                    existing.title_id === row.title_id
+                  ),
+              ),
+              row,
+            ]
+            return { data: row, error: null }
+          },
+        }),
+      }),
+      delete: () => {
+        const deleteFilters: Record<string, string> = {}
+        const deleteApi = {
+          eq(column: string, value: string) {
+            deleteFilters[column] = value
+            return deleteApi
+          },
+          then(
+            onFulfilled?: (value: {
+              data: null
+              error: { code?: string; message: string } | null
+            }) => unknown,
+            onRejected?: (reason: unknown) => unknown,
+          ) {
+            const groupId = deleteFilters.group_id
+            if (!session || !groupId || !isOwnerOf(groupId)) {
+              return Promise.resolve({
+                data: null,
+                error: { code: '42501', message: 'permission denied' },
+              }).then(onFulfilled, onRejected)
+            }
+
+            skippedTitles = skippedTitles.filter((row) => {
+              if (deleteFilters.group_id && row.group_id !== deleteFilters.group_id) {
+                return true
+              }
+              if (deleteFilters.title_id && row.title_id !== deleteFilters.title_id) {
+                return true
+              }
+              return false
+            })
+
+            return Promise.resolve({ data: null, error: null }).then(
+              onFulfilled,
+              onRejected,
+            )
+          },
+        }
+        return deleteApi
+      },
+    }
+  }
+
   if (table === 'titles') {
     return {
       select: () => ({
@@ -1563,6 +1746,8 @@ export function resetSupabaseClient(): void {
   deleteInviteError = null
   titles = []
   titlesError = null
+  skippedTitles = []
+  skippedTitlesError = null
   progress = []
   progressError = null
   progressWriteError = null

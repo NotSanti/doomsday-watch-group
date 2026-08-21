@@ -51,7 +51,7 @@ test.describe('owner and member journey', () => {
       memberPage.getByRole('heading', { name: 'Ratings and reviews' }),
     ).toBeVisible()
 
-    const status = memberPage.getByRole('button', { name: 'Not watching' })
+    const status = memberPage.getByRole('button', { name: 'Not watched' })
     await status.click()
     await expect(
       memberPage.getByRole('button', { name: 'Watched' }),

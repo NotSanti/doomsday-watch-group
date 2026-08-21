@@ -205,7 +205,7 @@ describe('group realtime', () => {
     await user.click(status)
 
     await waitFor(() => {
-      expect(screen.getByRole('button', { name: 'Not watching' })).toHaveAttribute(
+      expect(screen.getByRole('button', { name: 'Not watched' })).toHaveAttribute(
         'aria-pressed',
         'false',
       )

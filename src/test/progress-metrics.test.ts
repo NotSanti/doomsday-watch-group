@@ -93,5 +93,10 @@ describe('progress metrics', () => {
       'WandaVision',
       'Thor',
     ])
+    expect(
+      upcomingTitles(titles, IRON, 3, new Set([WANDA])).map(
+        (title) => title.name,
+      ),
+    ).toEqual(['Thor'])
   })
 })

@@ -14,6 +14,8 @@ type MemberRosterProps = {
   isError: boolean
   onRetry: () => void
   compact?: boolean
+  /** When compact, also show each display name under the icon. */
+  labeled?: boolean
 }
 
 export function MemberRoster({
@@ -22,12 +24,18 @@ export function MemberRoster({
   isError,
   onRetry,
   compact = false,
+  labeled = false,
 }: MemberRosterProps) {
   if (isPending) {
     return (
       <div role="status" aria-live="polite">
         <span className="sr-only">Loading members</span>
-        <Skeleton className={cn('w-full', compact ? 'h-8' : 'h-16')} />
+        <Skeleton
+          className={cn(
+            'w-full',
+            compact ? (labeled ? 'h-14' : 'h-8') : 'h-16',
+          )}
+        />
       </div>
     )
   }
@@ -59,13 +67,30 @@ export function MemberRoster({
 
   if (compact) {
     return (
-      <ul className="flex flex-wrap items-center justify-start gap-2">
+      <ul
+        className={cn(
+          'flex flex-wrap justify-start',
+          labeled ? 'items-start' : 'items-center ',
+        )}
+      >
         {members.map((member) => (
           <li
             key={`${member.group_id}:${member.user_id}`}
-            className="flex items-center"
+            className={cn(
+              'flex',
+              labeled ? 'w-16 flex-col items-center gap-1.5' : 'items-center',
+            )}
           >
-            <MemberAvatar member={member} highlightOwner />
+            <MemberAvatar
+              member={member}
+              highlightOwner
+              showNameTooltip={!labeled}
+            />
+            {labeled ? (
+              <MemberName className="w-full truncate text-center text-[10px] leading-tight text-secondary">
+                {member.display_name}
+              </MemberName>
+            ) : null}
           </li>
         ))}
       </ul>

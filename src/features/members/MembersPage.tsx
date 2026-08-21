@@ -13,10 +13,11 @@ import {
   type MemberSort,
 } from '@/features/members/member-sort'
 import { MemberProgressCard } from '@/features/progress/MemberProgressCard'
-import { upcomingTitles } from '@/features/progress/progress-metrics'
+import { upcomingTitles, titlesOnGroupPath } from '@/features/progress/progress-metrics'
 import { useGroupProgress } from '@/features/progress/use-progress'
 import { toFriendlyProgressListError } from '@/features/progress/progress-errors'
 import { toFriendlyTitleListError } from '@/features/watchlist/title-errors'
+import { useGroupSkippedTitles } from '@/features/watchlist/use-skipped-titles'
 import { useTitleList } from '@/features/watchlist/use-titles'
 import { cn } from '@/lib/utils'
 
@@ -32,6 +33,7 @@ export function MembersPage() {
   const membersQuery = useGroupMembers(groupId)
   const titlesQuery = useTitleList()
   const progressQuery = useGroupProgress(groupId)
+  const skippedQuery = useGroupSkippedTitles(groupId)
   const sort = isMemberSort(searchParams.get('sort') ?? '')
     ? (searchParams.get('sort') as MemberSort)
     : 'completion'
@@ -40,7 +42,8 @@ export function MembersPage() {
     groupQuery.isPending ||
     membersQuery.isPending ||
     titlesQuery.isPending ||
-    progressQuery.isPending
+    progressQuery.isPending ||
+    skippedQuery.isPending
 
   if (pending) {
     return (
@@ -85,16 +88,37 @@ export function MembersPage() {
     )
   }
 
+  if (skippedQuery.isError) {
+    return (
+      <ErrorState
+        message={toFriendlyTitleListError()}
+        onRetry={() => {
+          void skippedQuery.refetch()
+        }}
+      />
+    )
+  }
+
   const group = groupQuery.data
   const titles = titlesQuery.data ?? []
   const progress = progressQuery.data ?? []
+  const skippedTitleIds = new Set(
+    (skippedQuery.data ?? []).map((row) => row.title_id),
+  )
+  const pathTitles = titlesOnGroupPath(titles, skippedTitleIds)
   const members = membersQuery.data ?? []
-  const sorted = sortGroupMembers(members, titles, progress, sort)
+  const sorted = sortGroupMembers(
+    members,
+    titles,
+    progress,
+    sort,
+    skippedTitleIds,
+  )
   const comparisonTitles = [
     ...(group.current_title_id
       ? titles.filter((title) => title.id === group.current_title_id)
       : []),
-    ...upcomingTitles(titles, group.current_title_id),
+    ...upcomingTitles(titles, group.current_title_id, 3, skippedTitleIds),
   ].filter(
     (title, index, list) =>
       list.findIndex((item) => item.id === title.id) === index,
@@ -163,7 +187,7 @@ export function MembersPage() {
                   ) : null}
                   <MemberProgressCard
                     member={member}
-                    titles={titles}
+                    titles={pathTitles}
                     progress={progress}
                     currentTitleId={group.current_title_id}
                   />

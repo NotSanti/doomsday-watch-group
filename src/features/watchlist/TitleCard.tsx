@@ -4,11 +4,13 @@ import { Card } from '@/components/ui/card'
 import type { GroupMember } from '@/features/groups/group-schemas'
 import { ReviewPreviewBubble } from '@/features/reviews/ReviewPreviewBubble'
 import type { ReviewRow } from '@/features/reviews/review-schemas'
+import { SkipTitleControl } from '@/features/watchlist/SkipTitleControl'
 import { TitleTypeChip } from '@/features/watchlist/TitleTypeChip'
 import {
   IMPORTANCE_LABEL,
   MEDIA_TYPE_LABEL,
   TITLE_STATUS_LABEL,
+  isTitleWatched,
   sequenceForTitle,
   titleRuntimeLabel,
   titleYear,
@@ -16,6 +18,7 @@ import {
   type TitleStatus,
 } from '@/features/watchlist/title-schemas'
 import type { WatchlistSort } from '@/features/watchlist/title-filters'
+import { cn } from '@/lib/utils'
 
 type TitleCardProps = {
   title: TitleRow
@@ -26,6 +29,10 @@ type TitleCardProps = {
   averageRatingLabel: string
   showRating: boolean
   showReviews: boolean
+  skipped: boolean
+  canToggleSkip: boolean
+  skipDisabled?: boolean
+  onToggleSkip: (skipped: boolean) => void
   reviews: readonly ReviewRow[]
   members: readonly GroupMember[]
   currentUserId: string
@@ -48,6 +55,10 @@ export function TitleCard({
   averageRatingLabel,
   showRating,
   showReviews,
+  skipped,
+  canToggleSkip,
+  skipDisabled = false,
+  onToggleSkip,
   reviews,
   members,
   currentUserId,
@@ -55,11 +66,12 @@ export function TitleCard({
   const year = titleYear(title.release_date)
   const runtime = titleRuntimeLabel(title)
   const sequence = sequenceForTitle(title, sort)
+  const dimmed = isTitleWatched(status) || skipped
 
   return (
-    <Card className="relative h-full p-0">
-      <Link to={href} className="block h-full">
-        <div className="flex gap-3 p-4">
+    <Card className={cn('relative h-full p-0', dimmed && 'opacity-50')}>
+      <Link to={href} className="block">
+        <div className="flex gap-3 p-4 pb-2">
           <TitleTypeChip mediaType={title.media_type} />
           <div className="min-w-0 flex-1 space-y-2">
             <p className="text-xs tracking-[0.14em] text-secondary uppercase">
@@ -73,19 +85,23 @@ export function TitleCard({
                 .filter(Boolean)
                 .join(' · ')}
             </p>
-            <div className="flex flex-wrap gap-2">
-              <Badge>{IMPORTANCE_LABEL[title.importance]}</Badge>
-              <Badge tone={statusTone(status)}>
-                {TITLE_STATUS_LABEL[status]}
-              </Badge>
-              <Badge tone="muted">{groupWatchedLabel}</Badge>
-              {showRating ? (
-                <Badge tone="rating">{averageRatingLabel}</Badge>
-              ) : null}
-            </div>
           </div>
         </div>
       </Link>
+      <div className="flex flex-wrap gap-2 px-4 pb-4">
+        <Badge>{IMPORTANCE_LABEL[title.importance]}</Badge>
+        <Badge tone={statusTone(status)}>{TITLE_STATUS_LABEL[status]}</Badge>
+        <SkipTitleControl
+          skipped={skipped}
+          canToggle={canToggleSkip}
+          disabled={skipDisabled}
+          onToggle={onToggleSkip}
+        />
+        <Badge tone="muted">{groupWatchedLabel}</Badge>
+        {showRating ? (
+          <Badge tone="rating">{averageRatingLabel}</Badge>
+        ) : null}
+      </div>
       {showReviews ? (
         <div className="pointer-events-none absolute inset-0 z-10">
           <div className="pointer-events-auto absolute top-1.5 right-1.5">

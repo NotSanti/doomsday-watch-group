@@ -32,6 +32,7 @@ import {
   groupWatchedFraction,
   progressStatusFor,
   titlesCompletedAsAGroup,
+  titlesOnGroupPath,
   upcomingTitles,
 } from '@/features/progress/progress-metrics'
 import {
@@ -47,6 +48,7 @@ import {
   titleYear,
 } from '@/features/watchlist/title-schemas'
 import { useTitleList } from '@/features/watchlist/use-titles'
+import { useGroupSkippedTitles } from '@/features/watchlist/use-skipped-titles'
 import { toFriendlyTitleListError } from '@/features/watchlist/title-errors'
 
 export function GroupDashboardPage() {
@@ -56,6 +58,7 @@ export function GroupDashboardPage() {
   const membersQuery = useGroupMembers(groupId)
   const titlesQuery = useTitleList()
   const progressQuery = useGroupProgress(groupId)
+  const skippedQuery = useGroupSkippedTitles(groupId)
   const setStatus = useSetTitleStatus(groupId)
   const setCurrentTitle = useSetCurrentTitle(groupId)
   const [pickerOpen, setPickerOpen] = useState(false)
@@ -64,7 +67,8 @@ export function GroupDashboardPage() {
     groupQuery.isPending ||
     membersQuery.isPending ||
     titlesQuery.isPending ||
-    progressQuery.isPending
+    progressQuery.isPending ||
+    skippedQuery.isPending
 
   if (pending) {
     return (
@@ -110,13 +114,28 @@ export function GroupDashboardPage() {
     )
   }
 
+  if (skippedQuery.isError) {
+    return (
+      <ErrorState
+        message={toFriendlyTitleListError()}
+        onRetry={() => {
+          void skippedQuery.refetch()
+        }}
+      />
+    )
+  }
+
   const group = groupQuery.data
   const role = groupRoleForUser(group, user?.id ?? '')
   const titles = titlesQuery.data ?? []
   const members = membersQuery.data ?? []
   const progress = progressQuery.data ?? []
+  const skippedTitleIds = new Set(
+    (skippedQuery.data ?? []).map((row) => row.title_id),
+  )
+  const pathTitles = titlesOnGroupPath(titles, skippedTitleIds)
   const memberIds = members.map((member) => member.user_id)
-  const activeTitleIds = titles.map((title) => title.id)
+  const activeTitleIds = pathTitles.map((title) => title.id)
   const activeIdSet = new Set(activeTitleIds)
   const currentTitle =
     titles.find((title) => title.id === group.current_title_id) ?? null
@@ -127,7 +146,7 @@ export function GroupDashboardPage() {
   )
   const averageCompletion = averageCompletionPercent(
     memberIds,
-    titles.length,
+    pathTitles.length,
     progress,
     activeIdSet,
   )
@@ -136,7 +155,12 @@ export function GroupDashboardPage() {
     memberIds,
     progress,
   )
-  const upcoming = upcomingTitles(titles, group.current_title_id)
+  const upcoming = upcomingTitles(
+    titles,
+    group.current_title_id,
+    3,
+    skippedTitleIds,
+  )
   const currentFraction = currentTitle
     ? groupWatchedFraction(currentTitle.id, memberIds, progress)
     : null
@@ -214,7 +238,7 @@ export function GroupDashboardPage() {
         <div className="grid gap-3 sm:grid-cols-3">
           <MetricCard
             label="Completed as a group"
-            value={`${String(completedAsGroup)} of ${String(titles.length)}`}
+            value={`${String(completedAsGroup)} of ${String(pathTitles.length)}`}
             description="Titles where every active member has status Watched."
           />
           <MetricCard
@@ -296,7 +320,7 @@ export function GroupDashboardPage() {
               <li key={`${member.group_id}:${member.user_id}`}>
                 <MemberProgressCard
                   member={member}
-                  titles={titles}
+                  titles={pathTitles}
                   progress={progress}
                   currentTitleId={group.current_title_id}
                 />
@@ -323,6 +347,10 @@ export function GroupDashboardPage() {
           open={pickerOpen}
           onOpenChange={setPickerOpen}
           titles={titles}
+          skippedTitleIds={skippedTitleIds}
+          myProgress={progress
+            .filter((row) => row.user_id === user?.id)
+            .map((row) => ({ title_id: row.title_id, status: row.status }))}
           currentTitleId={group.current_title_id}
           isPending={setCurrentTitle.isPending}
           onSave={(titleId) => setCurrentTitle.mutateAsync(titleId)}

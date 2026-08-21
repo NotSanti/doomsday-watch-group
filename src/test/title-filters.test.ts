@@ -111,6 +111,7 @@ describe('watchlist URL filters', () => {
       sort: 'release',
       showRating: true,
       showReviews: true,
+      showSkipped: false,
     })
     expect(
       parseWatchlistFilters(
@@ -132,6 +133,7 @@ describe('watchlist URL filters', () => {
         sort: 'release',
         showRating: true,
         showReviews: true,
+        showSkipped: false,
       }).toString(),
     ).toBe(
       'q=Wanda&type=series&importance=recommended&status=unwatched&sort=release',
@@ -141,14 +143,18 @@ describe('watchlist URL filters', () => {
         ...DEFAULT_WATCHLIST_FILTERS,
         showRating: false,
         showReviews: false,
+        showSkipped: true,
       }).toString(),
-    ).toBe('showRating=0&showReviews=0')
+    ).toBe('showRating=0&showReviews=0&showSkipped=1')
     expect(
-      parseWatchlistFilters(new URLSearchParams('showRating=0&showReviews=0')),
+      parseWatchlistFilters(
+        new URLSearchParams('showRating=0&showReviews=0&showSkipped=1'),
+      ),
     ).toEqual({
       ...DEFAULT_WATCHLIST_FILTERS,
       showRating: false,
       showReviews: false,
+      showSkipped: true,
     })
   })
 })
@@ -160,6 +166,23 @@ describe('filterTitles', () => {
       filterTitles(titles, progress, DEFAULT_WATCHLIST_FILTERS).map(
         (title) => title.name,
       ),
+    ).toEqual(['WandaVision', 'Werewolf by Night', 'Iron Man'])
+  })
+
+  it('hides skipped titles unless showSkipped is on', () => {
+    const skipped = new Set([werewolf.id])
+    expect(
+      filterTitles(titles, progress, DEFAULT_WATCHLIST_FILTERS, skipped).map(
+        (title) => title.name,
+      ),
+    ).toEqual(['WandaVision', 'Iron Man'])
+    expect(
+      filterTitles(
+        titles,
+        progress,
+        { ...DEFAULT_WATCHLIST_FILTERS, showSkipped: true },
+        skipped,
+      ).map((title) => title.name),
     ).toEqual(['WandaVision', 'Werewolf by Night', 'Iron Man'])
   })
 

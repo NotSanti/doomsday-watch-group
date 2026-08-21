@@ -132,7 +132,7 @@ describe('personal progress and current title', () => {
     seedGroup()
     renderApp(`/groups/${GROUP_A}/titles/${WANDA_ID}`)
 
-    const status = await screen.findByRole('button', { name: 'Not watching' })
+    const status = await screen.findByRole('button', { name: 'Not watched' })
     expect(status).toHaveAttribute('aria-pressed', 'false')
     expect(status).toHaveClass('cursor-pointer')
     expect(screen.queryByText('My status')).not.toBeInTheDocument()
@@ -187,10 +187,14 @@ describe('personal progress and current title', () => {
       await screen.findByRole('button', { name: 'Change current title' }),
     )
     const dialog = await screen.findByRole('dialog')
-    await user.selectOptions(
-      within(dialog).getByLabelText('Current title'),
-      WANDA_ID,
+    expect(within(dialog).queryByLabelText('Search')).not.toBeInTheDocument()
+    expect(within(dialog).getByRole('option', { name: 'Iron Man' })).toHaveClass(
+      'opacity-50',
     )
+    expect(
+      within(dialog).getByRole('option', { name: 'WandaVision' }),
+    ).not.toHaveClass('opacity-50')
+    await user.click(within(dialog).getByRole('option', { name: 'WandaVision' }))
     await user.click(
       within(dialog).getByRole('button', { name: 'Save current title' }),
     )
@@ -314,6 +318,9 @@ describe('personal progress and current title', () => {
     expect(
       await screen.findByRole('heading', { name: 'Owner-only controls' }),
     ).toBeInTheDocument()
-    expect(screen.queryByLabelText('Current title')).not.toBeInTheDocument()
+    expect(screen.queryByRole('listbox', { name: 'Current title' })).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole('button', { name: 'Save current title' }),
+    ).not.toBeInTheDocument()
   })
 })

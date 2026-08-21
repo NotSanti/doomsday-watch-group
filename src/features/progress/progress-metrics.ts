@@ -122,13 +122,26 @@ export function currentTitleCompletionPercent(
   return completionPercent(watched, total)
 }
 
+export function titlesOnGroupPath(
+  titles: readonly TitleRow[],
+  skippedTitleIds: ReadonlySet<string>,
+): TitleRow[] {
+  return titles.filter((title) => !skippedTitleIds.has(title.id))
+}
+
 export function upcomingTitles(
   titles: readonly TitleRow[],
   currentTitleId: string | null,
   limit = 3,
+  skippedTitleIds: ReadonlySet<string> = new Set(),
 ): TitleRow[] {
   const ordered = titles
-    .filter((title) => title.is_active && title.doomsday_order !== null)
+    .filter(
+      (title) =>
+        title.is_active &&
+        title.doomsday_order !== null &&
+        !skippedTitleIds.has(title.id),
+    )
     .slice()
     .sort(
       (left, right) => (left.doomsday_order ?? 0) - (right.doomsday_order ?? 0),

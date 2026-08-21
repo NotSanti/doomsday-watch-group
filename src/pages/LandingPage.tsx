@@ -141,7 +141,7 @@ export function LandingPage() {
               </li>
               <li className="flex flex-wrap items-center justify-between gap-2 border-b border-border pb-2">
                 <span className="min-w-0 break-words">02 · The Incredible Hulk</span>
-                <Badge tone="notStarted">Not watching</Badge>
+                <Badge tone="notStarted">Not watched</Badge>
               </li>
               <li className="flex flex-wrap items-center justify-between gap-2">
                 <span className="min-w-0 break-words">03 · Iron Man 2</span>

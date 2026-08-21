@@ -84,7 +84,7 @@ export function CurrentTitleHero({
             </Link>
           </Button>
           {isOwner ? (
-            <Button variant="secondary" onClick={onChangeCurrentTitle}>
+            <Button variant="secondary" size="sm" onClick={onChangeCurrentTitle}>
               Change current title
             </Button>
           ) : null}

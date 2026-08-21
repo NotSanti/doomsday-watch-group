@@ -42,7 +42,7 @@ export function StatusControl({
       )}
     >
       {watched ? <Check className="size-4" aria-hidden="true" /> : null}
-      {watched ? 'Watched' : 'Not watching'}
+      {watched ? 'Watched' : 'Not watched'}
     </button>
   )
 }

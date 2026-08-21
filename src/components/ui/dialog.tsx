@@ -62,7 +62,7 @@ export function DialogContent({
             {description}
           </DialogPrimitive.Description>
         ) : null}
-        <div className="mt-4">{children}</div>
+        <div className="mt-4 min-h-0">{children}</div>
       </DialogPrimitive.Content>
     </DialogPrimitive.Portal>
   )
