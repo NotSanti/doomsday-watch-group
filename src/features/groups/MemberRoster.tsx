@@ -1,12 +1,6 @@
 import { Crown } from 'lucide-react'
 import { ErrorState } from '@/components/ErrorState'
 import { Skeleton } from '@/components/Skeleton'
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip'
 import { MemberAvatar } from '@/features/groups/MemberAvatar'
 import { MemberName } from '@/features/groups/MemberName'
 import { toFriendlyGroupMembersError } from '@/features/groups/group-errors'
@@ -65,18 +59,16 @@ export function MemberRoster({
 
   if (compact) {
     return (
-      <TooltipProvider>
-        <ul className="flex flex-wrap items-center justify-start gap-2">
-          {members.map((member) => (
-            <li
-              key={`${member.group_id}:${member.user_id}`}
-              className="flex items-center"
-            >
-              <MemberIcon member={member} />
-            </li>
-          ))}
-        </ul>
-      </TooltipProvider>
+      <ul className="flex flex-wrap items-center justify-start gap-2">
+        {members.map((member) => (
+          <li
+            key={`${member.group_id}:${member.user_id}`}
+            className="flex items-center"
+          >
+            <MemberAvatar member={member} highlightOwner />
+          </li>
+        ))}
+      </ul>
     )
   }
 
@@ -88,30 +80,6 @@ export function MemberRoster({
         </li>
       ))}
     </ul>
-  )
-}
-
-function MemberIcon({ member }: { member: GroupMember }) {
-  const isOwner = member.role === 'owner'
-  const label = isOwner
-    ? `${member.display_name} (owner)`
-    : member.display_name
-
-  return (
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <button
-          type="button"
-          aria-label={label}
-          className="flex size-8 shrink-0 items-center justify-center p-0 leading-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:outline-none"
-        >
-          <MemberAvatar member={member} highlightOwner />
-        </button>
-      </TooltipTrigger>
-      <TooltipContent className="px-2.5 py-1.5" side="top">
-        <MemberName>{member.display_name}</MemberName>
-      </TooltipContent>
-    </Tooltip>
   )
 }
 
