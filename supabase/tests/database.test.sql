@@ -1125,6 +1125,7 @@ select is(
 );
 
 -- Group skipped titles RLS + advance over skips
+set local role authenticated;
 select set_config('request.jwt.claim.sub', (select id::text from test_users where label = 'owner-b'), true);
 select set_config(
   'request.jwt.claims',
@@ -1193,15 +1194,8 @@ select is_empty(
   'outsiders cannot read skipped titles'
 );
 
-select set_config('request.jwt.claim.sub', (select id::text from test_users where label = 'owner-b'), true);
-select set_config(
-  'request.jwt.claims',
-  json_build_object(
-    'sub', (select id::text from test_users where label = 'owner-b'),
-    'role', 'authenticated'
-  )::text,
-  true
-);
+-- Seed watches as a privileged role; the watched trigger advances the current title.
+reset role;
 
 update public.groups
 set current_title_id = 'aa000000-0000-4000-8000-000000000002'
@@ -1227,7 +1221,11 @@ on conflict (group_id, user_id, title_id) do update
 set status = excluded.status, watched_at = excluded.watched_at;
 
 select is(
-  public.advance_current_title_if_ready((select id from test_groups where label = 'beta')),
+  (
+    select current_title_id
+    from public.groups
+    where id = (select id from test_groups where label = 'beta')
+  ),
   'aa000000-0000-4000-8000-000000000004'::uuid,
   'advance skips titles omitted by the group'
 );
