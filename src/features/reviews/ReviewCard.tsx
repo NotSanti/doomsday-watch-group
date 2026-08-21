@@ -58,9 +58,7 @@ export function ReviewCard({
                 {review.body}
               </SpoilerCover>
             )
-          ) : (
-            <p className="text-sm text-muted">Rated without a written review.</p>
-          )}
+          ) : null}
         </div>
       </div>
     </Card>

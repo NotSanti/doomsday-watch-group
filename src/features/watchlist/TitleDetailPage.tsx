@@ -17,12 +17,12 @@ import { TitleReviews } from '@/features/reviews/TitleReviews'
 import { useGroupReviews, useDeleteReview, useSaveReview } from '@/features/reviews/use-reviews'
 import { toFriendlyTitleDetailError } from '@/features/watchlist/title-errors'
 import {
-  IMPORTANCE_LABEL,
   MEDIA_TYPE_LABEL,
   isTitleId,
   titleRuntimeLabel,
   titleYear,
 } from '@/features/watchlist/title-schemas'
+import { ImportanceBadge } from '@/features/watchlist/ImportanceBadge'
 import { TitleArtwork } from '@/features/watchlist/TitleArtwork'
 import { TmdbCredit } from '@/features/watchlist/TmdbCredit'
 import { useTitle } from '@/features/watchlist/use-titles'
@@ -125,7 +125,7 @@ export function TitleDetailPage() {
             {title.name}
           </h1>
           <div className="flex flex-wrap gap-2">
-            <Badge>{IMPORTANCE_LABEL[title.importance]}</Badge>
+            <ImportanceBadge importance={title.importance} />
             {title.phase ? <Badge tone="muted">Phase {title.phase}</Badge> : null}
             {title.saga ? <Badge tone="muted">{title.saga}</Badge> : null}
           </div>
@@ -135,8 +135,8 @@ export function TitleDetailPage() {
             <p className="text-sm text-muted">No synopsis yet.</p>
           )}
           <p className="text-sm text-secondary">
-            {formatWatchedFraction(fraction.watched, fraction.total)} by the
-            group
+            {formatWatchedFraction(fraction.watched, fraction.total)} watched by
+            the group
           </p>
           <div className="flex flex-wrap items-center justify-between gap-3">
             <StatusControl

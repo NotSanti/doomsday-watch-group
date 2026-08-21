@@ -333,6 +333,8 @@ export function GroupDashboardPage() {
       <CollapsibleSection title="Members">
         <MemberRoster
           compact
+          labeled
+          avatarSize="sm"
           members={members}
           isPending={false}
           isError={membersQuery.isError}

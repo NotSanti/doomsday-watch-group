@@ -54,6 +54,13 @@ describe('push-utils', () => {
     expect(isPushSupported()).toBe(false)
   })
 
+  it('reports no local subscription when push is unsupported', async () => {
+    const { hasLocalPushSubscription } = await import(
+      '@/features/notifications/push-utils'
+    )
+    await expect(hasLocalPushSubscription()).resolves.toBe(false)
+  })
+
   it('returns null when the VAPID public key is missing', () => {
     expect(getVapidPublicKey()).toBeNull()
   })

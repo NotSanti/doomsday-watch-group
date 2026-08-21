@@ -14,6 +14,7 @@ import {
 } from '@/features/notifications/register-push'
 import {
   getVapidPublicKey,
+  hasLocalPushSubscription,
   isPushSupported,
 } from '@/features/notifications/push-utils'
 import { getSupabaseClient } from '@/lib/supabase'
@@ -24,6 +25,8 @@ export const notificationKeys = {
     [...notificationKeys.all, 'preferences', userId] as const,
   subscriptions: (userId: string) =>
     [...notificationKeys.all, 'subscriptions', userId] as const,
+  localSubscription: () =>
+    [...notificationKeys.all, 'local-subscription'] as const,
 }
 
 export function usePushNotificationSupport() {
@@ -52,6 +55,22 @@ export function usePushSubscriptionCount(userId: string | undefined) {
 export function usePushNotifications(userId: string | undefined) {
   const queryClient = useQueryClient()
   const subscriptionsQuery = usePushSubscriptionCount(userId)
+  const canCheckLocal =
+    isPushSupported() && Boolean(getVapidPublicKey()) && Boolean(userId)
+  const localSubscriptionQuery = useQuery({
+    queryKey: notificationKeys.localSubscription(),
+    queryFn: hasLocalPushSubscription,
+    enabled: canCheckLocal,
+  })
+
+  const invalidatePushState = (): void => {
+    void queryClient.invalidateQueries({
+      queryKey: notificationKeys.subscriptions(userId ?? ''),
+    })
+    void queryClient.invalidateQueries({
+      queryKey: notificationKeys.localSubscription(),
+    })
+  }
 
   const subscribe = useMutation({
     mutationFn: async () => {
@@ -62,9 +81,7 @@ export function usePushNotifications(userId: string | undefined) {
       return registerPushSubscription(getSupabaseClient(), userId)
     },
     onSuccess: () => {
-      void queryClient.invalidateQueries({
-        queryKey: notificationKeys.subscriptions(userId ?? ''),
-      })
+      invalidatePushState()
       toast.success('Notifications enabled on this device')
     },
     onError: (error: unknown) => {
@@ -93,9 +110,7 @@ export function usePushNotifications(userId: string | undefined) {
       await unregisterPushSubscription(getSupabaseClient(), userId)
     },
     onSuccess: () => {
-      void queryClient.invalidateQueries({
-        queryKey: notificationKeys.subscriptions(userId ?? ''),
-      })
+      invalidatePushState()
       toast.success('Notifications disabled on this device')
     },
     onError: () => {
@@ -113,9 +128,7 @@ export function usePushNotifications(userId: string | undefined) {
     },
     onSuccess: (synced) => {
       if (synced) {
-        void queryClient.invalidateQueries({
-          queryKey: notificationKeys.subscriptions(userId ?? ''),
-        })
+        invalidatePushState()
       }
     },
   })
@@ -132,8 +145,10 @@ export function usePushNotifications(userId: string | undefined) {
 
   return {
     subscriptionCount: subscriptionsQuery.data ?? 0,
-    isSubscribed: (subscriptionsQuery.data ?? 0) > 0,
-    isLoading: subscriptionsQuery.isLoading,
+    isSubscribed: localSubscriptionQuery.data === true,
+    isLoading:
+      subscriptionsQuery.isLoading ||
+      (canCheckLocal && localSubscriptionQuery.isLoading),
     subscribe,
     unsubscribe,
     sync,

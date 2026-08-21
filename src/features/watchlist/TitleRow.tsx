@@ -1,15 +1,15 @@
 import { Link } from 'react-router'
 import { Badge } from '@/components/ui/badge'
 import type { GroupMember } from '@/features/groups/group-schemas'
+import { StatusControl } from '@/features/progress/StatusControl'
 import { ReviewPreviewBubble } from '@/features/reviews/ReviewPreviewBubble'
 import type { ReviewRow } from '@/features/reviews/review-schemas'
+import { ImportanceBadge } from '@/features/watchlist/ImportanceBadge'
 import { SkipTitleControl } from '@/features/watchlist/SkipTitleControl'
 import { TitleTypeChip } from '@/features/watchlist/TitleTypeChip'
 import type { WatchlistSort } from '@/features/watchlist/title-filters'
 import {
-  IMPORTANCE_LABEL,
   MEDIA_TYPE_LABEL,
-  TITLE_STATUS_LABEL,
   isTitleWatched,
   sequenceForTitle,
   titleRuntimeLabel,
@@ -32,17 +32,11 @@ type TitleRowProps = {
   canToggleSkip: boolean
   skipDisabled?: boolean
   onToggleSkip: (skipped: boolean) => void
+  statusDisabled?: boolean
+  onStatusChange: (status: TitleStatus) => void
   reviews: readonly ReviewRow[]
   members: readonly GroupMember[]
   currentUserId: string
-}
-
-function statusTone(status: TitleStatus) {
-  if (status === 'watched') {
-    return 'watched' as const
-  }
-
-  return 'notStarted' as const
 }
 
 export function TitleRow({
@@ -58,6 +52,8 @@ export function TitleRow({
   canToggleSkip,
   skipDisabled = false,
   onToggleSkip,
+  statusDisabled = false,
+  onStatusChange,
   reviews,
   members,
   currentUserId,
@@ -87,14 +83,21 @@ export function TitleRow({
           </div>
         </Link>
         <div className="hidden flex-wrap items-center justify-end gap-2 sm:flex">
-          <Badge>{IMPORTANCE_LABEL[title.importance]}</Badge>
-          <Badge tone={statusTone(status)}>{TITLE_STATUS_LABEL[status]}</Badge>
-          <SkipTitleControl
-            skipped={skipped}
-            canToggle={canToggleSkip}
-            disabled={skipDisabled}
-            onToggle={onToggleSkip}
+          <ImportanceBadge importance={title.importance} />
+          <StatusControl
+            value={status}
+            disabled={statusDisabled}
+            onChange={onStatusChange}
+            className="px-2.5 py-0.5 text-xs [&_svg]:size-3"
           />
+          {!isTitleWatched(status) ? (
+            <SkipTitleControl
+              skipped={skipped}
+              canToggle={canToggleSkip}
+              disabled={skipDisabled}
+              onToggle={onToggleSkip}
+            />
+          ) : null}
           <Badge tone="muted">{groupWatchedLabel}</Badge>
           {showRating ? (
             <Badge tone="rating">{averageRatingLabel}</Badge>
@@ -102,14 +105,21 @@ export function TitleRow({
         </div>
       </div>
       <div className="mt-2 flex flex-wrap gap-2 sm:hidden">
-        <Badge>{IMPORTANCE_LABEL[title.importance]}</Badge>
-        <Badge tone={statusTone(status)}>{TITLE_STATUS_LABEL[status]}</Badge>
-        <SkipTitleControl
-          skipped={skipped}
-          canToggle={canToggleSkip}
-          disabled={skipDisabled}
-          onToggle={onToggleSkip}
+        <ImportanceBadge importance={title.importance} />
+        <StatusControl
+          value={status}
+          disabled={statusDisabled}
+          onChange={onStatusChange}
+          className="px-2.5 py-0.5 text-xs [&_svg]:size-3"
         />
+        {!isTitleWatched(status) ? (
+          <SkipTitleControl
+            skipped={skipped}
+            canToggle={canToggleSkip}
+            disabled={skipDisabled}
+            onToggle={onToggleSkip}
+          />
+        ) : null}
         <Badge tone="muted">{groupWatchedLabel}</Badge>
         {showRating ? (
           <Badge tone="rating">{averageRatingLabel}</Badge>

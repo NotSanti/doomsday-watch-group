@@ -16,6 +16,7 @@ Doomsday Watch Group is built one numbered milestone at a time. Follow these rul
 12. Report: files changed, migrations added, commands run, results, manual QA steps, and known limitations.
 13. Stop after the milestone’s acceptance criteria pass and wait for approval, unless the user explicitly asked to continue.
 14. Never copy code, proprietary copy, logos, or layouts from marvelwatchlist.com. Recreate only general product patterns with an original design.
+15. Popups/dialogs: frosted glass (`bg-surface-elevated/70` + blur); centered modal on desktop (`md+`); full viewport on mobile with a corner close (X) unless `preventDismiss`. Put desktop-only sizing in `md:` classes. Use shared `DialogContent` unless there is a strong reason not to.
 
 ## Product constraints
 

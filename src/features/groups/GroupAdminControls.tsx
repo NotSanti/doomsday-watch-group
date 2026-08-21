@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
+import { SelectField } from '@/components/ui/select'
 import { toFriendlyLeaveGroupError } from '@/features/groups/group-errors'
 import type { GroupMember, GroupRow } from '@/features/groups/group-schemas'
 import {
@@ -11,12 +12,6 @@ import {
   useTransferOwnership,
 } from '@/features/groups/use-groups'
 import { MemberName } from '@/features/groups/MemberName'
-import { cn } from '@/lib/utils'
-
-const selectClassName = cn(
-  'h-11 w-full rounded-md border border-border bg-surface px-3 text-sm text-heading uppercase tracking-[0.08em]',
-  'hover:border-border-strong focus-visible:outline-none',
-)
 
 export function MemberAdminList({
   groupId,
@@ -150,25 +145,16 @@ export function TransferOwnershipForm({
       <p className="text-sm text-muted">
         The group needs exactly one owner. Transfer before leaving.
       </p>
-      <label className="block">
-        <span className="mb-1 block text-sm text-secondary uppercase tracking-[0.08em]">
-          New owner
-        </span>
-        <select
-          aria-label="New owner"
-          className={selectClassName}
-          value={newOwnerId}
-          onChange={(event) => {
-            setSelected(event.target.value)
-          }}
-        >
-          {candidates.map((member) => (
-            <option key={member.user_id} value={member.user_id} className="uppercase">
-              {member.display_name}
-            </option>
-          ))}
-        </select>
-      </label>
+      <SelectField
+        label="New owner"
+        aria-label="New owner"
+        value={newOwnerId}
+        options={candidates.map((member) => ({
+          value: member.user_id,
+          label: member.display_name,
+        }))}
+        onValueChange={setSelected}
+      />
       <Button
         variant="secondary"
         disabled={!newOwnerId}

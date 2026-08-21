@@ -1,3 +1,4 @@
+import { useQueryClient } from '@tanstack/react-query'
 import { ArrowLeft, Menu, X } from 'lucide-react'
 import { Link, NavLink, Outlet, useLocation, useMatch, useParams } from 'react-router'
 import { AppVersionLabel } from '@/components/AppVersionLabel'
@@ -5,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { useAuth } from '@/features/auth/use-auth'
 import { GroupSwitcher } from '@/features/groups/GroupSwitcher'
 import { useGroup } from '@/features/groups/use-groups'
+import { prefetchMembersPage } from '@/features/members/prefetch-members-page'
 import { usePwaPushPermissionPrompt } from '@/features/notifications/use-pwa-push-permission-prompt'
 import { isStandalonePwa } from '@/features/notifications/push-utils'
 import { useRouteMenuOpen } from '@/hooks/use-route-menu-open'
@@ -21,12 +23,14 @@ function AppNavLinks({
   className,
   linkClassName,
   onNavigate,
+  onPrefetch,
   onSignOut,
 }: {
   links: AppNavLink[]
   className?: string
   linkClassName?: string
   onNavigate?: () => void
+  onPrefetch?: (to: string) => void
   onSignOut?: () => void
 }) {
   return (
@@ -37,6 +41,12 @@ function AppNavLinks({
             to={link.to}
             end={link.end}
             onClick={onNavigate}
+            onPointerEnter={() => {
+              onPrefetch?.(link.to)
+            }}
+            onFocus={() => {
+              onPrefetch?.(link.to)
+            }}
             className={({ isActive }) =>
               cn(
                 'block rounded-md px-3 py-2 text-sm text-secondary uppercase tracking-[0.08em] hover:bg-surface-hover hover:text-heading',
@@ -73,6 +83,7 @@ export function AppShell() {
   const location = useLocation()
   const titlePage = useMatch('/groups/:groupId/titles/:titleId')
   const { signOut, user } = useAuth()
+  const queryClient = useQueryClient()
   usePwaPushPermissionPrompt(user?.id)
   const groupQuery = useGroup(groupId ?? '')
   const [menuOpen, setMenuOpen] = useRouteMenuOpen()
@@ -82,6 +93,7 @@ export function AppShell() {
   const watchlistHref = titlePage
     ? `/groups/${titlePage.params.groupId}/watchlist${location.search}`
     : null
+  const membersHref = isMember ? `${base}/members` : null
 
   const links: AppNavLink[] = [
     { to: '/app', label: 'Groups', end: true },
@@ -93,8 +105,18 @@ export function AppShell() {
           { to: `${base}/settings`, label: 'Settings', end: false },
         ]
       : []),
-    { to: '/profile', label: 'Profile', end: false },
+    {
+      to: isMember ? `${base}/profile` : '/profile',
+      label: 'Profile',
+      end: false,
+    },
   ]
+
+  const prefetchLink = (to: string): void => {
+    if (membersHref && to === membersHref && groupId) {
+      prefetchMembersPage(queryClient, groupId)
+    }
+  }
 
   return (
     <div className="flex min-h-screen flex-col bg-bg">
@@ -131,6 +153,7 @@ export function AppShell() {
             <AppNavLinks
               className="flex flex-wrap items-center gap-3"
               links={links}
+              onPrefetch={prefetchLink}
               onSignOut={() => {
                 void signOut()
               }}
@@ -168,6 +191,7 @@ export function AppShell() {
               onNavigate={() => {
                 setMenuOpen(false)
               }}
+              onPrefetch={prefetchLink}
               onSignOut={() => {
                 void signOut()
               }}

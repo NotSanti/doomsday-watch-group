@@ -55,6 +55,16 @@ export const IMPORTANCE_LABEL: Record<Importance, string> = {
   optional: 'Optional',
 }
 
+/** Distinct pill colors for importance on listings and detail. */
+export const IMPORTANCE_BADGE_TONE: Record<
+  Importance,
+  'gold' | 'violet' | 'metal'
+> = {
+  essential: 'gold',
+  recommended: 'violet',
+  optional: 'metal',
+}
+
 export const TITLE_STATUS_LABEL: Record<TitleStatus, string> = {
   not_started: 'Not watched',
   watching: 'Not watched',

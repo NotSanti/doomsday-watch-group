@@ -40,6 +40,7 @@ export function AppRoutes() {
             <Route path="titles/:titleId" element={<TitleDetailPage />} />
             <Route path="members" element={<MembersPage />} />
             <Route path="settings" element={<GroupSettingsPage />} />
+            <Route path="profile" element={<ProfilePage />} />
           </Route>
         </Route>
       </Route>

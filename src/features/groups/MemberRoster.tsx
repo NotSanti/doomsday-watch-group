@@ -16,6 +16,7 @@ type MemberRosterProps = {
   compact?: boolean
   /** When compact, also show each display name under the icon. */
   labeled?: boolean
+  avatarSize?: 'xs' | 'sm'
 }
 
 export function MemberRoster({
@@ -25,6 +26,7 @@ export function MemberRoster({
   onRetry,
   compact = false,
   labeled = false,
+  avatarSize = 'xs',
 }: MemberRosterProps) {
   if (isPending) {
     return (
@@ -33,7 +35,13 @@ export function MemberRoster({
         <Skeleton
           className={cn(
             'w-full',
-            compact ? (labeled ? 'h-14' : 'h-8') : 'h-16',
+            compact
+              ? labeled
+                ? avatarSize === 'sm'
+                  ? 'h-16'
+                  : 'h-14'
+                : 'h-8'
+              : 'h-16',
           )}
         />
       </div>
@@ -70,7 +78,7 @@ export function MemberRoster({
       <ul
         className={cn(
           'flex flex-wrap justify-start',
-          labeled ? 'items-start' : 'items-center ',
+          labeled ? 'items-start gap-3' : 'items-center gap-2',
         )}
       >
         {members.map((member) => (
@@ -78,11 +86,17 @@ export function MemberRoster({
             key={`${member.group_id}:${member.user_id}`}
             className={cn(
               'flex',
-              labeled ? 'w-16 flex-col items-center gap-1.5' : 'items-center',
+              labeled
+                ? cn(
+                    'flex-col items-center gap-1.5',
+                    avatarSize === 'sm' ? 'w-20' : 'w-16',
+                  )
+                : 'items-center',
             )}
           >
             <MemberAvatar
               member={member}
+              size={avatarSize}
               highlightOwner
               showNameTooltip={!labeled}
             />

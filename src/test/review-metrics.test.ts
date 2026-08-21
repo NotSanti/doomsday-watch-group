@@ -55,7 +55,7 @@ describe('review metrics', () => {
   it('hides other members’ spoiler text in hover previews', () => {
     expect(
       reviewHoverPreview({ body: null, contains_spoilers: false }, false),
-    ).toBe('Rated without a written review.')
+    ).toBe('')
     expect(
       reviewHoverPreview(
         { body: 'Nick Fury is a skrull.', contains_spoilers: true },

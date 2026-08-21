@@ -3,6 +3,7 @@ import { useEffect, useId, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { SelectField } from '@/components/ui/select'
 import { chipClasses, type ChipTone } from '@/lib/chip-styles'
 import { cn } from '@/lib/utils'
 import {
@@ -14,11 +15,6 @@ import {
   isWatchlistTypeFilter,
   type WatchlistFilters,
 } from '@/features/watchlist/title-filters'
-
-const selectClassName = cn(
-  'h-11 w-full rounded-md border border-border bg-surface px-3 text-sm text-heading uppercase tracking-[0.08em]',
-  'hover:border-border-strong focus-visible:outline-none',
-)
 
 type WatchlistFiltersProps = {
   filters: WatchlistFilters
@@ -116,93 +112,73 @@ function WatchlistFiltersFields({
         />
       </div>
       <div>
-        <label
-          className="mb-1 block text-sm text-secondary uppercase tracking-[0.08em]"
-          htmlFor={typeId}
-        >
-          Type
-        </label>
-        <select
+        <SelectField
           id={typeId}
-          className={selectClassName}
+          label="Type"
           value={filters.type}
-          onChange={(event) => {
-            if (isWatchlistTypeFilter(event.target.value)) {
-              onChange({ ...filters, type: event.target.value })
+          options={[
+            { value: 'all', label: 'All types' },
+            { value: 'movie', label: 'Movies' },
+            { value: 'series', label: 'Series' },
+            { value: 'special', label: 'Specials' },
+          ]}
+          onValueChange={(value) => {
+            if (isWatchlistTypeFilter(value)) {
+              onChange({ ...filters, type: value })
             }
           }}
-        >
-          <option value="all">All types</option>
-          <option value="movie">Movies</option>
-          <option value="series">Series</option>
-          <option value="special">Specials</option>
-        </select>
+        />
       </div>
       <div>
-        <label
-          className="mb-1 block text-sm text-secondary uppercase tracking-[0.08em]"
-          htmlFor={importanceId}
-        >
-          Importance
-        </label>
-        <select
+        <SelectField
           id={importanceId}
-          className={selectClassName}
+          label="Importance"
           value={filters.importance}
-          onChange={(event) => {
-            if (isWatchlistImportanceFilter(event.target.value)) {
-              onChange({ ...filters, importance: event.target.value })
+          options={[
+            { value: 'all', label: 'All importance' },
+            { value: 'essential', label: 'Essential' },
+            { value: 'recommended', label: 'Recommended' },
+            { value: 'optional', label: 'Optional' },
+          ]}
+          onValueChange={(value) => {
+            if (isWatchlistImportanceFilter(value)) {
+              onChange({ ...filters, importance: value })
             }
           }}
-        >
-          <option value="all">All importance</option>
-          <option value="essential">Essential</option>
-          <option value="recommended">Recommended</option>
-          <option value="optional">Optional</option>
-        </select>
+        />
       </div>
       <div>
-        <label
-          className="mb-1 block text-sm text-secondary uppercase tracking-[0.08em]"
-          htmlFor={statusId}
-        >
-          My status
-        </label>
-        <select
+        <SelectField
           id={statusId}
-          className={selectClassName}
+          label="My status"
           value={filters.status}
-          onChange={(event) => {
-            if (isWatchlistStatusFilter(event.target.value)) {
-              onChange({ ...filters, status: event.target.value })
+          options={[
+            { value: 'all', label: 'All statuses' },
+            { value: 'unwatched', label: 'Not watched' },
+            { value: 'watched', label: 'Watched' },
+          ]}
+          onValueChange={(value) => {
+            if (isWatchlistStatusFilter(value)) {
+              onChange({ ...filters, status: value })
             }
           }}
-        >
-          <option value="all">All statuses</option>
-          <option value="unwatched">Not watched</option>
-          <option value="watched">Watched</option>
-        </select>
+        />
       </div>
       <div>
-        <label
-          className="mb-1 block text-sm text-secondary uppercase tracking-[0.08em]"
-          htmlFor={sortId}
-        >
-          Order
-        </label>
-        <select
+        <SelectField
           id={sortId}
-          className={selectClassName}
+          label="Order"
           value={filters.sort}
-          onChange={(event) => {
-            if (isWatchlistSort(event.target.value)) {
-              onChange({ ...filters, sort: event.target.value })
+          options={[
+            { value: 'doomsday', label: 'Doomsday order' },
+            { value: 'release', label: 'Release order' },
+          ]}
+          onValueChange={(value) => {
+            if (isWatchlistSort(value)) {
+              onChange({ ...filters, sort: value })
             }
           }}
-        >
-          <option value="doomsday">Doomsday order</option>
-          <option value="release">Release order</option>
-        </select>
+        />
       </div>
       {showDisplayToggles ? (
         <div

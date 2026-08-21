@@ -1,6 +1,8 @@
+import { useState } from 'react'
 import { EmptyState } from '@/components/EmptyState'
 import { ErrorState } from '@/components/ErrorState'
 import { Skeleton } from '@/components/Skeleton'
+import { Button } from '@/components/ui/button'
 import { useAuth } from '@/features/auth/use-auth'
 import {
   DeleteGroupSection,
@@ -12,7 +14,7 @@ import { GroupSettingsForm } from '@/features/groups/GroupSettingsForm'
 import { toFriendlyGroupDetailError, toFriendlyGroupMembersError } from '@/features/groups/group-errors'
 import { groupRoleForUser } from '@/features/groups/group-schemas'
 import { useGroup, useGroupMembers, useSetCurrentTitle } from '@/features/groups/use-groups'
-import { CurrentTitleForm } from '@/features/progress/ChangeCurrentTitleDialog'
+import { ChangeCurrentTitleDialog } from '@/features/progress/ChangeCurrentTitleDialog'
 import { useGroupProgress } from '@/features/progress/use-progress'
 import { InviteManager } from '@/features/invites/InviteManager'
 import { toFriendlyTitleListError } from '@/features/watchlist/title-errors'
@@ -29,10 +31,13 @@ export function GroupSettingsPage() {
   const progressQuery = useGroupProgress(groupId)
   const skippedQuery = useGroupSkippedTitles(groupId)
   const setCurrentTitle = useSetCurrentTitle(groupId)
+  const [pickerOpen, setPickerOpen] = useState(false)
   const group = groupQuery.data
   const isOwner = Boolean(
     group && user && groupRoleForUser(group, user.id) === 'owner',
   )
+  const titles = titlesQuery.data ?? []
+  const currentTitle = titles.find((title) => title.id === group?.current_title_id)
   const myProgress = (progressQuery.data ?? [])
     .filter((row) => row.user_id === user?.id)
     .map((row) => ({ title_id: row.title_id, status: row.status }))
@@ -87,25 +92,39 @@ export function GroupSettingsPage() {
             <h2 className="font-display text-2xl tracking-[0.08em] text-heading uppercase">
               Current title
             </h2>
-            {titlesQuery.isPending ? (
-              <Skeleton className="h-24 w-full" />
-            ) : titlesQuery.isError ? (
+            {titlesQuery.isPending || skippedQuery.isPending ? (
+              <Skeleton className="h-16 w-full" />
+            ) : titlesQuery.isError || skippedQuery.isError ? (
               <ErrorState
                 message={toFriendlyTitleListError()}
                 onRetry={() => {
                   void titlesQuery.refetch()
+                  void skippedQuery.refetch()
                 }}
               />
             ) : (
-              <CurrentTitleForm
-                key={group.current_title_id ?? 'none'}
-                titles={titlesQuery.data ?? []}
-                myProgress={myProgress}
-                skippedTitleIds={skippedTitleIds}
-                currentTitleId={group.current_title_id}
-                isPending={setCurrentTitle.isPending}
-                onSave={(titleId) => setCurrentTitle.mutateAsync(titleId)}
-              />
+              <div className="flex flex-wrap items-center gap-3">
+                <p className="text-sm text-secondary">
+                  {currentTitle ? (
+                    <>
+                      Now watching:{' '}
+                      <span className="text-heading">{currentTitle.name}</span>
+                    </>
+                  ) : (
+                    'No current title selected.'
+                  )}
+                </p>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant={currentTitle ? 'secondary' : 'primary'}
+                  onClick={() => {
+                    setPickerOpen(true)
+                  }}
+                >
+                  {currentTitle ? 'Change current title' : 'Choose current title'}
+                </Button>
+              </div>
             )}
           </section>
           <InviteManager groupId={group.id} />
@@ -125,6 +144,16 @@ export function GroupSettingsPage() {
             ownerId={group.owner_id}
           />
           <DeleteGroupSection group={group} />
+          <ChangeCurrentTitleDialog
+            open={pickerOpen}
+            onOpenChange={setPickerOpen}
+            titles={titles}
+            myProgress={myProgress}
+            skippedTitleIds={skippedTitleIds}
+            currentTitleId={group.current_title_id}
+            isPending={setCurrentTitle.isPending}
+            onSave={(titleId) => setCurrentTitle.mutateAsync(titleId)}
+          />
         </>
       ) : (
         <>

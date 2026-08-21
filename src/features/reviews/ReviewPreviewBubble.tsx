@@ -94,13 +94,18 @@ export function ReviewPreviewBubble({
                           : member.display_name}
                       </MemberName>
                     </span>
-                    <span className="gold-text shrink-0 text-xs">
+                    <span className="gold-text shrink-0 font-display text-base font-bold tracking-[0.06em]">
                       {formatRating(review.rating)} / 10
                     </span>
                   </p>
-                  <p className="text-muted uppercase tracking-[0.08em]">
-                    {reviewHoverPreview(review, isOwn)}
-                  </p>
+                  {(() => {
+                    const preview = reviewHoverPreview(review, isOwn)
+                    return preview ? (
+                      <p className="text-muted uppercase tracking-[0.08em]">
+                        {preview}
+                      </p>
+                    ) : null
+                  })()}
                 </div>
               </li>
             )

@@ -119,7 +119,9 @@ describe('group administration', () => {
     seedOwner()
     renderApp(`/groups/${GROUP_A}/settings`)
 
-    expect(await screen.findByLabelText('New owner')).toHaveValue(MEMBER_ID)
+    expect(
+      await screen.findByRole('combobox', { name: 'New owner' }),
+    ).toHaveTextContent('Member B')
     await user.click(screen.getByRole('button', { name: 'Transfer ownership' }))
     const dialog = await screen.findByRole('dialog')
     await user.click(

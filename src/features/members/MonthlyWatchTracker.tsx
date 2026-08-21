@@ -4,7 +4,6 @@ import type { GroupMember } from '@/features/groups/group-schemas'
 import {
   buildYearWatchGrid,
   currentYearInTimeZone,
-  // formatYearLabel,
   monthLabelsForYear,
   watchesByCalendarDate,
 } from '@/features/members/watch-activity'
@@ -14,7 +13,6 @@ import { cn } from '@/lib/utils'
 import {
   Tooltip,
   TooltipContent,
-  TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip'
 
@@ -29,6 +27,12 @@ const ROW_LABELS: Partial<Record<number, string>> = {
   3: 'Wed',
   5: 'Fri',
 }
+
+const MONTH_NAMES_UTC = Array.from({ length: 12 }, (_, index) =>
+  new Intl.DateTimeFormat('en-US', { month: 'long', timeZone: 'UTC' })
+    .format(new Date(Date.UTC(2026, index, 1)))
+    .toUpperCase(),
+)
 
 function ordinalSuffix(day: number): string {
   const remainder = day % 100
@@ -52,10 +56,7 @@ function formatWatchDay(date: string): string {
   const [, monthText = '', dayText = '1'] = date.split('-')
   const month = Number(monthText)
   const day = Number(dayText)
-  const monthLabel =
-    new Intl.DateTimeFormat('en-US', { month: 'long', timeZone: 'UTC' })
-      .format(new Date(Date.UTC(2026, month - 1, 1)))
-      .toUpperCase()
+  const monthLabel = MONTH_NAMES_UTC[month - 1] ?? ''
 
   return `${monthLabel} ${String(day)}${ordinalSuffix(day)}`
 }
@@ -78,45 +79,48 @@ export function MonthlyWatchTracker({
   const monthLabels = monthLabelsForYear(year, timeZone)
 
   return (
-    <article className="elevated-card rounded-xl p-4">
-      <div className="flex items-center gap-3">
+    <article className="elevated-card min-w-0 max-w-full overflow-hidden rounded-xl p-4 [content-visibility:auto] [contain-intrinsic-size:auto_180px]">
+      <div className="flex min-w-0 items-center gap-3">
         <MemberAvatar member={member} highlightOwner />
-        <MemberName as="p" className="text-heading">
+        <MemberName as="p" className="min-w-0 truncate text-heading">
           {member.display_name}
         </MemberName>
       </div>
 
-      <div className="mt-4 flex gap-2 overflow-x-auto">
-        <div
-          aria-hidden="true"
-          className="flex shrink-0 flex-col gap-0.75 pt-0.5 text-[10px] text-muted"
-        >
-          {Array.from({ length: 7 }, (_, row) => (
-            <div
-              key={row}
-              className="flex h-2.75 w-6 items-center leading-none"
-            >
-              {ROW_LABELS[row] ?? ''}
-            </div>
-          ))}
-        </div>
-        <div className="space-y-1">
+      <div
+        className="mt-4 min-w-0 max-w-full overflow-x-auto overscroll-x-contain [-webkit-overflow-scrolling:touch]"
+        data-testid="watch-activity-scroll"
+      >
+        <div className="flex w-max gap-2">
           <div
             aria-hidden="true"
-            className="relative h-4 text-[10px] text-muted"
-            style={{ width: `${weekCount * 14 - 3}px` }}
+            className="flex shrink-0 flex-col gap-0.75 pt-0.5 text-[10px] text-muted"
           >
-            {monthLabels.map((monthLabel) => (
-              <span
-                key={monthLabel.label}
-                className="absolute top-0"
-                style={{ left: `${monthLabel.weekIndex * 14}px` }}
+            {Array.from({ length: 7 }, (_, row) => (
+              <div
+                key={row}
+                className="flex h-2.75 w-6 items-center leading-none"
               >
-                {monthLabel.label}
-              </span>
+                {ROW_LABELS[row] ?? ''}
+              </div>
             ))}
           </div>
-          <TooltipProvider>
+          <div className="shrink-0 space-y-1">
+            <div
+              aria-hidden="true"
+              className="relative h-4 text-[10px] text-muted"
+              style={{ width: `${weekCount * 14 - 3}px` }}
+            >
+              {monthLabels.map((monthLabel) => (
+                <span
+                  key={monthLabel.label}
+                  className="absolute top-0"
+                  style={{ left: `${monthLabel.weekIndex * 14}px` }}
+                >
+                  {monthLabel.label}
+                </span>
+              ))}
+            </div>
             <div
               role="grid"
               aria-label={`${member.display_name} watch activity for ${String(year)}`}
@@ -137,21 +141,33 @@ export function MonthlyWatchTracker({
                       )
                     }
 
+                    if (!cell.active) {
+                      return (
+                        <div
+                          key={weekday}
+                          role="gridcell"
+                          className={cn(
+                            'size-2.75 rounded-xs',
+                            'border border-border/50 bg-surface-elevated',
+                          )}
+                        />
+                      )
+                    }
+
                     const formattedDay = formatWatchDay(cell.date)
-                    const watchesLabel = cell.watchCount === 1
-                      ? `1 WATCH ON ${formattedDay}`
-                      : `${String(cell.watchCount)} WATCHES ON ${formattedDay}`
-
+                    const watchesLabel =
+                      cell.watchCount === 1
+                        ? `1 WATCH ON ${formattedDay}`
+                        : `${String(cell.watchCount)} WATCHES ON ${formattedDay}`
                     const dateIso = zonedStartOfDayIso(cell.date, timeZone)
-                    const ariaLabel = cell.active ? watchesLabel : undefined
 
-                    const content = cell.active ? (
-                      <Tooltip>
+                    return (
+                      <Tooltip key={weekday}>
                         <TooltipTrigger asChild>
                           <div
                             role="gridcell"
                             tabIndex={0}
-                            aria-label={ariaLabel}
+                            aria-label={watchesLabel}
                             className={cn(
                               'size-2.75 rounded-xs bg-primary-emphasis',
                               'cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-focus',
@@ -163,23 +179,12 @@ export function MonthlyWatchTracker({
                           {watchesLabel}
                         </TooltipContent>
                       </Tooltip>
-                    ) : (
-                      <div
-                        role="gridcell"
-                        aria-label={ariaLabel}
-                        className={cn(
-                          'size-2.75 rounded-xs',
-                          'border border-border/50 bg-surface-elevated',
-                        )}
-                      />
                     )
-
-                    return <div key={weekday}>{content}</div>
                   })}
                 </div>
               ))}
             </div>
-          </TooltipProvider>
+          </div>
         </div>
       </div>
 

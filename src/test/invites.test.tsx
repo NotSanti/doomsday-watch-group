@@ -1,5 +1,6 @@
 import { screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import { chooseSelectOption } from '@/test/mobile-ui'
 import { renderApp } from '@/test/render-app'
 import {
   makeGroup,
@@ -199,7 +200,7 @@ describe('invites', () => {
 
     await user.click(screen.getByRole('button', { name: 'Create invite' }))
     const dialog = await screen.findByRole('dialog')
-    await user.selectOptions(within(dialog).getByLabelText('Expires'), 'never')
+    await chooseSelectOption(user, within(dialog), 'Expires', 'No expiry')
     await user.type(within(dialog).getByLabelText('Max uses (optional)'), '3')
     await user.click(
       within(dialog).getByRole('button', { name: 'Create invite' }),

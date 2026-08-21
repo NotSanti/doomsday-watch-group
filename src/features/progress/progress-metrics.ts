@@ -164,5 +164,5 @@ export function formatPercent(value: number): string {
 }
 
 export function formatWatchedFraction(watched: number, total: number): string {
-  return `${String(watched)}/${String(total)} watched`
+  return `${String(watched)}/${String(total)}`
 }

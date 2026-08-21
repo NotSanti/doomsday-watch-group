@@ -1,9 +1,9 @@
 import { Check } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
+import { ImportanceBadge } from '@/features/watchlist/ImportanceBadge'
 import { TitleTypeChip } from '@/features/watchlist/TitleTypeChip'
 import type { WatchlistSort } from '@/features/watchlist/title-filters'
 import {
-  IMPORTANCE_LABEL,
   MEDIA_TYPE_LABEL,
   TITLE_STATUS_LABEL,
   isTitleWatched,
@@ -84,7 +84,7 @@ export function SelectableTitleRow({
         </p>
       </div>
       <div className="hidden flex-wrap justify-end gap-2 sm:flex">
-        <Badge>{IMPORTANCE_LABEL[title.importance]}</Badge>
+        <ImportanceBadge importance={title.importance} />
         <Badge tone={statusTone(status)}>{TITLE_STATUS_LABEL[status]}</Badge>
       </div>
     </button>

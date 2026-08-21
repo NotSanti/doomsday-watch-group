@@ -57,7 +57,7 @@ export function reviewHoverPreview(
   isOwn: boolean,
 ): string {
   if (!review.body) {
-    return 'Rated without a written review.'
+    return ''
   }
 
   if (review.contains_spoilers && !isOwn) {

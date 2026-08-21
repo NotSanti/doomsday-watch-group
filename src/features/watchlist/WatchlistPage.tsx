@@ -10,7 +10,7 @@ import {
   groupWatchedFraction,
   progressStatusFor,
 } from '@/features/progress/progress-metrics'
-import { useGroupProgress } from '@/features/progress/use-progress'
+import { useGroupProgress, useSetTitleStatus } from '@/features/progress/use-progress'
 import {
   averageRating,
   formatAverageRatingLabel,
@@ -59,6 +59,7 @@ export function WatchlistPage() {
   const membersQuery = useGroupMembers(groupId)
   const skippedQuery = useGroupSkippedTitles(groupId)
   const toggleSkip = useToggleGroupTitleSkip(groupId)
+  const setStatus = useSetTitleStatus(groupId)
   const filters = parseWatchlistFilters(searchParams)
   const titles = titlesQuery.data ?? []
   const progress = progressQuery.data ?? []
@@ -196,6 +197,13 @@ export function WatchlistPage() {
                             skipped: nextSkipped,
                           })
                         }}
+                        statusDisabled={setStatus.isPending}
+                        onStatusChange={(nextStatus) => {
+                          setStatus.mutate({
+                            titleId: title.id,
+                            status: nextStatus,
+                          })
+                        }}
                         reviews={titleReviews}
                         members={membersQuery.data ?? []}
                         currentUserId={user?.id ?? ''}
@@ -243,6 +251,13 @@ export function WatchlistPage() {
                           toggleSkip.mutate({
                             titleId: title.id,
                             skipped: nextSkipped,
+                          })
+                        }}
+                        statusDisabled={setStatus.isPending}
+                        onStatusChange={(nextStatus) => {
+                          setStatus.mutate({
+                            titleId: title.id,
+                            status: nextStatus,
                           })
                         }}
                         reviews={titleReviews}

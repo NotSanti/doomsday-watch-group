@@ -36,6 +36,9 @@ export function usePwaPushPermissionPrompt(userId: string | undefined) {
         void queryClient.invalidateQueries({
           queryKey: notificationKeys.subscriptions(userId),
         })
+        void queryClient.invalidateQueries({
+          queryKey: notificationKeys.localSubscription(),
+        })
       })
       .catch(() => {
         // Denied / dismissed / unsupported — stay silent on the auto path.

@@ -2,14 +2,14 @@ import { Link } from 'react-router'
 import { Badge } from '@/components/ui/badge'
 import { Card } from '@/components/ui/card'
 import type { GroupMember } from '@/features/groups/group-schemas'
+import { StatusControl } from '@/features/progress/StatusControl'
 import { ReviewPreviewBubble } from '@/features/reviews/ReviewPreviewBubble'
 import type { ReviewRow } from '@/features/reviews/review-schemas'
+import { ImportanceBadge } from '@/features/watchlist/ImportanceBadge'
 import { SkipTitleControl } from '@/features/watchlist/SkipTitleControl'
 import { TitleTypeChip } from '@/features/watchlist/TitleTypeChip'
 import {
-  IMPORTANCE_LABEL,
   MEDIA_TYPE_LABEL,
-  TITLE_STATUS_LABEL,
   isTitleWatched,
   sequenceForTitle,
   titleRuntimeLabel,
@@ -33,17 +33,11 @@ type TitleCardProps = {
   canToggleSkip: boolean
   skipDisabled?: boolean
   onToggleSkip: (skipped: boolean) => void
+  statusDisabled?: boolean
+  onStatusChange: (status: TitleStatus) => void
   reviews: readonly ReviewRow[]
   members: readonly GroupMember[]
   currentUserId: string
-}
-
-function statusTone(status: TitleStatus) {
-  if (status === 'watched') {
-    return 'watched' as const
-  }
-
-  return 'notStarted' as const
 }
 
 export function TitleCard({
@@ -59,6 +53,8 @@ export function TitleCard({
   canToggleSkip,
   skipDisabled = false,
   onToggleSkip,
+  statusDisabled = false,
+  onStatusChange,
   reviews,
   members,
   currentUserId,
@@ -89,14 +85,21 @@ export function TitleCard({
         </div>
       </Link>
       <div className="flex flex-wrap gap-2 px-4 pb-4">
-        <Badge>{IMPORTANCE_LABEL[title.importance]}</Badge>
-        <Badge tone={statusTone(status)}>{TITLE_STATUS_LABEL[status]}</Badge>
-        <SkipTitleControl
-          skipped={skipped}
-          canToggle={canToggleSkip}
-          disabled={skipDisabled}
-          onToggle={onToggleSkip}
+        <ImportanceBadge importance={title.importance} />
+        <StatusControl
+          value={status}
+          disabled={statusDisabled}
+          onChange={onStatusChange}
+          className="px-2.5 py-0.5 text-xs [&_svg]:size-3"
         />
+        {!isTitleWatched(status) ? (
+          <SkipTitleControl
+            skipped={skipped}
+            canToggle={canToggleSkip}
+            disabled={skipDisabled}
+            onToggle={onToggleSkip}
+          />
+        ) : null}
         <Badge tone="muted">{groupWatchedLabel}</Badge>
         {showRating ? (
           <Badge tone="rating">{averageRatingLabel}</Badge>

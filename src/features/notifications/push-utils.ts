@@ -93,6 +93,20 @@ export function isStandalonePwa(): boolean {
   return Boolean(iOSStandalone || displayModeStandalone)
 }
 
+export async function hasLocalPushSubscription(): Promise<boolean> {
+  if (!isPushSupported()) {
+    return false
+  }
+
+  try {
+    const registration = await navigator.serviceWorker.ready
+    const subscription = await registration.pushManager.getSubscription()
+    return Boolean(subscription)
+  } catch {
+    return false
+  }
+}
+
 export function urlBase64ToUint8Array(value: string): Uint8Array {
   const padding = '='.repeat((4 - (value.length % 4)) % 4)
   const base64 = (value + padding).replace(/-/g, '+').replace(/_/g, '/')

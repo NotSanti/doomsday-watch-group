@@ -108,6 +108,9 @@ describe('reviews', () => {
     const updateButton = within(editDialog).getByRole('button', {
       name: 'Update review',
     })
+    expect(updateButton.parentElement?.className).toMatch(/mt-4/)
+    expect(updateButton.parentElement?.className).toMatch(/shrink-0/)
+    expect(updateButton.parentElement?.className).toMatch(/border-t/)
     expect(updateButton).toBeDisabled()
 
     await user.click(within(editDialog).getByRole('radio', { name: /^6$/ }))

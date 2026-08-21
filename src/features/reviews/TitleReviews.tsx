@@ -156,7 +156,7 @@ export function TitleReviews({
         }}
       >
         <DialogContent
-          className="w-[min(36rem,calc(100%-2rem))]"
+          className="md:w-[min(36rem,calc(100%-2rem))]"
           title={mine ? 'Edit review' : 'Write review'}
           onOpenAutoFocus={(event) => {
             event.preventDefault()

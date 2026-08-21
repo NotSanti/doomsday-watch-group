@@ -3,9 +3,9 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { StatusControl } from '@/features/progress/StatusControl'
+import { ImportanceBadge } from '@/features/watchlist/ImportanceBadge'
 import { TitleArtwork } from '@/features/watchlist/TitleArtwork'
 import {
-  IMPORTANCE_LABEL,
   MEDIA_TYPE_LABEL,
   sequenceForTitle,
   titleRuntimeLabel,
@@ -66,7 +66,7 @@ export function CurrentTitleHero({
             .join(' · ')}
         </p>
         <div className="flex flex-wrap gap-2">
-          <Badge>{IMPORTANCE_LABEL[title.importance]}</Badge>
+          <ImportanceBadge importance={title.importance} />
           <Badge tone="muted">{groupWatchedLabel}</Badge>
         </div>
         {title.synopsis ? (

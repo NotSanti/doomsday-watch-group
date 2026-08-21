@@ -4,6 +4,10 @@ import { Skeleton } from '@/components/Skeleton'
 import { ChooseAvatarOverlay } from '@/features/auth/ChooseAvatarOverlay'
 import { useAuth } from '@/features/auth/use-auth'
 
+function isProfilePath(pathname: string): boolean {
+  return pathname === '/profile' || /^\/groups\/[^/]+\/profile\/?$/.test(pathname)
+}
+
 function GuardSkeleton() {
   return (
     <div
@@ -60,7 +64,7 @@ export function RequireAuth() {
     )
   }
 
-  if (needsOnboarding && location.pathname !== '/profile') {
+  if (needsOnboarding && !isProfilePath(location.pathname)) {
     return (
       <Navigate
         to={`/profile?onboarding=1&returnTo=${encodeURIComponent(

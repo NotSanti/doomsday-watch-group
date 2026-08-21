@@ -107,9 +107,7 @@ describe('groups', () => {
       .closest('section')
     expect(createdRoster).not.toBeNull()
     expect(
-      await within(createdRoster!).findByRole('button', {
-        name: 'Owner A (owner)',
-      }),
+      await within(createdRoster!).findByText('Owner A'),
     ).toBeInTheDocument()
   })
 
@@ -172,9 +170,7 @@ describe('groups', () => {
       .closest('section')
     expect(dashboardRoster).not.toBeNull()
     expect(
-      await within(dashboardRoster!).findByRole('button', {
-        name: 'Owner A (owner)',
-      }),
+      await within(dashboardRoster!).findByText('Owner A'),
     ).toBeInTheDocument()
     const membersToggle = within(dashboardRoster!).getByRole('button', {
       name: 'Members',
@@ -182,11 +178,7 @@ describe('groups', () => {
     expect(membersToggle).toHaveAttribute('aria-expanded', 'true')
     await user.click(membersToggle)
     expect(membersToggle).toHaveAttribute('aria-expanded', 'false')
-    expect(
-      within(dashboardRoster!).queryByRole('button', {
-        name: 'Owner A (owner)',
-      }),
-    ).not.toBeInTheDocument()
+    expect(within(dashboardRoster!).queryByText('Owner A')).not.toBeInTheDocument()
   })
 
   it('lists each group’s members as icons and highlights the owner', async () => {
@@ -244,13 +236,10 @@ describe('groups', () => {
     })
     const roster = membersHeading.closest('section')
     expect(roster).not.toBeNull()
-    const dashboardOwner = await within(roster!).findByRole('button', {
-      name: 'Owner A (owner)',
-    })
-    expect(dashboardOwner.querySelector('span')).toHaveClass('border-gold')
-    expect(
-      within(roster!).getByRole('button', { name: 'Member B' }),
-    ).toBeInTheDocument()
+    const dashboardOwner = await within(roster!).findByText('Owner A')
+    const dashboardOwnerAvatar = dashboardOwner.previousElementSibling
+    expect(dashboardOwnerAvatar).toHaveClass('border-gold')
+    expect(within(roster!).getByText('Member B')).toBeInTheDocument()
   })
 
   it('keeps group tile actions aligned when a group has no notes', async () => {
@@ -398,6 +387,44 @@ describe('groups', () => {
     expect(
       screen.queryByText('relation groups exploded'),
     ).not.toBeInTheDocument()
+  })
+
+  it('keeps group navigation when opening profile from a group', async () => {
+    const user = userEvent.setup()
+    signInAsOwner()
+    setMockGroups([makeGroup({ id: GROUP_A, name: 'Alpha Watch' })])
+    setMockMembers([
+      makeMember({
+        group_id: GROUP_A,
+        user_id: USER_ID,
+        role: 'owner',
+        display_name: 'Owner A',
+      }),
+    ])
+    renderApp(`/groups/${GROUP_A}`)
+
+    expect(
+      await screen.findByRole('heading', { name: 'Alpha Watch' }),
+    ).toBeInTheDocument()
+
+    const mobileNav = await openMobileNav(user, 'App')
+    const profileLink = within(mobileNav).getByRole('link', { name: 'Profile' })
+    expect(profileLink).toHaveAttribute('href', `/groups/${GROUP_A}/profile`)
+    await user.click(profileLink)
+
+    expect(
+      await screen.findByRole('heading', { name: 'Profile' }),
+    ).toBeInTheDocument()
+
+    const profileNav = await openMobileNav(user, 'App')
+    expect(
+      within(profileNav).getByRole('link', { name: 'Dashboard' }),
+    ).toBeInTheDocument()
+    expect(
+      within(profileNav).getByRole('link', { name: 'Watchlist' }),
+    ).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Switch group' })).toBeInTheDocument()
+    expect(screen.getByText('Alpha Watch')).toBeInTheDocument()
   })
 
   it('shows an error state when a member group cannot load', async () => {

@@ -1,5 +1,6 @@
 import { screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import { chooseSelectOption, expectSelectValue } from '@/test/mobile-ui'
 import { renderApp } from '@/test/render-app'
 import {
   makeGroup,
@@ -78,7 +79,10 @@ describe('members', () => {
     renderApp(`/groups/${GROUP_A}/members`)
 
     expect(await screen.findByRole('heading', { name: 'Members' })).toBeInTheDocument()
-    expect(screen.getByText('Owner')).toBeInTheDocument()
+    expect(await screen.findByText('Owner')).toBeInTheDocument()
+    expect(
+      screen.getByRole('button', { name: 'Add members' }),
+    ).toBeInTheDocument()
     const memberCards = screen.getAllByText('Member B')
     expect(memberCards.length).toBeGreaterThan(0)
 
@@ -87,8 +91,66 @@ describe('members', () => {
     expect(within(grid).getByText('WandaVision')).toBeInTheDocument()
     expect(within(grid).getAllByText('Watched').length).toBeGreaterThan(0)
 
-    await user.selectOptions(screen.getByLabelText('Sort by'), 'name')
-    expect(screen.getByLabelText('Sort by')).toHaveValue('name')
+    await chooseSelectOption(user, screen, 'Sort by', 'Name')
+    expectSelectValue(screen, 'Sort by', 'Name')
+  })
+
+  it('lets the owner open the create-invite flow from Add members', async () => {
+    const user = userEvent.setup()
+    seedGroup()
+    renderApp(`/groups/${GROUP_A}/members`)
+
+    await user.click(
+      await screen.findByRole('button', { name: 'Add members' }),
+    )
+
+    expect(
+      await screen.findByRole('dialog', { name: 'Create invite' }),
+    ).toBeInTheDocument()
+    expect(screen.getByRole('combobox', { name: 'Expires' })).toBeInTheDocument()
+  })
+
+  it('hides Add members for non-owners', async () => {
+    setMockSession(
+      makeSession({
+        user: { id: MEMBER_ID, email: 'member@example.test' },
+      }),
+    )
+    setMockProfile(makeProfile({ id: MEMBER_ID, display_name: 'Member B' }))
+    setMockGroups([
+      makeGroup({
+        id: GROUP_A,
+        name: 'Alpha Watch',
+        owner_id: OWNER_ID,
+        current_title_id: IRON_ID,
+      }),
+    ])
+    setMockMembers([
+      makeMember({
+        group_id: GROUP_A,
+        user_id: OWNER_ID,
+        role: 'owner',
+        display_name: 'Owner A',
+      }),
+      makeMember({
+        group_id: GROUP_A,
+        user_id: MEMBER_ID,
+        role: 'member',
+        display_name: 'Member B',
+      }),
+    ])
+    setMockTitles([
+      makeTitle({ id: IRON_ID, name: 'Iron Man', doomsday_order: 1 }),
+      makeTitle({ id: WANDA_ID, name: 'WandaVision', doomsday_order: 2 }),
+    ])
+    setMockProgress([])
+    renderApp(`/groups/${GROUP_A}/members`)
+
+    expect(await screen.findByRole('heading', { name: 'Members' })).toBeInTheDocument()
+    expect(await screen.findByText('Owner')).toBeInTheDocument()
+    expect(
+      screen.queryByRole('button', { name: 'Add members' }),
+    ).not.toBeInTheDocument()
   })
 
   it('shows yearly watch activity in the progress section', async () => {
@@ -101,8 +163,15 @@ describe('members', () => {
     ).toBeInTheDocument()
 
     expect(
-      screen.getByRole('gridcell', { name: /1 WATCH ON APRIL 1ST/i }),
+      await screen.findByRole('gridcell', { name: /1 WATCH ON APRIL 1ST/i }),
     ).toBeInTheDocument()
+
+    const scrollRegions = screen.getAllByTestId('watch-activity-scroll')
+    expect(scrollRegions.length).toBeGreaterThan(0)
+    for (const scrollRegion of scrollRegions) {
+      expect(scrollRegion.className).toMatch(/overflow-x-auto/)
+      expect(scrollRegion.className).toMatch(/min-w-0/)
+    }
 
     const watchedSquare = screen.getByRole('gridcell', {
       name: /1 WATCH ON APRIL 1ST/i,

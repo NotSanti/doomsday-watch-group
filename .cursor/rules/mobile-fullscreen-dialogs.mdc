@@ -1,0 +1,15 @@
+---
+description: Dialogs and popups are fullscreen on mobile, centered on desktop
+globs: src/components/ui/dialog.tsx,src/**/*Dialog*.tsx,src/**/*Overlay*.tsx
+alwaysApply: false
+---
+
+# Mobile fullscreen popups
+
+- Any popup/dialog that is a centered card on desktop must occupy the full viewport on mobile (`fixed inset-0`, `h-dvh`, no rounded card chrome).
+- Use frosted glass styling by default (`bg-surface-elevated/70`, `backdrop-blur-2xl`, `backdrop-saturate-150`) via shared `DialogContent` / `PopoverContent`.
+- Fullscreen mobile sheets always include a corner close (X) control, unless `preventDismiss` is set for required flows (e.g. onboarding).
+- Implement this in shared `DialogContent` by default. Do not reintroduce per-dialog mobile sizing that breaks the sheet.
+- Desktop-only width/max-height overrides belong on `md:` utilities (e.g. `md:w-[min(36rem,calc(100%-2rem))]`).
+- Body content inside dialogs should scroll within the sheet (`min-h-0 flex-1 overflow-y-auto`), not expand the page.
+- Custom overlays (e.g. watchlist filters) should follow the same mobile fullscreen rule when they act as popups.

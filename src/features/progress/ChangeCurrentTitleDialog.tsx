@@ -13,7 +13,7 @@ type CurrentTitleFormProps = {
   currentTitleId: string | null
   isPending: boolean
   onSave: (titleId: string | null) => Promise<unknown> | void
-  /** Taller scroll layout for dialog; settings page uses the default. */
+  /** Taller scroll layout for dialog use. */
   compactList?: boolean
 }
 
@@ -64,7 +64,10 @@ export function CurrentTitleForm({
 
   return (
     <form
-      className="flex min-h-0 flex-col gap-4"
+      className={cn(
+        'flex min-h-0 flex-col gap-4',
+        compactList && 'flex-1',
+      )}
       onSubmit={(event) => {
         event.preventDefault()
         void onSave(selected === '' ? null : selected)
@@ -74,7 +77,7 @@ export function CurrentTitleForm({
         className={cn(
           'min-h-0',
           compactList
-            ? 'max-h-[min(28rem,55vh)] overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden'
+            ? 'flex-1 overflow-y-auto [scrollbar-width:none] md:max-h-[min(28rem,55vh)] md:flex-none [&::-webkit-scrollbar]:hidden'
             : undefined,
         )}
       >
@@ -105,7 +108,7 @@ export function CurrentTitleForm({
           </ul>
         )}
       </div>
-      <div className="flex flex-wrap items-center gap-3">
+      <div className="flex shrink-0 flex-wrap items-center gap-3">
         <Button type="submit" disabled={isPending}>
           {isPending ? 'Saving…' : 'Save current title'}
         </Button>
@@ -146,7 +149,7 @@ export function ChangeCurrentTitleDialog({
       <DialogContent
         title="Change current title"
         description="Pick a title from the catalog, then save."
-        className="flex max-h-[min(40rem,calc(100dvh-2rem))] w-[min(42rem,calc(100%-2rem))] flex-col overflow-hidden"
+        className="md:flex md:max-h-[min(40rem,calc(100dvh-2rem))] md:w-[min(42rem,calc(100%-2rem))] md:flex-col md:overflow-hidden"
       >
         <CurrentTitleForm
           key={`${currentTitleId ?? 'none'}:${String(open)}`}

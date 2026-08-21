@@ -178,7 +178,7 @@ export function PushNotificationsCard({ userId }: PushNotificationsCardProps) {
               >
                 {push.unsubscribe.isPending
                   ? 'Disabling…'
-                  : 'Disable on this device'}
+                  : 'Disable push notifications'}
               </Button>
             ) : (
               <Button
@@ -190,7 +190,7 @@ export function PushNotificationsCard({ userId }: PushNotificationsCardProps) {
               >
                 {push.subscribe.isPending
                   ? 'Enabling…'
-                  : 'Enable on this device'}
+                  : 'Enable push notifications'}
               </Button>
             )}
             {push.isSubscribed ? (

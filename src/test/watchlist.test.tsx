@@ -3,6 +3,8 @@ import userEvent from '@testing-library/user-event'
 import { TMDB_CREDIT } from '@/features/watchlist/TmdbCredit'
 import {
   applyWatchlistFilters,
+  chooseSelectOption,
+  expectSelectValue,
   filterDialog,
   openWatchlistFilters,
 } from '@/test/mobile-ui'
@@ -17,6 +19,7 @@ import {
   setMockGroups,
   setMockProfile,
   setMockProgress,
+  getMockProgress,
   setMockReviews,
   setMockSession,
   setMockSkippedTitles,
@@ -110,6 +113,18 @@ describe('watchlist', () => {
     expect(screen.getAllByText('WandaVision').length).toBeGreaterThan(0)
     expect(screen.getAllByText('Werewolf by Night').length).toBeGreaterThan(0)
     expect(screen.getAllByText('Iron Man').length).toBeGreaterThan(0)
+    const essential = screen
+      .getAllByText('Essential')
+      .find((el) => el.className.includes('border-chip-'))
+    const recommended = screen
+      .getAllByText('Recommended')
+      .find((el) => el.className.includes('border-chip-'))
+    const optional = screen
+      .getAllByText('Optional')
+      .find((el) => el.className.includes('border-chip-'))
+    expect(essential).toHaveClass('border-chip-gold-fg')
+    expect(recommended).toHaveClass('border-chip-violet-fg')
+    expect(optional).toHaveClass('border-chip-metal-fg')
     const ironManHeading = screen.getAllByText('Iron Man')[0]
     expect(
       ironManHeading.closest('[class*="opacity-50"]'),
@@ -119,7 +134,7 @@ describe('watchlist', () => {
     expect(screen.getAllByText('FILM').length).toBeGreaterThan(0)
     expect(screen.getAllByText('TV').length).toBeGreaterThan(0)
     expect(screen.getAllByText('SPC').length).toBeGreaterThan(0)
-    expect(screen.getAllByText('1/1 watched').length).toBeGreaterThan(0)
+    expect(screen.getAllByText('1/1').length).toBeGreaterThan(0)
     expect(
       screen.getByRole('heading', {
         name: 'Phase 4 — The Blip & New Beginnings (2023)',
@@ -152,9 +167,9 @@ describe('watchlist', () => {
     await openWatchlistFilters(user)
     const filters = within(filterDialog())
     expect(filters.getByLabelText('Search')).toHaveValue('Iron')
-    expect(filters.getByLabelText('Type')).toHaveValue('movie')
-    expect(filters.getByLabelText('My status')).toHaveValue('watched')
-    expect(filters.getByLabelText('Order')).toHaveValue('release')
+    expectSelectValue(filters, 'Type', 'Movies')
+    expectSelectValue(filters, 'My status', 'Watched')
+    expectSelectValue(filters, 'Order', 'Release order')
     expect(filters.getByLabelText('Show rating')).toBeChecked()
     expect(filters.getByLabelText('Show reviews')).toBeChecked()
     expect(screen.getByText('4 selected')).toBeInTheDocument()
@@ -182,7 +197,7 @@ describe('watchlist', () => {
     await openWatchlistFilters(user)
     const filters = within(filterDialog())
     await user.type(filters.getByLabelText('Search'), 'Wanda')
-    await user.selectOptions(filters.getByLabelText('Type'), 'series')
+    await chooseSelectOption(user, filters, 'Type', 'Series')
     await applyWatchlistFilters(user)
 
     expect(screen.getByText('Showing 1 of 3 titles')).toBeInTheDocument()
@@ -217,7 +232,7 @@ describe('watchlist', () => {
     await openWatchlistFilters(user)
     const restoredFilters = within(filterDialog())
     expect(restoredFilters.getByLabelText('Search')).toHaveValue('Wanda')
-    expect(restoredFilters.getByLabelText('Type')).toHaveValue('series')
+    expectSelectValue(restoredFilters, 'Type', 'Series')
     expect(screen.getByText('Showing 1 of 3 titles')).toBeInTheDocument()
   })
 
@@ -252,6 +267,35 @@ describe('watchlist', () => {
     ).toBeInTheDocument()
   })
 
+  it('lets a member toggle watch status from a listing', async () => {
+    const user = userEvent.setup()
+    signInAsOwner()
+    seedCatalog()
+    renderApp(`/groups/${GROUP_A}/watchlist`)
+
+    expect(
+      await screen.findByRole('heading', { name: 'Watchlist' }),
+    ).toBeInTheDocument()
+
+    const wanda = screen.getAllByText('WandaVision')[0]!.closest('li')
+    expect(wanda).not.toBeNull()
+    const status = within(wanda!).getByRole('button', { name: 'Not watched' })
+    expect(status).toHaveAttribute('aria-pressed', 'false')
+    await user.click(status)
+
+    expect(
+      await within(wanda!).findByRole('button', { name: 'Watched' }),
+    ).toHaveAttribute('aria-pressed', 'true')
+    expect(
+      getMockProgress().find(
+        (row) =>
+          row.title_id === WANDA_ID &&
+          row.group_id === GROUP_A &&
+          row.status === 'watched',
+      ),
+    ).toBeTruthy()
+  })
+
   it('lets the owner skip a title and reveal it with Show skipped', async () => {
     const user = userEvent.setup()
     signInAsOwner()
@@ -261,6 +305,13 @@ describe('watchlist', () => {
     expect(
       await screen.findByRole('heading', { name: 'Watchlist' }),
     ).toBeInTheDocument()
+
+    const ironMan = screen.getAllByText('Iron Man')[0]!.closest('li')
+    expect(ironMan).not.toBeNull()
+    expect(
+      within(ironMan!).queryByRole('button', { name: 'Skip title' }),
+    ).not.toBeInTheDocument()
+
     const skipButtons = await screen.findAllByRole('button', {
       name: 'Skip title',
     })

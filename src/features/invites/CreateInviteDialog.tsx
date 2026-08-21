@@ -1,9 +1,10 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useState } from 'react'
-import { useForm } from 'react-hook-form'
+import { Controller, useForm } from 'react-hook-form'
+import { useState, type ReactElement } from 'react'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
+import { SelectField } from '@/components/ui/select'
 import { CopyInviteLink } from '@/features/invites/CopyInviteLink'
 import { toFriendlyCreateInviteError } from '@/features/invites/invite-errors'
 import { inviteUrl } from '@/features/invites/invite-link'
@@ -14,14 +15,16 @@ import {
 } from '@/features/invites/invite-schemas'
 import { useCreateInvite } from '@/features/invites/use-invites'
 import { getClientEnv } from '@/lib/env'
-import { cn } from '@/lib/utils'
 
-const selectClassName = cn(
-  'h-11 w-full rounded-md border border-border bg-surface px-3 text-sm text-heading uppercase tracking-[0.08em]',
-  'hover:border-border-strong focus-visible:outline-none',
-)
+type CreateInviteDialogProps = {
+  groupId: string
+  trigger?: ReactElement
+}
 
-export function CreateInviteDialog({ groupId }: { groupId: string }) {
+export function CreateInviteDialog({
+  groupId,
+  trigger,
+}: CreateInviteDialogProps) {
   const [open, setOpen] = useState(false)
   const [created, setCreated] = useState<CreatedInvite | null>(null)
 
@@ -36,7 +39,7 @@ export function CreateInviteDialog({ groupId }: { groupId: string }) {
       }}
     >
       <DialogTrigger asChild>
-        <Button>Create invite</Button>
+        {trigger ?? <Button type="button">Create invite</Button>}
       </DialogTrigger>
       <DialogContent title={created ? 'Invite link' : 'Create invite'}>
         {created ? (
@@ -92,24 +95,24 @@ function CreateInviteForm({
           {formError}
         </p>
       ) : null}
-      <div>
-        <label
-          className="mb-1 block text-sm text-secondary uppercase tracking-[0.08em]"
-          htmlFor="invite-expiry"
-        >
-          Expires
-        </label>
-        <select
-          id="invite-expiry"
-          className={selectClassName}
-          {...form.register('expiry')}
-        >
-          <option value="24h">In 24 hours</option>
-          <option value="7d">In 7 days</option>
-          <option value="30d">In 30 days</option>
-          <option value="never">No expiry</option>
-        </select>
-      </div>
+      <Controller
+        name="expiry"
+        control={form.control}
+        render={({ field }) => (
+          <SelectField
+            id="invite-expiry"
+            label="Expires"
+            value={field.value}
+            options={[
+              { value: '24h', label: 'In 24 hours' },
+              { value: '7d', label: 'In 7 days' },
+              { value: '30d', label: 'In 30 days' },
+              { value: 'never', label: 'No expiry' },
+            ]}
+            onValueChange={field.onChange}
+          />
+        )}
+      />
       <div>
         <label
           className="mb-1 block text-sm text-secondary"

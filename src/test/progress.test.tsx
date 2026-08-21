@@ -98,7 +98,7 @@ describe('personal progress and current title', () => {
       screen.getByRole('heading', { name: 'Iron Man' }),
     ).toBeInTheDocument()
     expect(screen.getByLabelText('Doomsday order 01')).toHaveTextContent('#01')
-    expect(screen.getByText('1/2 watched')).toBeInTheDocument()
+    expect(screen.getByText('1/2')).toBeInTheDocument()
     expect(
       screen.getByRole('heading', { name: 'Progress' }),
     ).toBeInTheDocument()
@@ -252,7 +252,7 @@ describe('personal progress and current title', () => {
     seedGroup()
     const { queryClient } = renderApp(`/groups/${GROUP_A}`)
 
-    expect(await screen.findByText('1/2 watched')).toBeInTheDocument()
+    expect(await screen.findByText('1/2')).toBeInTheDocument()
 
     setMockProgress([
       makeTitleProgress({
@@ -271,7 +271,7 @@ describe('personal progress and current title', () => {
     emitRealtimeChange('member_title_progress')
 
     await waitFor(() => {
-      expect(screen.getByText('2/2 watched')).toBeInTheDocument()
+      expect(screen.getByText('2/2')).toBeInTheDocument()
     })
     expect(
       queryClient.getQueryData(progressKeys.group(GROUP_A)),
@@ -320,7 +320,40 @@ describe('personal progress and current title', () => {
     ).toBeInTheDocument()
     expect(screen.queryByRole('listbox', { name: 'Current title' })).not.toBeInTheDocument()
     expect(
+      screen.queryByRole('button', { name: 'Change current title' }),
+    ).not.toBeInTheDocument()
+    expect(
       screen.queryByRole('button', { name: 'Save current title' }),
     ).not.toBeInTheDocument()
+  })
+
+  it('lets the owner change the current title from settings via the picker dialog', async () => {
+    const user = userEvent.setup()
+    seedGroup()
+    renderApp(`/groups/${GROUP_A}/settings`)
+
+    expect(
+      await screen.findByRole('heading', { name: 'Current title' }),
+    ).toBeInTheDocument()
+    expect(
+      await screen.findByRole('button', { name: 'Change current title' }),
+    ).toBeInTheDocument()
+    expect(screen.getByText(/Now watching:/i)).toBeInTheDocument()
+    expect(screen.queryByRole('listbox', { name: 'Current title' })).not.toBeInTheDocument()
+
+    await user.click(
+      screen.getByRole('button', { name: 'Change current title' }),
+    )
+
+    const dialog = await screen.findByRole('dialog')
+    await user.click(within(dialog).getByRole('option', { name: 'WandaVision' }))
+    await user.click(
+      within(dialog).getByRole('button', { name: 'Save current title' }),
+    )
+
+    await waitFor(() => {
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    })
+    expect(screen.getByText(/Now watching:/i).textContent).toMatch(/WandaVision/)
   })
 })

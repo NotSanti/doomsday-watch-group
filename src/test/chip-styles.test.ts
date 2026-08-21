@@ -19,5 +19,6 @@ describe('chipStyles', () => {
     expect(chipButtonClasses('danger')).toContain('border-chip-danger-fg')
     expect(chipButtonClasses('danger')).toContain('text-chip-danger-fg')
     expect(chipButtonClasses('danger')).toContain('bg-chip-danger-bg')
+    expect(chipButtonClasses('danger')).toContain('cursor-pointer')
   })
 })

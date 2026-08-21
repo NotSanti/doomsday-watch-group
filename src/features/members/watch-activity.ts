@@ -11,6 +11,9 @@ export type YearGridCell = {
 
 const WEEKDAY_LABEL = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'] as const
 
+const weekdayFormatters = new Map<string, Intl.DateTimeFormat>()
+const monthFormatters = new Map<string, Intl.DateTimeFormat>()
+
 function pad(value: number): string {
   return String(value).padStart(2, '0')
 }
@@ -19,12 +22,47 @@ function daysInMonth(year: number, month: number): number {
   return new Date(Date.UTC(year, month, 0)).getUTCDate()
 }
 
-export function calendarWeekday(date: string, timeZone: string): number {
-  const iso = zonedStartOfDayIso(date, timeZone)
-  const label = new Intl.DateTimeFormat('en-US', {
+function weekdayFormatter(timeZone: string): Intl.DateTimeFormat {
+  const cached = weekdayFormatters.get(timeZone)
+  if (cached) {
+    return cached
+  }
+
+  const formatter = new Intl.DateTimeFormat('en-US', {
     timeZone,
     weekday: 'short',
-  }).format(new Date(iso))
+  })
+  weekdayFormatters.set(timeZone, formatter)
+  return formatter
+}
+
+function monthFormatter(timeZone: string): Intl.DateTimeFormat {
+  const cached = monthFormatters.get(timeZone)
+  if (cached) {
+    return cached
+  }
+
+  const formatter = new Intl.DateTimeFormat('en-US', {
+    month: 'short',
+    timeZone,
+  })
+  monthFormatters.set(timeZone, formatter)
+  return formatter
+}
+
+function advanceDays(
+  weekday: number,
+  weekIndex: number,
+  days: number,
+): { weekday: number; weekIndex: number } {
+  const nextWeekday = (weekday + days) % 7
+  const nextWeekIndex = weekIndex + Math.floor((weekday + days) / 7)
+  return { weekday: nextWeekday, weekIndex: nextWeekIndex }
+}
+
+export function calendarWeekday(date: string, timeZone: string): number {
+  const iso = zonedStartOfDayIso(date, timeZone)
+  const label = weekdayFormatter(timeZone).format(new Date(iso))
   const index = WEEKDAY_LABEL.indexOf(label as (typeof WEEKDAY_LABEL)[number])
   return index === -1 ? 0 : index
 }
@@ -49,18 +87,23 @@ export function monthLabelsForYear(
   year: number,
   timeZone: string,
 ): { label: string; weekIndex: number }[] {
-  return Array.from({ length: 12 }, (_, index) => {
-    const month = index + 1
+  let weekday = calendarWeekday(`${year}-01-01`, timeZone)
+  let weekIndex = 0
+  const labels: { label: string; weekIndex: number }[] = []
+
+  for (let month = 1; month <= 12; month += 1) {
     const iso = zonedStartOfDayIso(`${year}-${pad(month)}-01`, timeZone)
-    const label = new Intl.DateTimeFormat('en-US', {
-      month: 'short',
-      timeZone,
-    }).format(new Date(iso))
-    return {
-      label,
-      weekIndex: weekIndexForDate(`${year}-${pad(month)}-01`, timeZone),
-    }
-  })
+    labels.push({
+      label: monthFormatter(timeZone).format(new Date(iso)),
+      weekIndex,
+    })
+
+    const next = advanceDays(weekday, weekIndex, daysInMonth(year, month))
+    weekday = next.weekday
+    weekIndex = next.weekIndex
+  }
+
+  return labels
 }
 
 export function watchesByCalendarDate(
@@ -103,19 +146,16 @@ export function weekIndexForDate(date: string, timeZone: string): number {
   const year = yearValue ?? 0
   const month = monthValue ?? 1
   const day = dayValue ?? 1
+  let weekday = calendarWeekday(`${year}-01-01`, timeZone)
   let weekIndex = 0
 
   for (let currentMonth = 1; currentMonth < month; currentMonth += 1) {
-    const dim = daysInMonth(year, currentMonth)
-    const firstWeekday = calendarWeekday(
-      `${year}-${pad(currentMonth)}-01`,
-      timeZone,
-    )
-    weekIndex += Math.ceil((firstWeekday + dim) / 7)
+    const next = advanceDays(weekday, weekIndex, daysInMonth(year, currentMonth))
+    weekday = next.weekday
+    weekIndex = next.weekIndex
   }
 
-  const firstWeekday = calendarWeekday(`${year}-${pad(month)}-01`, timeZone)
-  return weekIndex + Math.floor((firstWeekday + day - 1) / 7)
+  return weekIndex + Math.floor((weekday + day - 1) / 7)
 }
 
 export function buildYearWatchGrid(
@@ -123,36 +163,45 @@ export function buildYearWatchGrid(
   watchesByDate: ReadonlyMap<string, number>,
   timeZone: string,
 ): { cells: (YearGridCell | null)[][]; weekCount: number } {
-  const weekCount = weekIndexForDate(`${year}-12-31`, timeZone) + 1
-  const cells: (YearGridCell | null)[][] = Array.from({ length: 7 }, () =>
-    Array.from({ length: weekCount }, () => null),
-  )
+  let weekday = calendarWeekday(`${year}-01-01`, timeZone)
+  let weekIndex = 0
+  const cells: (YearGridCell | null)[][] = Array.from({ length: 7 }, () => [])
+
+  const ensureWeek = (index: number): void => {
+    for (const row of cells) {
+      while (row.length <= index) {
+        row.push(null)
+      }
+    }
+  }
 
   for (let month = 1; month <= 12; month += 1) {
     const dim = daysInMonth(year, month)
 
     for (let day = 1; day <= dim; day += 1) {
+      ensureWeek(weekIndex)
       const date = `${String(year)}-${pad(month)}-${pad(day)}`
-      const weekday = calendarWeekday(date, timeZone)
-      const weekIndex = weekIndexForDate(date, timeZone)
       const watchCount = watchesByDate.get(date) ?? 0
-
       const row = cells[weekday]
-      if (!row) {
-        continue
+      if (row) {
+        row[weekIndex] = {
+          date,
+          month,
+          day,
+          active: watchCount > 0,
+          watchCount,
+        }
       }
 
-      row[weekIndex] = {
-        date,
-        month,
-        day,
-        active: watchCount > 0,
-        watchCount,
+      weekday += 1
+      if (weekday === 7) {
+        weekday = 0
+        weekIndex += 1
       }
     }
   }
 
-  return { cells, weekCount }
+  return { cells, weekCount: cells[0]?.length ?? 0 }
 }
 
 export function isFutureYear(

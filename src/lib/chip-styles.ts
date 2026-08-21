@@ -50,6 +50,7 @@ export function chipClasses(
 export function chipButtonClasses(tone: ChipTone, className?: string): string {
   return cn(
     CHIP_BASE,
+    'cursor-pointer',
     chipToneClasses(tone),
     BUTTON_HOVER[tone],
     className,

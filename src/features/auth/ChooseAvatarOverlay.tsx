@@ -25,7 +25,7 @@ export function ChooseAvatarOverlay() {
         title="Last step"
         description="Choose a profile icon. You can change it later from your profile."
         preventDismiss
-        className="w-[min(40rem,calc(100%-2rem))]"
+        className="md:w-[min(40rem,calc(100%-2rem))]"
       >
         {formError ? (
           <p
