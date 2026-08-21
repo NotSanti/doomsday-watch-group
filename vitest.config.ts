@@ -8,6 +8,10 @@ const rootDir = path.dirname(fileURLToPath(import.meta.url))
 
 export default defineConfig({
   root: rootDir,
+  define: {
+    __APP_VERSION__: JSON.stringify('0.1.0'),
+    __APP_GIT_SHA__: JSON.stringify('local'),
+  },
   plugins: [react(), tailwindcss()],
   resolve: {
     alias: {

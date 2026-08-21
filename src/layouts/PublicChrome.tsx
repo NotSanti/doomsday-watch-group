@@ -1,7 +1,9 @@
 import { Menu, X } from 'lucide-react'
 import { Link, NavLink } from 'react-router'
+import { AppVersionLabel } from '@/components/AppVersionLabel'
 import { Button } from '@/components/ui/button'
 import { useAuth } from '@/features/auth/use-auth'
+import { isStandalonePwa } from '@/features/notifications/push-utils'
 import { useRouteMenuOpen } from '@/hooks/use-route-menu-open'
 import { cn } from '@/lib/utils'
 
@@ -47,6 +49,7 @@ function PublicNavLinks({
 export function PublicHeader() {
   const { status } = useAuth()
   const [menuOpen, setMenuOpen] = useRouteMenuOpen()
+  const showMenuVersion = isStandalonePwa()
   const links: PublicNavLink[] = [
     { to: '/', label: 'Home' },
     { to: '/about', label: 'About' },
@@ -103,6 +106,11 @@ export function PublicHeader() {
               setMenuOpen(false)
             }}
           />
+          {showMenuVersion ? (
+            <div className="mx-auto max-w-6xl border-t border-border/60 px-4 py-3">
+              <AppVersionLabel />
+            </div>
+          ) : null}
         </nav>
       ) : null}
     </header>
@@ -110,6 +118,10 @@ export function PublicHeader() {
 }
 
 export function PublicFooter() {
+  if (isStandalonePwa()) {
+    return null
+  }
+
   return (
     <footer className="border-t border-border/80">
       <div className="mx-auto max-w-6xl px-4 py-8 text-sm text-muted">
@@ -121,6 +133,7 @@ export function PublicFooter() {
           This product uses the TMDB API but is not endorsed or certified by
           TMDB.
         </p>
+        <AppVersionLabel className="mt-4" />
       </div>
     </footer>
   )

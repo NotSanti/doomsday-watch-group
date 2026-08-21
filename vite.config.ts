@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import tailwindcss from '@tailwindcss/vite'
@@ -5,6 +6,16 @@ import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vite'
 import { VitePWA } from 'vite-plugin-pwa'
 import { applyViteAppUrl } from './src/lib/resolve-app-url.ts'
+
+const packageJson = JSON.parse(
+  readFileSync(new URL('./package.json', import.meta.url), 'utf8'),
+) as { version: string }
+
+const appGitSha = (
+  process.env.VERCEL_GIT_COMMIT_SHA ??
+  process.env.GITHUB_SHA ??
+  'local'
+).slice(0, 7)
 
 function withWindowsDriveCase(filePath: string): string {
   return filePath.replace(
@@ -28,6 +39,10 @@ applyViteAppUrl(process.env)
 
 export default defineConfig({
   root: rootDir,
+  define: {
+    __APP_VERSION__: JSON.stringify(packageJson.version),
+    __APP_GIT_SHA__: JSON.stringify(appGitSha),
+  },
   plugins: [
     react(),
     tailwindcss(),

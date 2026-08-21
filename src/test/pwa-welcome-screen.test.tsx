@@ -1,4 +1,5 @@
-import { screen } from '@testing-library/react'
+import { screen, within } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import {
   makeProfile,
@@ -6,6 +7,7 @@ import {
   setMockProfile,
   setMockSession,
 } from '@/test/supabase-mock'
+import { openMobileNav } from '@/test/mobile-ui'
 import { renderApp } from '@/test/render-app'
 
 const isStandalonePwa = vi.hoisted(() => vi.fn(() => false))
@@ -62,19 +64,17 @@ describe('PWA welcome gate', () => {
     expect(screen.queryByRole('banner')).not.toBeInTheDocument()
   })
 
-  it('sends signed-in standalone PWA users from home to /app', async () => {
+  it('shows the app version in the PWA hamburger menu', async () => {
     isStandalonePwa.mockReturnValue(true)
     setMockSession(makeSession())
     setMockProfile(makeProfile())
-    renderApp('/')
+    const user = userEvent.setup()
+    renderApp('/app')
 
-    expect(
-      await screen.findByRole('heading', { name: 'Your groups' }),
-    ).toBeInTheDocument()
-    expect(
-      screen.queryByRole('heading', {
-        name: /watch together on the road to doomsday/i,
-      }),
-    ).not.toBeInTheDocument()
+    await screen.findByRole('heading', { name: 'Your groups' })
+    expect(screen.queryByText(/^v0\.1\.0/)).not.toBeInTheDocument()
+
+    const mobileNav = await openMobileNav(user, 'App')
+    expect(within(mobileNav).getByText(/^v0\.1\.0/)).toBeInTheDocument()
   })
 })

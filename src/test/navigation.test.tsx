@@ -13,6 +13,7 @@ describe('navigation', () => {
       }),
     ).toBeInTheDocument()
     expect(screen.getByText(/doomsday is coming/i)).toBeInTheDocument()
+    expect(screen.getByText(/^v0\.1\.0/)).toBeInTheDocument()
   })
 
   it('opens the about page from the public header', async () => {

@@ -1,10 +1,12 @@
 import { ArrowLeft, Menu, X } from 'lucide-react'
 import { Link, NavLink, Outlet, useLocation, useMatch, useParams } from 'react-router'
+import { AppVersionLabel } from '@/components/AppVersionLabel'
 import { Button } from '@/components/ui/button'
 import { useAuth } from '@/features/auth/use-auth'
 import { GroupSwitcher } from '@/features/groups/GroupSwitcher'
 import { useGroup } from '@/features/groups/use-groups'
 import { usePwaPushPermissionPrompt } from '@/features/notifications/use-pwa-push-permission-prompt'
+import { isStandalonePwa } from '@/features/notifications/push-utils'
 import { useRouteMenuOpen } from '@/hooks/use-route-menu-open'
 import { cn } from '@/lib/utils'
 
@@ -74,6 +76,7 @@ export function AppShell() {
   usePwaPushPermissionPrompt(user?.id)
   const groupQuery = useGroup(groupId ?? '')
   const [menuOpen, setMenuOpen] = useRouteMenuOpen()
+  const standalone = isStandalonePwa()
   const isMember = Boolean(groupId && groupQuery.data)
   const base = isMember ? `/groups/${groupId}` : '/app'
   const watchlistHref = titlePage
@@ -94,7 +97,7 @@ export function AppShell() {
   ]
 
   return (
-    <div className="min-h-screen bg-bg">
+    <div className="flex min-h-screen flex-col bg-bg">
       <a
         href="#main-content"
         className="sr-only focus:not-sr-only focus:absolute focus:top-3 focus:left-3 focus:z-50 focus:rounded-md focus:bg-primary focus:px-3 focus:py-2 focus:text-on-primary"
@@ -169,12 +172,24 @@ export function AppShell() {
                 void signOut()
               }}
             />
+            {standalone ? (
+              <div className="mx-auto max-w-6xl border-t border-border/60 px-4 py-3">
+                <AppVersionLabel />
+              </div>
+            ) : null}
           </nav>
         ) : null}
       </header>
-      <main id="main-content" className="mx-auto max-w-6xl px-4 py-8">
+      <main id="main-content" className="mx-auto w-full max-w-6xl flex-1 px-4 py-8">
         <Outlet />
       </main>
+      {standalone ? null : (
+        <footer className="border-t border-border/80">
+          <div className="mx-auto max-w-6xl px-4 py-4">
+            <AppVersionLabel />
+          </div>
+        </footer>
+      )}
     </div>
   )
 }
