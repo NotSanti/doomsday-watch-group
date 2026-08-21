@@ -7,3 +7,11 @@ export function shouldShowPwaWelcomeGate(input: {
 }): boolean {
   return input.isStandalone && input.authStatus !== 'authenticated'
 }
+
+/** Signed-in PWA launches should land in the app, not the marketing home. */
+export function shouldRedirectPwaHomeToApp(input: {
+  isStandalone: boolean
+  authStatus: AuthStatus
+}): boolean {
+  return input.isStandalone && input.authStatus === 'authenticated'
+}

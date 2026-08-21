@@ -1,19 +1,47 @@
-import { Link } from 'react-router'
+import { Link, Navigate } from 'react-router'
 import { Countdown } from '@/components/Countdown'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardTitle } from '@/components/ui/card'
+import { Skeleton } from '@/components/Skeleton'
 import { PwaWelcomeScreen } from '@/features/auth/PwaWelcomeScreen'
-import { shouldShowPwaWelcomeGate } from '@/features/auth/pwa-welcome'
+import {
+  shouldRedirectPwaHomeToApp,
+  shouldShowPwaWelcomeGate,
+} from '@/features/auth/pwa-welcome'
 import { useAuth } from '@/features/auth/use-auth'
 import { isStandalonePwa } from '@/features/notifications/push-utils'
 
 export function LandingPage() {
   const { status } = useAuth()
+  const standalone = isStandalonePwa()
+
+  if (status === 'loading' && standalone) {
+    return (
+      <main
+        className="mx-auto max-w-md px-4 py-16"
+        role="status"
+        aria-live="polite"
+      >
+        <span className="sr-only">Loading</span>
+        <Skeleton className="h-10 w-40" />
+        <Skeleton className="mt-4 h-24 w-full" />
+      </main>
+    )
+  }
+
+  if (
+    shouldRedirectPwaHomeToApp({
+      isStandalone: standalone,
+      authStatus: status,
+    })
+  ) {
+    return <Navigate to="/app" replace />
+  }
 
   if (
     shouldShowPwaWelcomeGate({
-      isStandalone: isStandalonePwa(),
+      isStandalone: standalone,
       authStatus: status,
     })
   ) {

@@ -1,5 +1,11 @@
 import { screen } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import {
+  makeProfile,
+  makeSession,
+  setMockProfile,
+  setMockSession,
+} from '@/test/supabase-mock'
 import { renderApp } from '@/test/render-app'
 
 const isStandalonePwa = vi.hoisted(() => vi.fn(() => false))
@@ -54,5 +60,21 @@ describe('PWA welcome gate', () => {
       }),
     ).not.toBeInTheDocument()
     expect(screen.queryByRole('banner')).not.toBeInTheDocument()
+  })
+
+  it('sends signed-in standalone PWA users from home to /app', async () => {
+    isStandalonePwa.mockReturnValue(true)
+    setMockSession(makeSession())
+    setMockProfile(makeProfile())
+    renderApp('/')
+
+    expect(
+      await screen.findByRole('heading', { name: 'Your groups' }),
+    ).toBeInTheDocument()
+    expect(
+      screen.queryByRole('heading', {
+        name: /watch together on the road to doomsday/i,
+      }),
+    ).not.toBeInTheDocument()
   })
 })
