@@ -126,11 +126,13 @@ describe('watchlist', () => {
     expect(recommended).toHaveClass('border-chip-violet-fg')
     expect(optional).toHaveClass('border-chip-metal-fg')
     const ironManHeading = screen.getAllByText('Iron Man')[0]
+    expect(ironManHeading).toBeDefined()
     expect(
-      ironManHeading.closest('[class*="opacity-50"]'),
+      ironManHeading!.closest('[class*="opacity-50"]'),
     ).not.toBeNull()
     const wandaHeading = screen.getAllByText('WandaVision')[0]
-    expect(wandaHeading.closest('[class*="opacity-50"]')).toBeNull()
+    expect(wandaHeading).toBeDefined()
+    expect(wandaHeading!.closest('[class*="opacity-50"]')).toBeNull()
     expect(screen.getAllByText('FILM').length).toBeGreaterThan(0)
     expect(screen.getAllByText('TV').length).toBeGreaterThan(0)
     expect(screen.getAllByText('SPC').length).toBeGreaterThan(0)

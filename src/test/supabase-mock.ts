@@ -425,7 +425,7 @@ function isMemberOf(groupId: string): boolean {
     session &&
       members.some(
         (member) =>
-          member.group_id === groupId && member.user_id === session.user.id,
+          member.group_id === groupId && member.user_id === session!.user.id,
       ),
   )
 }

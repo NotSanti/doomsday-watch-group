@@ -27,10 +27,8 @@ vi.mock('@/features/notifications/push-utils', async (importOriginal) => {
 })
 
 vi.mock('@/features/notifications/register-push', () => ({
-  registerPushSubscription: (...args: unknown[]) =>
-    registerPushSubscription(...args),
-  unregisterPushSubscription: (...args: unknown[]) =>
-    unregisterPushSubscription(...args),
+  registerPushSubscription,
+  unregisterPushSubscription,
   syncExistingPushSubscription: vi.fn(async () => false),
 }))
 
