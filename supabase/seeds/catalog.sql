@@ -3,4 +3,5 @@
 --   20260819020000_doomsday_path_order.sql
 --   20260819030000_title_eras.sql
 --   20260819090000_title_artwork.sql
+--   20260825031632_gotg_vol3_optional.sql
 -- Keep this file as the review pointer so the seed glob stays explicit.

@@ -4,6 +4,8 @@ import { groupKeys } from '@/features/groups/group-keys'
 import { isGroupId } from '@/features/groups/group-schemas'
 import { listGroupProgress } from '@/features/progress/progress-api'
 import { progressKeys } from '@/features/progress/progress-keys'
+import { listGroupReviews } from '@/features/reviews/review-api'
+import { reviewKeys } from '@/features/reviews/review-keys'
 import { listGroupSkippedTitles } from '@/features/watchlist/skip-api'
 import { skipKeys } from '@/features/watchlist/skip-keys'
 import { listTitles } from '@/features/watchlist/title-api'
@@ -35,5 +37,9 @@ export function prefetchMembersPage(
   void queryClient.prefetchQuery({
     queryKey: skipKeys.group(groupId),
     queryFn: () => listGroupSkippedTitles(client, groupId),
+  })
+  void queryClient.prefetchQuery({
+    queryKey: reviewKeys.group(groupId),
+    queryFn: () => listGroupReviews(client, groupId),
   })
 }

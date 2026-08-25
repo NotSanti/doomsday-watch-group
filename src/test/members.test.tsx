@@ -6,6 +6,7 @@ import {
   makeGroup,
   makeMember,
   makeProfile,
+  makeReview,
   makeSession,
   makeTitle,
   makeTitleProgress,
@@ -13,6 +14,7 @@ import {
   setMockMembers,
   setMockProfile,
   setMockProgress,
+  setMockReviews,
   setMockSession,
   setMockTitles,
 } from '@/test/supabase-mock'
@@ -195,6 +197,174 @@ describe('members', () => {
     ).toBeInTheDocument()
     expect(
       screen.queryByText('relation group_members exploded'),
+    ).not.toBeInTheDocument()
+  })
+
+  it('shows each member’s personal ranking and opens that member’s full list', async () => {
+    const user = userEvent.setup()
+    const capId = 'aa000000-0000-4000-8000-000000000005'
+    const hulkId = 'aa000000-0000-4000-8000-000000000004'
+    const thorId = 'aa000000-0000-4000-8000-000000000007'
+    const antId = 'aa000000-0000-4000-8000-00000000000d'
+    seedGroup()
+    setMockTitles([
+      makeTitle({ id: IRON_ID, name: 'Iron Man', doomsday_order: 1 }),
+      makeTitle({ id: WANDA_ID, name: 'WandaVision', doomsday_order: 2 }),
+      makeTitle({ id: capId, name: 'Captain America: The First Avenger' }),
+      makeTitle({ id: hulkId, name: 'The Incredible Hulk' }),
+      makeTitle({ id: thorId, name: 'Thor' }),
+      makeTitle({ id: antId, name: 'Ant-Man' }),
+    ])
+    setMockReviews([
+      makeReview({
+        id: '77777777-7777-4777-8777-777777777701',
+        user_id: OWNER_ID,
+        title_id: IRON_ID,
+        rating: 10,
+      }),
+      makeReview({
+        id: '77777777-7777-4777-8777-777777777702',
+        user_id: OWNER_ID,
+        title_id: WANDA_ID,
+        rating: 4,
+      }),
+      makeReview({
+        id: '77777777-7777-4777-8777-777777777703',
+        user_id: MEMBER_ID,
+        title_id: IRON_ID,
+        rating: 10,
+      }),
+      makeReview({
+        id: '77777777-7777-4777-8777-777777777704',
+        user_id: MEMBER_ID,
+        title_id: WANDA_ID,
+        rating: 9,
+      }),
+      makeReview({
+        id: '77777777-7777-4777-8777-777777777705',
+        user_id: MEMBER_ID,
+        title_id: capId,
+        rating: 8,
+      }),
+      makeReview({
+        id: '77777777-7777-4777-8777-777777777706',
+        user_id: MEMBER_ID,
+        title_id: hulkId,
+        rating: 7,
+      }),
+      makeReview({
+        id: '77777777-7777-4777-8777-777777777707',
+        user_id: MEMBER_ID,
+        title_id: thorId,
+        rating: 6,
+      }),
+      makeReview({
+        id: '77777777-7777-4777-8777-777777777708',
+        user_id: MEMBER_ID,
+        title_id: antId,
+        rating: 5,
+      }),
+    ])
+    renderApp(`/groups/${GROUP_A}/members`)
+
+    expect(
+      await screen.findByRole('heading', { name: 'Title ranking' }),
+    ).toBeInTheDocument()
+
+    const ownerList = screen.getByRole('list', {
+      name: 'Top rated titles for Owner A',
+    })
+    expect(ownerList.className).toMatch(/min-w-0/)
+    expect(
+      within(ownerList).getByRole('link', {
+        name: '1. Iron Man, 10 out of 10',
+      }),
+    ).toHaveClass('min-w-0')
+    expect(
+      within(ownerList).getByRole('link', {
+        name: '1. Iron Man, 10 out of 10',
+      }),
+    ).toBeInTheDocument()
+    expect(
+      within(ownerList).getByRole('link', {
+        name: '2. WandaVision, 4 out of 10',
+      }),
+    ).toBeInTheDocument()
+    expect(
+      screen.queryByRole('button', {
+        name: 'View all titles ranked by Owner A',
+      }),
+    ).not.toBeInTheDocument()
+
+    const memberList = screen.getByRole('list', {
+      name: 'Top rated titles for Member B',
+    })
+    expect(
+      within(memberList).getByRole('link', {
+        name: '1. Iron Man, 10 out of 10',
+      }),
+    ).toBeInTheDocument()
+    expect(
+      within(memberList).getByRole('link', {
+        name: '5. Thor, 6 out of 10',
+      }),
+    ).toBeInTheDocument()
+    expect(
+      within(memberList).queryByRole('link', {
+        name: '6. Ant-Man, 5 out of 10',
+      }),
+    ).not.toBeInTheDocument()
+
+    await user.click(
+      screen.getByRole('button', {
+        name: 'View all titles ranked by Member B',
+      }),
+    )
+    const dialog = await screen.findByRole('dialog', { name: 'Member B' })
+    const fullList = within(dialog).getByRole('list', {
+      name: 'All ranked titles for Member B',
+    })
+    expect(
+      within(fullList).getByRole('link', {
+        name: '1. Iron Man, 10 out of 10',
+      }),
+    ).toBeInTheDocument()
+    expect(
+      within(fullList).getByRole('link', {
+        name: '6. Ant-Man, 5 out of 10',
+      }),
+    ).toBeInTheDocument()
+  })
+
+  it('shows an empty ranking for members who have not rated', async () => {
+    seedGroup()
+    renderApp(`/groups/${GROUP_A}/members`)
+
+    expect(
+      await screen.findByRole('heading', { name: 'Title ranking' }),
+    ).toBeInTheDocument()
+    expect(screen.getAllByText('No ratings yet.').length).toBe(2)
+    expect(
+      screen.queryByRole('button', { name: /View all titles ranked by/ }),
+    ).not.toBeInTheDocument()
+    const rankingCards = screen.getAllByTestId('title-ranking-card')
+    expect(rankingCards.length).toBeGreaterThan(0)
+    for (const card of rankingCards) {
+      expect(card.className).toMatch(/min-w-0/)
+      expect(card.className).toMatch(/max-w-full/)
+    }
+  })
+
+  it('shows a friendly error when ranking reviews cannot load', async () => {
+    seedGroup()
+    setMockReviews([], { message: 'permission denied for table reviews' })
+    renderApp(`/groups/${GROUP_A}/members`)
+
+    expect(
+      await screen.findByText('Reviews could not be loaded. Please try again.'),
+    ).toBeInTheDocument()
+    expect(
+      screen.queryByText('permission denied for table reviews'),
     ).not.toBeInTheDocument()
   })
 })

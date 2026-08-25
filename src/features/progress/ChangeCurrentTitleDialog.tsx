@@ -26,24 +26,15 @@ function progressStatusFor(
   )
 }
 
-/** Active catalog in Doomsday order, excluding group-skipped titles. */
-function titlesInDoomsdayOrder(
+/** Active catalog in release order, excluding group-skipped titles. */
+function titlesInReleaseOrder(
   titles: readonly TitleRow[],
   skippedTitleIds: ReadonlySet<string>,
 ): TitleRow[] {
   return titles
-    .filter(
-      (title) =>
-        title.is_active &&
-        title.doomsday_order != null &&
-        !skippedTitleIds.has(title.id),
-    )
+    .filter((title) => title.is_active && !skippedTitleIds.has(title.id))
     .slice()
-    .sort((left, right) => {
-      const leftOrder = left.doomsday_order ?? Number.MAX_SAFE_INTEGER
-      const rightOrder = right.doomsday_order ?? Number.MAX_SAFE_INTEGER
-      return leftOrder - rightOrder
-    })
+    .sort((left, right) => left.release_order - right.release_order)
 }
 
 export function CurrentTitleForm({
@@ -56,7 +47,7 @@ export function CurrentTitleForm({
   compactList = false,
 }: CurrentTitleFormProps) {
   const [selected, setSelected] = useState(currentTitleId ?? '')
-  const visible = titlesInDoomsdayOrder(titles, skippedTitleIds)
+  const visible = titlesInReleaseOrder(titles, skippedTitleIds)
 
   function toggleTitle(titleId: string) {
     setSelected((current) => (current === titleId ? '' : titleId))
@@ -97,7 +88,7 @@ export function CurrentTitleForm({
                 <SelectableTitleRow
                   title={title}
                   status={progressStatusFor(myProgress, title.id)}
-                  sort="doomsday"
+                  sort="release"
                   selected={selected === title.id}
                   onSelect={() => {
                     toggleTitle(title.id)

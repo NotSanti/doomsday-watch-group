@@ -15,6 +15,7 @@ import { useGroup, useGroupMembers } from '@/features/groups/use-groups'
 import { CreateInviteDialog } from '@/features/invites/CreateInviteDialog'
 import { MemberComparisonGrid } from '@/features/members/MemberComparisonGrid'
 import { MonthlyWatchTracker } from '@/features/members/MonthlyWatchTracker'
+import { TitleRankingSection } from '@/features/members/TitleRankingSection'
 import {
   isMemberSort,
   sortGroupMembers,
@@ -25,6 +26,7 @@ import { upcomingTitles, titlesOnGroupPath } from '@/features/progress/progress-
 import type { GroupProgressRow } from '@/features/progress/progress-schemas'
 import { useGroupProgress } from '@/features/progress/use-progress'
 import { toFriendlyProgressListError } from '@/features/progress/progress-errors'
+import { useGroupReviews } from '@/features/reviews/use-reviews'
 import { toFriendlyTitleListError } from '@/features/watchlist/title-errors'
 import { useGroupSkippedTitles } from '@/features/watchlist/use-skipped-titles'
 import { useTitleList } from '@/features/watchlist/use-titles'
@@ -48,6 +50,7 @@ export function MembersPage() {
   const titlesQuery = useTitleList()
   const progressQuery = useGroupProgress(groupId)
   const skippedQuery = useGroupSkippedTitles(groupId)
+  const reviewsQuery = useGroupReviews(groupId)
   const sort = isMemberSort(searchParams.get('sort') ?? '')
     ? (searchParams.get('sort') as MemberSort)
     : 'completion'
@@ -276,6 +279,17 @@ export function MembersPage() {
               </ul>
             </TooltipProvider>
           </section>
+          <TitleRankingSection
+            groupId={group.id}
+            members={sorted}
+            titles={titles}
+            reviews={reviewsQuery.data ?? []}
+            isPending={reviewsQuery.isPending}
+            isError={reviewsQuery.isError}
+            onRetry={() => {
+              void reviewsQuery.refetch()
+            }}
+          />
           <section className="space-y-3">
             <h2 className="font-display text-2xl tracking-[0.08em] text-heading uppercase">
               Next titles

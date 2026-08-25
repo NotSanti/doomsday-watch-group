@@ -13,6 +13,7 @@ import {
   toFriendlyGroupMembersError,
 } from '@/features/groups/group-errors'
 import { groupRoleForUser } from '@/features/groups/group-schemas'
+import { GroupTitleRankingSection } from '@/features/groups/GroupTitleRankingSection'
 import { MemberRoster } from '@/features/groups/MemberRoster'
 import {
   useGroup,
@@ -24,6 +25,11 @@ import { CurrentTitleHero } from '@/features/progress/CurrentTitleHero'
 import { GroupWatchlistProgress } from '@/features/progress/GroupWatchlistProgress'
 import { MemberProgressCard } from '@/features/progress/MemberProgressCard'
 import { MetricCard } from '@/features/progress/MetricCard'
+import {
+  computeDoomsdayPacing,
+  formatDailyPace,
+  formatHoursLeft,
+} from '@/features/progress/doomsday-pacing'
 import {
   averageCompletionPercent,
   currentTitleCompletionPercent,
@@ -40,6 +46,7 @@ import {
   useSetTitleStatus,
 } from '@/features/progress/use-progress'
 import { toFriendlyProgressListError } from '@/features/progress/progress-errors'
+import { useGroupReviews } from '@/features/reviews/use-reviews'
 import { TitleArtwork } from '@/features/watchlist/TitleArtwork'
 import {
   MEDIA_TYPE_LABEL,
@@ -59,6 +66,7 @@ export function GroupDashboardPage() {
   const titlesQuery = useTitleList()
   const progressQuery = useGroupProgress(groupId)
   const skippedQuery = useGroupSkippedTitles(groupId)
+  const reviewsQuery = useGroupReviews(groupId)
   const setStatus = useSetTitleStatus(groupId)
   const setCurrentTitle = useSetCurrentTitle(groupId)
   const [pickerOpen, setPickerOpen] = useState(false)
@@ -164,9 +172,17 @@ export function GroupDashboardPage() {
   const currentFraction = currentTitle
     ? groupWatchedFraction(currentTitle.id, memberIds, progress)
     : null
+  const pacing = computeDoomsdayPacing({
+    titles,
+    skippedTitleIds,
+    memberIds,
+    progress,
+    targetDateIso: group.target_date,
+    timeZone: group.timezone,
+  })
 
   return (
-    <div className="space-y-8">
+    <div className="min-w-0 space-y-8">
       <header className="space-y-3">
         <div className="flex flex-wrap items-center gap-3">
           <h1 className="font-display text-3xl tracking-[0.08em] text-heading uppercase">
@@ -227,11 +243,26 @@ export function GroupDashboardPage() {
       </CollapsibleSection>
 
       <CollapsibleSection title="Progress">
-        <GroupWatchlistProgress
-          activeTitleIds={activeTitleIds}
-          memberIds={memberIds}
-          progress={progress}
-        />
+        <div className="min-w-0 space-y-3">
+          <GroupWatchlistProgress
+            activeTitleIds={activeTitleIds}
+            memberIds={memberIds}
+            progress={progress}
+          />
+          <div className="grid min-w-0 gap-3 sm:grid-cols-2">
+            <MetricCard
+              label="Time left"
+              value={formatHoursLeft(pacing.remainingHours)}
+              description="Hours left on the path to Doomsday."
+            />
+            <MetricCard
+              label="Daily pace"
+              value={formatDailyPace(pacing.titlesPerDay)}
+              description="Doomsday titles to finish together today. Recalculated each day."
+              highlight={pacing.titlesPerDay === 0 ? 'gold' : undefined}
+            />
+          </div>
+        </div>
       </CollapsibleSection>
 
       <CollapsibleSection title="Stats">
@@ -299,6 +330,19 @@ export function GroupDashboardPage() {
             })}
           </ul>
         )}
+      </CollapsibleSection>
+
+      <CollapsibleSection title="Title ranking" className="min-w-0">
+        <GroupTitleRankingSection
+          groupId={group.id}
+          titles={titles}
+          reviews={reviewsQuery.data ?? []}
+          isPending={reviewsQuery.isPending}
+          isError={reviewsQuery.isError}
+          onRetry={() => {
+            void reviewsQuery.refetch()
+          }}
+        />
       </CollapsibleSection>
 
       <CollapsibleSection title="Member progress">

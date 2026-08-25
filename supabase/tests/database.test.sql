@@ -816,6 +816,18 @@ select is(
 );
 
 select is(
+  (select doomsday_order from public.titles where id = 'aa000000-0000-4000-8000-000000000026'),
+  null,
+  'Guardians of the Galaxy Vol. 3 is off the doomsday path'
+);
+
+select is(
+  (select importance from public.titles where id = 'aa000000-0000-4000-8000-000000000026'),
+  'optional',
+  'off-path Guardians of the Galaxy Vol. 3 is optional'
+);
+
+select is(
   (select count(*)::integer from public.titles where poster_path is null or poster_path not like '/%'),
   0,
   'every catalog title stores a TMDB poster path'
