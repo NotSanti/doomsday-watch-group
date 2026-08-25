@@ -15,6 +15,7 @@ import {
   updateGroupSettings,
 } from '@/features/groups/group-api'
 import { groupKeys } from '@/features/groups/group-keys'
+import { GROUPS_LIST_NAV_STATE } from '@/features/groups/home-group'
 import {
   isGroupId,
   type CreateGroupValues,
@@ -195,7 +196,7 @@ export function useLeaveGroup(groupId: string) {
       }
 
       toast.success('You left the group')
-      void navigate('/app')
+      void navigate('/app', { state: GROUPS_LIST_NAV_STATE })
     },
     onError: (error) => {
       toast.error(toFriendlyLeaveGroupError(error))
@@ -256,7 +257,7 @@ export function useDeleteGroup(groupId: string) {
       }
 
       toast.success('Group deleted')
-      void navigate('/app')
+      void navigate('/app', { state: GROUPS_LIST_NAV_STATE })
     },
     onError: (error) => {
       toast.error(toFriendlyDeleteGroupError(error))

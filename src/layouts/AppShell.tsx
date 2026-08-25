@@ -5,6 +5,7 @@ import { AppVersionLabel } from '@/components/AppVersionLabel'
 import { Button } from '@/components/ui/button'
 import { useAuth } from '@/features/auth/use-auth'
 import { GroupSwitcher } from '@/features/groups/GroupSwitcher'
+import { GROUPS_LIST_NAV_STATE } from '@/features/groups/home-group'
 import { useGroup } from '@/features/groups/use-groups'
 import { prefetchMembersPage } from '@/features/members/prefetch-members-page'
 import { usePwaPushPermissionPrompt } from '@/features/notifications/use-pwa-push-permission-prompt'
@@ -16,6 +17,7 @@ type AppNavLink = {
   to: string
   label: string
   end: boolean
+  state?: typeof GROUPS_LIST_NAV_STATE
 }
 
 function AppNavLinks({
@@ -39,6 +41,7 @@ function AppNavLinks({
         <li key={link.to}>
           <NavLink
             to={link.to}
+            state={link.state}
             end={link.end}
             onClick={onNavigate}
             onPointerEnter={() => {
@@ -96,7 +99,7 @@ export function AppShell() {
   const membersHref = isMember ? `${base}/members` : null
 
   const links: AppNavLink[] = [
-    { to: '/app', label: 'Groups', end: true },
+    { to: '/app', label: 'Groups', end: true, state: GROUPS_LIST_NAV_STATE },
     ...(isMember
       ? [
           { to: base, label: 'Dashboard', end: true },
@@ -143,6 +146,7 @@ export function AppShell() {
             ) : null}
             <Link
               to="/app"
+              state={GROUPS_LIST_NAV_STATE}
               className="min-w-0 break-words font-display text-base tracking-[0.16em] text-heading uppercase sm:text-lg"
             >
               Doom Watch Party

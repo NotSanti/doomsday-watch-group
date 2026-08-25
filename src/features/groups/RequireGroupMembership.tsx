@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { useAuth } from '@/features/auth/use-auth'
 import { toFriendlyGroupDetailError } from '@/features/groups/group-errors'
 import { isGroupId } from '@/features/groups/group-schemas'
+import { GROUPS_LIST_NAV_STATE } from '@/features/groups/home-group'
 import { useGroup } from '@/features/groups/use-groups'
 import { useActiveGroupRealtime } from '@/features/realtime/use-active-group-realtime'
 
@@ -26,7 +27,9 @@ function GroupUnavailable() {
       description="This group does not exist or you are not a member."
       action={
         <Button asChild>
-          <Link to="/app">Back to your groups</Link>
+          <Link to="/app" state={GROUPS_LIST_NAV_STATE}>
+            Back to your groups
+          </Link>
         </Button>
       }
     />

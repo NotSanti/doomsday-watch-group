@@ -31,4 +31,6 @@ if (!Element.prototype.scrollIntoView) {
 afterEach(() => {
   cleanup()
   resetSupabaseMock()
+  localStorage.clear()
+  sessionStorage.clear()
 })

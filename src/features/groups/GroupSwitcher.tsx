@@ -9,6 +9,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import { GROUPS_LIST_NAV_STATE } from '@/features/groups/home-group'
 import { useGroupList } from '@/features/groups/use-groups'
 
 export function GroupSwitcher() {
@@ -25,7 +26,7 @@ export function GroupSwitcher() {
 
   function goToGroup(nextId: string) {
     if (!nextId) {
-      void navigate('/app')
+      void navigate('/app', { state: GROUPS_LIST_NAV_STATE })
       return
     }
 

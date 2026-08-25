@@ -6,7 +6,26 @@ import { AppRoutes } from '@/app/router'
 import { createQueryClient } from '@/app/query-client'
 import { AuthProvider } from '@/features/auth/AuthProvider'
 
-export function renderApp(path: string): ReturnType<typeof render> & {
+function locationEntry(
+  path: string,
+  state?: unknown,
+): string | { pathname: string; search: string; state: unknown } {
+  if (state === undefined) {
+    return path
+  }
+
+  const [pathname = '/', search = ''] = path.split('?')
+  return {
+    pathname,
+    search: search ? `?${search}` : '',
+    state,
+  }
+}
+
+export function renderApp(
+  path: string,
+  options?: { state?: unknown },
+): ReturnType<typeof render> & {
   queryClient: ReturnType<typeof createQueryClient>
 } {
   const queryClient = createQueryClient()
@@ -17,7 +36,7 @@ export function renderApp(path: string): ReturnType<typeof render> & {
 
   const view = render(
     <QueryClientProvider client={queryClient}>
-      <MemoryRouter initialEntries={[path]}>
+      <MemoryRouter initialEntries={[locationEntry(path, options?.state)]}>
         <AuthProvider>
           <AppRoutes />
         </AuthProvider>

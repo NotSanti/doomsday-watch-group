@@ -1,6 +1,10 @@
 import { screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { groupKeys } from '@/features/groups/group-keys'
+import {
+  GROUPS_LIST_NAV_STATE,
+  writeHomeGroupPreference,
+} from '@/features/groups/home-group'
 import { openMobileNav } from '@/test/mobile-ui'
 import { renderApp } from '@/test/render-app'
 import {
@@ -31,7 +35,7 @@ function signInAsOwner(): void {
 describe('groups', () => {
   it('shows an empty state when the member has no groups', async () => {
     signInAsOwner()
-    renderApp('/app')
+    renderApp('/app', { state: GROUPS_LIST_NAV_STATE })
 
     expect(
       await screen.findByRole('heading', { name: 'Your groups' }),
@@ -47,7 +51,7 @@ describe('groups', () => {
   it('validates the create-group form before calling the backend', async () => {
     const user = userEvent.setup()
     signInAsOwner()
-    renderApp('/app')
+    renderApp('/app', { state: GROUPS_LIST_NAV_STATE })
 
     await user.click(
       await screen.findByRole('button', { name: 'Create group' }),
@@ -66,7 +70,7 @@ describe('groups', () => {
   it('creates a group through the atomic function and enters it as owner', async () => {
     const user = userEvent.setup()
     signInAsOwner()
-    renderApp('/app')
+    renderApp('/app', { state: GROUPS_LIST_NAV_STATE })
 
     await user.click(
       await screen.findByRole('button', { name: 'Create group' }),
@@ -118,7 +122,7 @@ describe('groups', () => {
       code: '42501',
       message: 'Not authenticated',
     })
-    renderApp('/app')
+    renderApp('/app', { state: GROUPS_LIST_NAV_STATE })
 
     await user.click(
       await screen.findByRole('button', { name: 'Create group' }),
@@ -148,7 +152,7 @@ describe('groups', () => {
         description: 'First room',
       }),
     ])
-    renderApp('/app')
+    renderApp('/app', { state: GROUPS_LIST_NAV_STATE })
 
     expect(
       await screen.findByRole('heading', { name: 'Your groups' }),
@@ -207,7 +211,7 @@ describe('groups', () => {
         joined_at: '2026-08-19T00:00:00.000Z',
       }),
     ])
-    renderApp('/app')
+    renderApp('/app', { state: GROUPS_LIST_NAV_STATE })
 
     const tileHeading = await screen.findByRole('heading', {
       name: 'Alpha Watch',
@@ -256,7 +260,7 @@ describe('groups', () => {
         description: null,
       }),
     ])
-    renderApp('/app')
+    renderApp('/app', { state: GROUPS_LIST_NAV_STATE })
 
     const alpha = (
       await screen.findByRole('heading', { name: 'Alpha Watch' })
@@ -286,7 +290,7 @@ describe('groups', () => {
     signInAsOwner()
     setMockGroups([makeGroup({ id: GROUP_A, name: 'Alpha Watch' })])
     setMockMembers([], { message: 'relation group_members exploded' })
-    renderApp('/app')
+    renderApp('/app', { state: GROUPS_LIST_NAV_STATE })
 
     expect(
       await screen.findByRole('heading', { name: 'Alpha Watch' }),
@@ -297,6 +301,123 @@ describe('groups', () => {
     expect(
       screen.queryByText('relation group_members exploded'),
     ).not.toBeInTheDocument()
+  })
+
+  it('opens the lone group dashboard on the first groups-page load', async () => {
+    signInAsOwner()
+    setMockGroups([makeGroup({ id: GROUP_A, name: 'Alpha Watch' })])
+    renderApp('/app')
+
+    expect(
+      await screen.findByRole('heading', { name: 'Alpha Watch' }),
+    ).toBeInTheDocument()
+    expect(
+      screen.queryByRole('heading', { name: 'Your groups' }),
+    ).not.toBeInTheDocument()
+  })
+
+  it('stays on the groups list when Groups is opened from the navbar', async () => {
+    const user = userEvent.setup()
+    signInAsOwner()
+    setMockGroups([makeGroup({ id: GROUP_A, name: 'Alpha Watch' })])
+    renderApp('/app')
+
+    expect(
+      await screen.findByRole('heading', { name: 'Alpha Watch' }),
+    ).toBeInTheDocument()
+
+    const mobileNav = await openMobileNav(user, 'App')
+    await user.click(within(mobileNav).getByRole('link', { name: 'Groups' }))
+
+    expect(
+      await screen.findByRole('heading', { name: 'Your groups' }),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole('button', {
+        name: 'Alpha Watch is your home group. Click to disable.',
+      }),
+    ).toHaveAttribute('aria-pressed', 'true')
+  })
+
+  it('opens the selected home group when the member belongs to more than one', async () => {
+    signInAsOwner()
+    writeHomeGroupPreference(USER_ID, { kind: 'group', id: GROUP_B })
+    setMockGroups([
+      makeGroup({ id: GROUP_A, name: 'Alpha Watch' }),
+      makeGroup({ id: GROUP_B, name: 'Beta Watch' }),
+    ])
+    renderApp('/app')
+
+    expect(
+      await screen.findByRole('heading', { name: 'Beta Watch' }),
+    ).toBeInTheDocument()
+    expect(
+      screen.queryByRole('heading', { name: 'Your groups' }),
+    ).not.toBeInTheDocument()
+  })
+
+  it('does not auto-open after the member disables the home group', async () => {
+    signInAsOwner()
+    writeHomeGroupPreference(USER_ID, { kind: 'none' })
+    setMockGroups([makeGroup({ id: GROUP_A, name: 'Alpha Watch' })])
+    renderApp('/app')
+
+    expect(
+      await screen.findByRole('heading', { name: 'Your groups' }),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole('button', { name: 'Set Alpha Watch as home group' }),
+    ).toHaveAttribute('aria-pressed', 'false')
+  })
+
+  it('keeps only one home group active at a time', async () => {
+    const user = userEvent.setup()
+    signInAsOwner()
+    setMockGroups([
+      makeGroup({ id: GROUP_A, name: 'Alpha Watch' }),
+      makeGroup({ id: GROUP_B, name: 'Beta Watch' }),
+    ])
+    renderApp('/app', { state: GROUPS_LIST_NAV_STATE })
+
+    const alphaHome = await screen.findByRole('button', {
+      name: 'Set Alpha Watch as home group',
+    })
+    const betaHome = screen.getByRole('button', {
+      name: 'Set Beta Watch as home group',
+    })
+    expect(alphaHome).toHaveAttribute('aria-pressed', 'false')
+    expect(betaHome).toHaveAttribute('aria-pressed', 'false')
+
+    await user.click(alphaHome)
+    expect(
+      screen.getByRole('button', {
+        name: 'Alpha Watch is your home group. Click to disable.',
+      }),
+    ).toHaveAttribute('aria-pressed', 'true')
+    expect(
+      screen.getByRole('button', { name: 'Set Beta Watch as home group' }),
+    ).toHaveAttribute('aria-pressed', 'false')
+
+    await user.click(
+      screen.getByRole('button', { name: 'Set Beta Watch as home group' }),
+    )
+    expect(
+      screen.getByRole('button', {
+        name: 'Beta Watch is your home group. Click to disable.',
+      }),
+    ).toHaveAttribute('aria-pressed', 'true')
+    expect(
+      screen.getByRole('button', { name: 'Set Alpha Watch as home group' }),
+    ).toHaveAttribute('aria-pressed', 'false')
+
+    await user.click(
+      screen.getByRole('button', {
+        name: 'Beta Watch is your home group. Click to disable.',
+      }),
+    )
+    expect(
+      screen.getByRole('button', { name: 'Set Beta Watch as home group' }),
+    ).toHaveAttribute('aria-pressed', 'false')
   })
 
   it('switches between groups without mixing query data', async () => {
@@ -377,7 +498,7 @@ describe('groups', () => {
   it('shows an error state when the group list cannot load', async () => {
     signInAsOwner()
     setMockGroups([], { message: 'relation groups exploded' })
-    renderApp('/app')
+    renderApp('/app', { state: GROUPS_LIST_NAV_STATE })
 
     expect(
       await screen.findByText(

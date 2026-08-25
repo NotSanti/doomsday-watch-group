@@ -1,4 +1,5 @@
-import { Link } from 'react-router'
+import { useEffect } from 'react'
+import { Link, useLocation, useNavigate } from 'react-router'
 import { EmptyState } from '@/components/EmptyState'
 import { ErrorState } from '@/components/ErrorState'
 import { Skeleton } from '@/components/Skeleton'
@@ -7,9 +8,12 @@ import { Button } from '@/components/ui/button'
 import { Card, CardTitle } from '@/components/ui/card'
 import { useAuth } from '@/features/auth/use-auth'
 import { CreateGroupDialog } from '@/features/groups/CreateGroupDialog'
+import { HomeGroupButton } from '@/features/groups/HomeGroupButton'
 import { toFriendlyGroupListError } from '@/features/groups/group-errors'
 import { groupRoleForUser } from '@/features/groups/group-schemas'
+import { isGroupsListNavState } from '@/features/groups/home-group'
 import { MemberRoster } from '@/features/groups/MemberRoster'
+import { useHomeGroupPreference } from '@/features/groups/use-home-group'
 import { useGroupList, useGroupMemberLists } from '@/features/groups/use-groups'
 
 function GroupsSkeleton() {
@@ -25,12 +29,33 @@ function GroupsSkeleton() {
 
 export function GroupHomePage() {
   const { user } = useAuth()
+  const location = useLocation()
+  const navigate = useNavigate()
   const groupsQuery = useGroupList()
   const groups = groupsQuery.data ?? []
   const userId = user?.id ?? ''
   const membersQuery = useGroupMemberLists(groups.map((group) => group.id))
+  const fromNav = isGroupsListNavState(location.state)
+  const { homeGroupId, setHomeGroup } = useHomeGroupPreference(
+    userId,
+    groups.map((group) => group.id),
+    { autoSelectSingle: !fromNav },
+  )
+  const shouldOpenHome =
+    !fromNav &&
+    !groupsQuery.isPending &&
+    !groupsQuery.isError &&
+    homeGroupId !== null
 
-  if (groupsQuery.isPending) {
+  useEffect(() => {
+    if (!shouldOpenHome || !homeGroupId) {
+      return
+    }
+
+    void navigate(`/groups/${homeGroupId}`, { replace: true })
+  }, [homeGroupId, navigate, shouldOpenHome])
+
+  if (groupsQuery.isPending || shouldOpenHome) {
     return <GroupsSkeleton />
   }
 
@@ -71,15 +96,25 @@ export function GroupHomePage() {
       <ul className="grid gap-4 sm:grid-cols-2">
         {groups.map((group) => {
           const role = groupRoleForUser(group, userId)
+          const isHome = homeGroupId === group.id
 
           return (
             <li key={group.id} className="h-full">
               <Card className="flex h-full flex-col">
                 <div className="flex items-start justify-between gap-3">
                   <CardTitle>{group.name}</CardTitle>
-                  <Badge tone={role === 'owner' ? 'watched' : 'muted'}>
-                    {role === 'owner' ? 'Owner' : 'Member'}
-                  </Badge>
+                  <div className="flex shrink-0 items-center gap-2">
+                    <HomeGroupButton
+                      active={isHome}
+                      groupName={group.name}
+                      onToggle={() => {
+                        setHomeGroup(group.id)
+                      }}
+                    />
+                    <Badge tone={role === 'owner' ? 'watched' : 'muted'}>
+                      {role === 'owner' ? 'Owner' : 'Member'}
+                    </Badge>
+                  </div>
                 </div>
                 <p className="mt-3 line-clamp-2 min-h-10 text-sm text-muted">
                   {group.description?.trim() ? group.description : '\u00a0'}
