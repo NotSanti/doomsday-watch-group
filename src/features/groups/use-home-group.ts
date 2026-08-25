@@ -8,20 +8,22 @@ import {
   type HomeGroupPreference,
 } from '@/features/groups/home-group'
 
+type HomeGroupOverride = {
+  userId: string
+  preference: HomeGroupPreference
+}
+
 export function useHomeGroupPreference(
   userId: string,
   groupIds: readonly string[],
   options?: { autoSelectSingle?: boolean },
 ) {
   const autoSelectSingle = options?.autoSelectSingle ?? true
-  const [override, setOverride] = useState<HomeGroupPreference | null>(null)
-
-  useEffect(() => {
-    setOverride(null)
-  }, [userId])
-
-  const stored = userId ? readHomeGroupPreference(userId) : { kind: 'unset' as const }
-  const base = override ?? stored
+  const [override, setOverride] = useState<HomeGroupOverride | null>(null)
+  const stored = userId
+    ? readHomeGroupPreference(userId)
+    : { kind: 'unset' as const }
+  const base = override?.userId === userId ? override.preference : stored
   const preference = autoSelectSingle
     ? maybeAutoSelectSingleGroup(groupIds, base)
     : base
@@ -42,7 +44,7 @@ export function useHomeGroupPreference(
     if (userId) {
       writeHomeGroupPreference(userId, next)
     }
-    setOverride(next)
+    setOverride({ userId, preference: next })
   }
 
   return { homeGroupId, preference, setHomeGroup }
