@@ -1,4 +1,3 @@
-import { describe, expect, it } from 'vitest'
 import { getAppVersionLabel } from '@/lib/app-version'
 
 describe('getAppVersionLabel', () => {

@@ -1,5 +1,4 @@
 import { fireEvent, render, screen } from '@testing-library/react'
-import { describe, expect, it } from 'vitest'
 import { MemberAvatar } from '@/features/groups/MemberAvatar'
 import { makeMember } from '@/test/supabase-mock'
 

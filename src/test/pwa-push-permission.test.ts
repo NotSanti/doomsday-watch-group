@@ -1,4 +1,3 @@
-import { describe, expect, it } from 'vitest'
 import { getPwaPushPermissionAction } from '@/features/notifications/pwa-push-permission'
 
 describe('getPwaPushPermissionAction', () => {
