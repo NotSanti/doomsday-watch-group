@@ -1,5 +1,5 @@
 begin;
-select plan(84);
+select plan(86);
 
 create temp table test_users (
   label text primary key,
